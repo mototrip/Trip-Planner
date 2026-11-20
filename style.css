@@ -36,3 +36,5 @@ nav{grid-template-columns:repeat(4,minmax(0,1fr))!important}nav button{min-width
 
 /* Compact phone navigation: keep all four tabs within the viewport. */
 @media(max-width:600px){nav{gap:5px;grid-template-columns:repeat(4,minmax(0,1fr))!important}nav button{min-width:0;width:100%;padding:9px 2px;white-space:normal;overflow-wrap:anywhere;font-size:clamp(11px,3vw,14px);line-height:1.2;min-height:48px}nav button span{display:block;margin:0 0 3px;font-size:16px}nav button[data-tab="split"]{font-size:clamp(11px,3vw,14px)}}
+
+#breakdown .breakdown-total{font-size:1.15rem;font-weight:800;border-top:2px solid currentColor;border-bottom:0;padding-block:14px;gap:12px} #breakdown .breakdown-total strong:last-child{white-space:nowrap}
