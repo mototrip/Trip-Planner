@@ -38,3 +38,26 @@ nav{grid-template-columns:repeat(4,minmax(0,1fr))!important}nav button{min-width
 @media(max-width:600px){nav{gap:5px;grid-template-columns:repeat(4,minmax(0,1fr))!important}nav button{min-width:0;width:100%;padding:9px 2px;white-space:normal;overflow-wrap:anywhere;font-size:clamp(11px,3vw,14px);line-height:1.2;min-height:48px}nav button span{display:block;margin:0 0 3px;font-size:16px}nav button[data-tab="split"]{font-size:clamp(11px,3vw,14px)}}
 
 #breakdown .breakdown-total{font-size:1.15rem;font-weight:800;border-top:2px solid currentColor;border-bottom:0;padding-block:14px;gap:12px} #breakdown .breakdown-total strong:last-child{white-space:nowrap}
+
+/* V3.3: readable dashboard cards in light mode. */
+html[data-theme=light] body .dashboard .stat:nth-child(1){background:#eeeaff;border-color:#d1c5f3;color:#34256f}
+html[data-theme=light] body .dashboard .stat:nth-child(2){background:#e1f5fa;border-color:#b4dce7;color:#124d65}
+html[data-theme=light] body .dashboard .stat:nth-child(3){background:#fff0df;border-color:#ebcfac;color:#78441a}
+html[data-theme=light] body .dashboard .stat small{color:inherit!important}
+html[data-theme=light] body .dashboard .stat strong{color:inherit}
+.trip-timing label{min-width:0}.trip-timing input{min-width:0;max-width:100%;width:100%;box-sizing:border-box;color-scheme:dark}html[data-theme=light] .trip-timing input{color-scheme:light}
+
+/* V3.6: visual refresh only; all calculation logic retained. */
+#planner .journey-grid,#planner .cost-grid{display:grid;gap:10px;grid-template-columns:repeat(2,minmax(0,1fr));margin-top:12px}
+#planner .journey-grid label,#planner .cost-grid label{--tile:#71d9f1;min-width:0;margin:0;padding:12px;border:1px solid var(--edge);border-top:3px solid var(--tile);border-radius:15px;background:var(--sub);color:var(--ink);font-size:12px;font-weight:700;overflow-wrap:anywhere}
+#planner .journey-grid label:first-child{grid-column:1/-1;--tile:#71d9f1}
+#planner .journey-grid label:nth-child(2){--tile:#ffbf79}#planner .journey-grid label:nth-child(3){--tile:#b9a4ff}
+#planner .cost-grid label:nth-child(2){--tile:#9eea91}#planner .cost-grid label:nth-child(3){--tile:#b9a4ff}#planner .cost-grid label:nth-child(4){--tile:#ffbf79}#planner .cost-grid label:nth-child(5){--tile:#f69abb}#planner .cost-grid label:nth-child(6){--tile:#9aaccb}
+html body #planner :is(.journey-grid,.cost-grid) input{margin-top:8px;background:var(--panel);font-weight:750;font-variant-numeric:tabular-nums;padding:10px;min-width:0}
+.ride-tip{background:#b9a4ff16;color:var(--muted);border:1px solid #a997e44d;border-radius:12px;padding:11px 13px;font-size:12px;line-height:1.5}
+#planner .section-kicker{margin-top:22px}#planner .section-kicker:first-child{margin-top:0}
+#breakdown{border-radius:15px;border:1px solid var(--edge);padding:4px 14px;background:var(--sub);margin-top:14px}#breakdown .breakdown-total{color:var(--accent);border-top:1px solid var(--edge);font-size:clamp(14px,3.8vw,19px)}
+#planner .primary{min-height:49px;box-shadow:0 6px 18px #5ce1ad22}
+html[data-theme=light] #planner .journey-grid label,html[data-theme=light] #planner .cost-grid label{background:color-mix(in srgb,var(--tile) 12%,white);color:var(--ink)}
+@media(min-width:760px){#planner .journey-grid,#planner .cost-grid{grid-template-columns:repeat(3,minmax(0,1fr))}#planner .journey-grid label:first-child{grid-column:auto}}
+@media(max-width:380px){#planner .journey-grid label,#planner .cost-grid label{padding:9px;font-size:11px}}
