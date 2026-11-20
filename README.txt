@@ -1,0 +1,2 @@
+MotoTrip v1
+Host all files together on an HTTPS static host (for example GitHub Pages). Open the published URL in Safari, tap Share, Add to Home Screen, then Add. Open online once to cache the app. Maps require internet. Data is device/browser-local and can be removed by iOS or clearing website data; export JSON backups regularly. Sample trip values are not verified. Hotel assumes days minus one nights. Edit/reuse creates a new saved trip. HTML is structure, CSS design, JS calculations and storage, manifest installation metadata, service worker offline cache.
