@@ -828,3 +828,28 @@ html body #plan #selected-stop-summary.mt61-route-tip #planner-route-jump{paddin
   #planner .mt621-place-grid legend {font-size: 11px;}
   #planner .mt621-place-grid .mt61-place-label {font-size: 10px;}
 }
+
+/* V6.3 — One rider name source: Profile; compact touch-friendly edit action */
+#shared-ride-setup .mt63-rider-from-profile{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;align-items:end;margin:8px 0}
+#shared-ride-setup .mt63-rider-from-profile>label{min-width:0;margin:0}
+#shared-ride-setup .mt63-rider-from-profile input[readonly]{cursor:default;opacity:1!important;background:var(--sub)!important;color:var(--ink)!important}
+#shared-ride-setup #shared-edit-profile{width:auto!important;min-height:44px!important;max-width:140px;margin:0!important;padding:8px 10px!important;border-radius:11px;font-size:12px!important;font-weight:700;white-space:nowrap}
+@media(max-width:365px){#shared-ride-setup .mt63-rider-from-profile{gap:5px}#shared-ride-setup #shared-edit-profile{font-size:10px!important;padding:7px!important}}
+
+/* MotoTrip V6.4: respectful user-controlled update banner. */
+main > #mt-update-prompt.mt-update-prompt{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:12px 14px;margin:12px 0 2px;border:1px solid #8ad7bc;border-radius:17px;background:linear-gradient(105deg,#e6fff3,#eef7ff);color:#143e4a;box-shadow:0 6px 16px #153c5414}
+main > #mt-update-prompt[hidden]{display:none!important}
+.mt-update-message{display:flex;align-items:center;gap:10px;flex:1;min-width:180px}
+.mt-update-message strong,.mt-update-message small{display:block;letter-spacing:normal}
+.mt-update-message strong{font-size:13px;line-height:1.4}
+.mt-update-message small{font-size:11px;line-height:1.4;color:#466273;margin-top:2px}
+.mt-update-icon{display:grid;place-items:center;background:#c1f6df;border-radius:12px;min-width:35px;height:35px;font-size:19px}
+.mt-update-actions{display:flex;gap:7px;flex-wrap:wrap}
+html body .mt-update-actions button{font-size:12px;min-height:37px;padding:8px 12px;margin:0;border-radius:11px;font-weight:750}
+html body .mt-update-actions .mt-update-now{background:#147f78;color:white;border:1px solid #147f78}
+html body .mt-update-actions .mt-update-later{background:white;color:#254c56;border:1px solid #b6d1d1}
+html[data-theme=dark] body #mt-update-prompt{background:linear-gradient(120deg,#173b42,#202f56);color:#f0fcff;border-color:#3c9c8f}
+html[data-theme=dark] body .mt-update-message small{color:#bbd6df}
+html[data-theme=dark] body .mt-update-icon{background:#255957}
+html[data-theme=dark] body .mt-update-actions .mt-update-later{background:#334d60;color:#f0fcff;border-color:#6c8a9c}
+@media(max-width:420px){.mt-update-actions{width:100%;display:grid;grid-template-columns:1fr 1fr}.mt-update-actions button{width:100%}}

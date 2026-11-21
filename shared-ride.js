@@ -7,6 +7,8 @@
  const $ = id => document.getElementById(id);
  const sessionKey = 'mototrip-shared-ride-v1';
  const backupKey = 'mototrip-shared-local-split-backup-v1';
+ const perUserSessionKey = uid => 'mototrip-shared-ride-v2-' + uid;
+ const perUserBackupKey = uid => backupKey + '-' + uid;
  // Reuse the same private ride ID if an earlier attempt timed out, avoiding duplicate rides.
  const pendingCreateKey = 'mototrip-pending-create-v1';
  const CREATE_STEP_TIMEOUT_MS = 12000;
@@ -28,7 +30,27 @@
  const token = () => [...crypto.getRandomValues(new Uint8Array(16))].map(v=>v.toString(16).padStart(2,'0')).join('');
  const message = (s,warning=false) => {lastError=warning?s:''; $('shared-message').textContent=s; $('shared-message').style.color=warning?'#ffe1ba':'';};
  const badge = s => $('shared-mode').textContent=s;
- const inputName = () => $('shared-name').value.trim().slice(0,80);
+ // The rider's display name comes from Profile, never a separate Shared Ride field.
+ const profileName = () => {
+  if(typeof window.motoTripRiderProfileName === 'function')return window.motoTripRiderProfileName();
+  // account.js runs later on this page; read only the profile NAME for early button clicks.
+  try {
+   const scope=localStorage.getItem('mototrip-account-scope')||'guest';
+   const profile=JSON.parse(localStorage.getItem('mototrip-rider-profile-v1-'+scope)||'null');
+   return typeof profile?.name==='string'?profile.name.trim().slice(0,80):'';
+  }catch(_){return '';}
+ };
+ const inputName = () => profileName();
+ function refreshRiderName(){
+  const field=$('shared-name');if(!field)return;
+  const name=profileName();field.value=name;
+  field.readOnly=true;field.setAttribute('aria-readonly','true');
+  field.placeholder='Set your name in Profile first';
+  const action=$('shared-edit-profile');if(action)action.hidden=false;
+ }
+ window.motoTripRefreshRiderName=refreshRiderName;
+ window.addEventListener('mototrip-profile-updated',refreshRiderName);
+ $('shared-edit-profile')?.addEventListener('click',()=> $('mt-account-open')?.click());
  const format = s => String(s||'').trim().slice(0,100);
  const enabled = () => Boolean(current);
  const dataOnly = g => ({name:format(g.name),members:Array.isArray(g.members)?g.members.slice(0,100):[],
@@ -40,10 +62,15 @@
  };
  const inviteURL = id => location.origin+location.pathname+'#join='+id;
  const saveSession = () => {
-  if(current)localStorage.setItem(sessionKey,JSON.stringify({rideId:current.rideId,inviteId:current.inviteId}));
+  if(current&&me){
+   const record={rideId:current.rideId,inviteId:current.inviteId,uid:me.uid};
+   localStorage.setItem(perUserSessionKey(me.uid),JSON.stringify(record));
+   localStorage.setItem(sessionKey,JSON.stringify(record)); // legacy-compatible pointer, tagged with uid
+  }
  };
  const preserveLocal = () => {
-  if(!localStorage.getItem(backupKey)) localStorage.setItem(backupKey,JSON.stringify(dataOnly(window.state?.split||state.split||{name:'',members:[],expenses:[],transfers:[]})));
+  const key=perUserBackupKey(me?.uid||'guest');
+  if(!localStorage.getItem(key))localStorage.setItem(key,JSON.stringify(dataOnly(window.state?.split||state.split||{name:'',members:[],expenses:[],transfers:[]})));
  };
  function updateUI(active) {
   $('shared-ride-setup').hidden=active;
@@ -67,6 +94,8 @@
  }
  async function signIn(){
   await loadSDK();
+  // Firebase restores persisted login asynchronously; do not replace it with a new anonymous UID.
+  if(typeof auth.authStateReady==='function')await auth.authStateReady();
   if(auth.currentUser){me=auth.currentUser;return me;}
   const u=await sdk.authM.signInAnonymously(auth);me=u.user;return me;
  }
@@ -91,24 +120,32 @@
   subscription=sdk.dbM.onSnapshot(rideRef(rid),snap=>{
    if(!current||current.rideId!==rid)return;
    if(!snap.exists()) {message('This ride is no longer available.',true);return;}
+   if(snap.metadata.fromCache){badge('Reconnecting');message('Waiting for latest group history from Firebase…');return;}
    lastRemote=snap.data();
-   if(!busy)display(lastRemote);
+   // Avoid replacing freshly loaded complete server history with a stale offline cache.
+   if(!snap.metadata.fromCache && !busy)display(lastRemote);
    if(!lastError)message('✓ Connected. Changes appear on all joined phones.');
   },e=>{badge('Disconnected');message('Cloud sync error: '+e.message+'. Check Firebase settings and permissions.',true);});
  }
  async function activate(rideId,inviteId){
+  // Server-first: never replace past bills with empty local state while connecting.
+  const snap=await withTimeout(sdk.dbM.getDocFromServer(rideRef(rideId)), 'Loading past expenses',15000);
+  if(!snap.exists())throw Error('Shared Ride could not be found.');
+  const remote=snap.data();
+  if(!Array.isArray(remote.members)||!Array.isArray(remote.expenses)||!Array.isArray(remote.transfers))
+   throw Error('Ride history is incomplete. Ask the organizer to check the group.');
   leaving=false;
   current={rideId,inviteId,name:'Shared Ride'};
-  saveSession();updateUI(true);showQRCode(false);lastRemote=null;lastLocal=null;
-  // Block edits until first authoritative cloud snapshot is received.
-  state.split={name:'Connecting to shared ride…',members:[],expenses:[],transfers:[]};
-  persist();if(window.renderSplit)window.renderSplit();
+  lastRemote=remote;lastLocal=null;
+  saveSession();updateUI(true);showQRCode(false);
+  display(remote);
   listen();
   window.dispatchEvent(new Event('mototrip-ride-change'));
+  message('✓ Connected. '+remote.expenses.length+' previous expense(s) and '+remote.transfers.length+' payment(s) loaded.');
  }
  async function createRide(){
   if(enabled())return;
-  const name=inputName();if(!name){message('Apna rider name likho.',true);$('shared-name').focus();return;}
+  const name=inputName();if(!name){message('First save your Rider Name in Profile. Shared Ride will use it automatically.',true);$('mt-account-open')?.click();return;}
   if(!configured){message('Firebase setup needed: See SHARED_RIDE_SETUP_HINGLISH.md in the ZIP.',true);return;}
   const local=dataOnly(group());
   if((local.expenses.length||local.transfers.length||local.members.length)&&
@@ -148,7 +185,7 @@
  async function joinRide(){
   if(enabled())return;
   const name=inputName(),code=joinToken($('shared-code').value);
-  if(!name){message('Your rider name is required.',true);return;}
+  if(!name){message('First add your Rider Name in Profile. It will be picked automatically.',true);$('mt-account-open')?.click();return;}
   if(!code){message('Paste a valid Shared Ride invitation link or code.',true);return;}
   if(!configured){message('Owner needs to set up Firebase first. See setup guide in ZIP.',true);return;}
   try{
@@ -159,18 +196,28 @@
    const rideId=inviteSnap.data().rideId;
    if(typeof rideId!=='string'||!/^[a-f0-9]{32}$/.test(rideId))throw Error('Invalid shared ride.');
    const myRef=memberRef(rideId,user.uid),memberSnap=await sdk.dbM.getDoc(myRef);
-   if(!memberSnap.exists())await sdk.dbM.setDoc(myRef,{name,inviteId:code,joinedAt:new Date().toISOString()});
-   // Add the participant's chosen rider name to the shared expenses table.
-   const r=rideRef(rideId);
-   await sdk.dbM.runTransaction(db,async tx=>{
-    const snap=await tx.get(r);
-    if(!snap.exists())throw Error('Shared ride has been removed.');
-    const old=snap.data();const members=old.members||[];
-    if(!members.some(x=>x.toLowerCase()===name.toLowerCase())){
-     if(members.length>=100)throw Error('Ride has reached rider limit.');
-     tx.update(r,{members:[...members,name],updatedAt:new Date().toISOString()});
-    }
-   });
+   // Returning riders keep their original ledger name, so historical payer/share references survive.
+   const wasMember=memberSnap.exists();
+   const ledgerName=wasMember?memberSnap.data().name:name;
+   if(!wasMember)await sdk.dbM.setDoc(myRef,{name,inviteId:code,joinedAt:new Date().toISOString()});
+   try{
+    const r=rideRef(rideId);
+    await sdk.dbM.runTransaction(db,async tx=>{
+     const snap=await tx.get(r);
+     if(!snap.exists())throw Error('Shared ride has been removed.');
+     const old=snap.data();const members=old.members||[];
+     const collision=members.some(x=>x.toLocaleLowerCase()===ledgerName.toLocaleLowerCase());
+     if(collision&&!wasMember)throw Error('A rider with this name is already in the group. Use a distinguishable name in Profile.');
+     if(!collision){
+      if(members.length>=100)throw Error('Ride has reached rider limit.');
+      tx.update(r,{members:[...members,ledgerName],updatedAt:new Date().toISOString()});
+     }
+    });
+   }catch(e){
+    // Membership was created only for this attempt: revoke partial joins on failure.
+    if(!wasMember)try{await sdk.dbM.deleteDoc(myRef);}catch(_){/* warn on next try */}
+    throw e;
+   }
    preserveLocal();await activate(rideId,code);
    // Hide invitation after successful join so users won't accidentally share it on screenshots.
    if(location.hash.includes('join='))history.replaceState(null,'',location.pathname+location.search);
@@ -311,24 +358,40 @@
    return;
   }
   if(subscription){subscription();subscription=null;}
-  localStorage.removeItem(sessionKey);current=null;lastRemote=null;lastLocal=null;busy=0;
-  const backup=localStorage.getItem(backupKey);
-  if(backup){try{state.split=JSON.parse(backup);persist();}catch(e){}localStorage.removeItem(backupKey);}
+  const uid=me.uid,rideId=current.rideId;
+  localStorage.removeItem(perUserSessionKey(uid));
+  try{const ptr=JSON.parse(localStorage.getItem(sessionKey)||'null');if(ptr?.rideId===rideId&&(!ptr.uid||ptr.uid===uid))localStorage.removeItem(sessionKey);}catch(_){}
+  current=null;lastRemote=null;lastLocal=null;busy=0;
+  const ownedBackup=perUserBackupKey(uid);
+  const backup=localStorage.getItem(ownedBackup)||localStorage.getItem(backupKey);
+  if(backup){try{state.split=JSON.parse(backup);persist();}catch(e){}}
+  localStorage.removeItem(ownedBackup);
   if(window.renderSplit)window.renderSplit();
   updateUI(false);showQRCode(false);closeShareSheet();message('You are back to your offline Bill Split. Group access on this account was revoked.');
   window.dispatchEvent(new Event('mototrip-ride-change'));
   if(location.hash.includes('join='))history.replaceState(null,'',location.pathname+location.search);
  }
  async function restore(){
-  let session=null;
-  try{session=JSON.parse(localStorage.getItem(sessionKey)||'null');}catch(e){}
-  if(!session?.rideId||!session?.inviteId||!configured)return;
+  if(!configured)return;
   try{
-   message('Reconnecting to Shared Ride…');await signIn();
-   const member=await sdk.dbM.getDoc(memberRef(session.rideId,me.uid));
-   if(!member.exists())throw Error('This phone is no longer a member; rejoin using your invitation.');
-   preserveLocal();await activate(session.rideId,session.inviteId);
-  }catch(e){message('Reconnect failed: '+e.message+'. Try again online.',true);}
+   // IMPORTANT: restore an existing identity, never sign in anonymously on page load.
+   await loadSDK();
+   if(typeof auth.authStateReady==='function')await auth.authStateReady();
+   const user=auth.currentUser;
+   if(!user){message('Sign in to your account to reconnect to your Shared Ride, or join using an invite.');return;}
+   me=user;
+   let session=null;
+   try{session=JSON.parse(localStorage.getItem(perUserSessionKey(user.uid))||'null');}catch(_){}
+   if(!session){
+    // One-time migration of older, unscoped ride sessions. Membership is verified below.
+    try{const legacy=JSON.parse(localStorage.getItem(sessionKey)||'null');if(!legacy?.uid||legacy.uid===user.uid)session=legacy;}catch(_){}
+   }
+   if(!session?.rideId||!session?.inviteId||!(/^[a-f0-9]{32}$/i.test(session.rideId)))return;
+   message('Reconnecting to your Shared Ride…');
+   const member=await withTimeout(sdk.dbM.getDocFromServer(memberRef(session.rideId,user.uid)), 'Checking ride membership');
+   if(!member.exists())throw Error('This account is not a member. Use your invite link to join.');
+   await activate(session.rideId,session.inviteId);
+  }catch(e){message('Reconnect failed: '+e.message+'. Sign in with the SAME account or use your invite link.',true);}
  }
  window.motoTripSharedRide={get active(){return enabled();},capture,
   safetyContext(){return current&&me&&sdk?{rideId:current.rideId,uid:me.uid,db,dbM:sdk.dbM}:null;}
@@ -348,5 +411,5 @@
  const code=joinToken(location.hash);
  if(code){$('shared-code').value=code;const joinPanel=$('join-ride-panel');if(joinPanel)joinPanel.hidden=false;const joinButton=$('join-ride-trigger');if(joinButton)joinButton.setAttribute('aria-expanded','true');message('Invite detected! Enter your name and tap Join Shared Ride.');}
  else if(!configured)message('Offline Bill Split works as usual. To turn on live sharing, MotoTrip owner must configure Firebase.');
- updateUI(false);restore();
+ updateUI(false);refreshRiderName();restore();
 })();

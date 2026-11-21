@@ -125,7 +125,7 @@
  }
  async function login(event) {
    event.preventDefault();
-   if (groupIsActive()) { setMessage('Leave the current Shared Ride first before switching to another login, so its membership is not lost.', true); return; }
+   if (groupIsActive() && !confirm('Signing in to a different account will pause this ride on this device. You can reconnect when you sign back in, or use the original invite link. Continue?')) return;
    await guarded(async () => {
      await loadAuth();
      const user = (await modules.signInWithEmailAndPassword(auth, $('mt-login-email').value.trim(), $('mt-login-password').value)).user;
@@ -175,7 +175,7 @@
    if (p.icePhone && !/^[+0-9() .-]{7,22}$/.test(p.icePhone)) { setMessage('Check the emergency contact number.', true); return; }
    try { localStorage.setItem(savedProfileKey(), JSON.stringify(p)); }
    catch (_) { setMessage('Cannot save profile on this device. Browser storage may be blocked.', true); return; }
-   if ($('shared-name') && !$('shared-name').value.trim()) $('shared-name').value = p.name;
+   if (typeof window.motoTripRefreshRiderName === 'function') window.motoTripRefreshRiderName();
    updateHeaderProfile(p.name);
    updateEmergencyCall(p.icePhone);
    window.dispatchEvent(new Event('mototrip-profile-updated'));
@@ -186,11 +186,10 @@
  function fillLabel() {
    const p = readProfile();
    updateHeaderProfile(p.name);
-   if ($('shared-name') && !$('shared-name').value.trim() && p.name) $('shared-name').value = p.name;
+   if (typeof window.motoTripRefreshRiderName === 'function') window.motoTripRefreshRiderName();
  }
  async function logout() {
-   if (groupIsActive()) { setMessage('Leave Shared Ride before signing out. This keeps your ride membership safe.', true); return; }
-   if (!confirm('Sign out of this account? Its local trips and emergency profile stay on this device. Guest data will be shown.')) return;
+   if (!confirm('Sign out? You will temporarily disconnect from Shared Ride, but REMAIN a member. Log back in with this same account to reconnect.')) return;
    await guarded(async () => {
      await loadAuth();
      if (auth.currentUser) await modules.signOut(auth);
@@ -231,6 +230,12 @@
      setMessage('If this email belongs to a registered account, a reset email may arrive shortly.');
    });
  }
+
+ // Share only the profile rider NAME with Shared Ride. Emergency fields remain private.
+ window.motoTripRiderProfileName = () => {
+   const p = readProfile();
+   return typeof p.name === 'string' ? p.name.trim().slice(0, 80) : '';
+ };
  $('mt-account-open').addEventListener('click', () => openDialog('profile'));
  $('mt-account-x').addEventListener('click', closeDialog);
  el.querySelector('[data-mt-close]').addEventListener('click', closeDialog);

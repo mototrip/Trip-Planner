@@ -1,0 +1,12 @@
+MotoTrip V6.3 — Rider Profile + Shared Ride Rejoin + Full History Fix
+
+1. Shared Ride rider name is automatically taken from your saved Rider Profile. The field is read-only; tap Edit Profile to change it. Profile email, blood group, and emergency contact remain private by default.
+2. Signing out PAUSES Shared Ride access but does NOT leave/revoke your membership. Log in again with the SAME Firebase Email/Password account on this device to restore the ride automatically.
+3. Each Firebase user ID has its own saved Shared Ride session. A different account cannot automatically access another account’s ride.
+4. New riders first fetch complete Firestore history (expenses, payments, riders) from the server before the group is displayed; no blank group replaces it while waiting.
+5. Group name collisions are blocked for new rider identities to avoid mixing payments.
+6. Intentional Leave Shared Ride continues to revoke membership; signing out does not.
+
+NOTE: If your original Shared Ride was created with anonymous login and you SIGNED OUT of that anonymous account before linking it to an email, the original anonymous Firebase UID may be lost. Use the original invite link to join again. For future reliability, link an email account before switching devices. Existing server group data are not deleted by signing out.
+
+Deployment: upload all files in the Full ZIP, or use the Quick ZIP files at repository root. No new Firestore rules are needed for these changes if V5.8 Group Safety rules were already published. Never use open read/write rules. This build has not been validated against the user's live Firebase account.

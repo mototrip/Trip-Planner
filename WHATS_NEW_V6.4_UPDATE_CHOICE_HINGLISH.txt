@@ -1,0 +1,18 @@
+MotoTrip V6.4 — User Choice for App Updates
+
+1. Jab naya version available ho, ek chhota banner show hoga:
+   Update now | Later
+2. Update now: new service worker activate, app reload ONCE. Trip, bill, profile
+   aur localStorage manually clear nahi hoti.
+3. Later: current tab par update prompt 12 hours snooze.
+4. Profile -> Check for updates: manually check and show update if available.
+5. App is offline? Existing cached version works (when available).
+
+Important browser limitation: If ALL app tabs are closed, a waiting service worker
+may activate automatically next time. During an open session, the app does not
+force reload without Update now being tapped.
+
+GitHub Upload: extract Quick ZIP; upload index.html, app-update.js,
+style.css, sw.js to repository root. Do not upload the ZIP itself.
+Testing: code/ZIP verification completed; physical iPhone/Android behavior
+still needs testing after live deployment.

@@ -1,14 +1,14 @@
-/* MotoTrip V6.2.1 — online-first updates, offline-safe fallback.
+/* MotoTrip V6.4 — online-first updates, offline-safe fallback.
  * Original application © 2026 Satish Kumar Gupta.
  * IMPORTANT: cache cleanup here does not delete trips/expenses in localStorage.
  */
-const CACHE_NAME = 'mototrip-v6.2.1';
+const CACHE_NAME = 'mototrip-v6.4';
 const PREVIOUS_CACHE_PREFIX = 'mototrip-';
 const APP_SHELL = [
-  './index.html','./app-update.js?v=61','./style.css?v=621',
-  './app.js?v=61','./account.js?v=61','./split.js?v=61','./route.js?v=61','./ui.js?v=61',
-  './exports.js?v=61','./firebase-config.js?v=61','./qr-code.js?v=61','./shared-ride.js?v=61','./safety.js?v=61','./qr-scanner.js?v=61',
-  './report.html','./report.js?v=61','./privacy.html',
+  './index.html','./app-update.js?v=64','./style.css?v=64',
+  './app.js?v=64','./account.js?v=64','./split.js?v=64','./route.js?v=64','./ui.js?v=64',
+  './exports.js?v=64','./firebase-config.js?v=64','./qr-code.js?v=64','./shared-ride.js?v=64','./safety.js?v=64','./qr-scanner.js?v=64',
+  './report.html','./report.js?v=64','./privacy.html',
   './terms.html','./ownership.html','./manifest.json',
   './icon-192.png','./icon-512.png'
 ];
@@ -23,7 +23,8 @@ self.addEventListener('install', event => {
     const cache = await caches.open(CACHE_NAME);
     // A newly deployed bundle must be complete before it replaces an old one.
     await cache.addAll(APP_SHELL.map(path => new Request(path, {cache: 'reload'})));
-    await self.skipWaiting();
+    // Do NOT force-activate a new version. The user chooses Update now or Later.
+    // First install activates normally; upgrades stay waiting while an old client is open.
   })());
 });
 
@@ -33,14 +34,8 @@ self.addEventListener('activate', event => {
     const previous = names.filter(n => n.startsWith(PREVIOUS_CACHE_PREFIX) && n !== CACHE_NAME);
     await Promise.all(previous.map(n => caches.delete(n)));
     await self.clients.claim();
-    // One-time migration of already-open v4.x tabs to the new online-first strategy.
-    // No browser-storage clearing is needed, so saved trips and bills are preserved.
-    if (previous.length) {
-      const windows = await self.clients.matchAll({type: 'window', includeUncontrolled: true});
-      await Promise.all(windows.filter(c => c.url.startsWith(self.registration.scope)).map(async c => {
-        try { await c.navigate(c.url); } catch (_) { /* Some browsers disallow navigation. */ }
-      }));
-    }
+    // Keep existing tabs unchanged. If the user approved Update now, the client
+    // listens for controllerchange and reloads once on that explicit action.
   })());
 });
 
