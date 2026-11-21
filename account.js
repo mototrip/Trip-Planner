@@ -150,6 +150,17 @@
    link.hidden = !good;
    if (good) link.href = 'tel:' + phone; else link.removeAttribute('href');
  }
+ function updateHeaderProfile(name) {
+   const button = $('mt-account-open');
+   if (!button) return;
+   const first = String(name || '').trim().split(/\s+/)[0].slice(0, 13);
+   const avatar = document.createElement('span'); avatar.className='mt-profile-avatar';
+   avatar.textContent = first ? first.charAt(0).toUpperCase() : '👤'; avatar.setAttribute('aria-hidden','true');
+   const caption = document.createElement('span'); caption.className='mt-profile-caption';
+   caption.textContent = first || 'Profile';
+   button.replaceChildren(avatar,caption);
+   button.setAttribute('aria-label','Open rider profile'+(first?' for '+first:''));
+ }
  function saveProfile(event) {
    event.preventDefault();
    const p = {
@@ -165,7 +176,7 @@
    try { localStorage.setItem(savedProfileKey(), JSON.stringify(p)); }
    catch (_) { setMessage('Cannot save profile on this device. Browser storage may be blocked.', true); return; }
    if ($('shared-name') && !$('shared-name').value.trim()) $('shared-name').value = p.name;
-   $('mt-account-open').textContent = '👤 ' + p.name.split(' ')[0].slice(0, 13);
+   updateHeaderProfile(p.name);
    updateEmergencyCall(p.icePhone);
    window.dispatchEvent(new Event('mototrip-profile-updated'));
    markSeen();
@@ -174,7 +185,7 @@
  }
  function fillLabel() {
    const p = readProfile();
-   $('mt-account-open').textContent = '👤 ' + (p.name ? p.name.split(' ')[0].slice(0, 13) : 'Profile');
+   updateHeaderProfile(p.name);
    if ($('shared-name') && !$('shared-name').value.trim() && p.name) $('shared-name').value = p.name;
  }
  async function logout() {

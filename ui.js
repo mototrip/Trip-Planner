@@ -24,6 +24,18 @@
  // Applies to the page once and to every later expense/settlement render.
  window.MotoTripUI={afterSplitRender,selectionStatus};
  try { if(typeof group==='function')afterSplitRender(group()); } catch (_) {}
+ // V6.0: one-tap Route help and half-width Create / Join actions.
+ const routeJump=$('planner-route-jump');
+ if(routeJump)routeJump.addEventListener('click',()=>{
+   const target=document.querySelector('nav button[data-tab="route"]');
+   if(target)target.click();
+ });
+ const joinTrigger=$('join-ride-trigger'),joinPanel=$('join-ride-panel');
+ if(joinTrigger&&joinPanel)joinTrigger.addEventListener('click',()=>{
+   joinPanel.hidden=!joinPanel.hidden;
+   joinTrigger.setAttribute('aria-expanded',String(!joinPanel.hidden));
+   if(!joinPanel.hidden){const field=$('shared-code');if(field)field.focus({preventScroll:true});}
+ });
  // A bottom nav tap should always land at the top of the new section.
  const nav=$('main-nav');
  if(nav)nav.addEventListener('click',event=>{

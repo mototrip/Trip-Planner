@@ -696,3 +696,35 @@ html[data-theme=dark] #split .mt-reset-row #new-group{background:#472537;color:#
  #trips .mt-utility-card .export-grid button{font-size:11px}
  #route .mt-route-tools .route-map-options>*{font-size:10px!important}
 }
+
+
+/* MotoTrip V6.0 | Header, shared-ride actions and planner polish */
+.masthead .top-actions{display:flex!important;align-items:center!important;justify-content:space-between!important;gap:8px!important;margin-bottom:10px!important}
+.masthead .mt60-header-actions{display:flex;align-items:center;justify-content:flex-end;gap:8px;min-width:0}
+html body .masthead #mt-account-open.mt60-profile-chip{display:inline-flex!important;align-items:center!important;gap:7px!important;max-width:154px!important;min-height:39px!important;padding:4px 11px 4px 5px!important;border-radius:999px!important;background:#0c193e99!important;border:1px solid #abc5f477!important;box-shadow:0 3px 11px #070d262b!important;color:#fff!important;font-size:12px!important;font-weight:700!important;line-height:1!important}
+.masthead .mt-profile-avatar{display:grid;place-items:center;flex:0 0 28px;width:28px;height:28px;border-radius:50%;background:linear-gradient(145deg,#83e5fb,#a8ffbf);color:#143658;font-size:14px;font-weight:900;box-shadow:0 1px 7px #040e2733}
+.masthead .mt-profile-caption{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+html body .masthead #theme-toggle.mt60-theme-pill{display:inline-grid!important;place-items:center!important;flex:0 0 39px!important;width:39px!important;height:39px!important;min-height:39px!important;padding:0!important;border-radius:50%!important;background:#0c193e99!important;border:1px solid #abc5f477!important;box-shadow:0 3px 11px #070d262b!important;color:#fff!important;font-size:23px!important;line-height:1!important}
+.masthead #mt-account-open:hover,.masthead #theme-toggle:hover{border-color:#a5f9d5!important;filter:brightness(1.08)}
+.masthead :is(#mt-account-open,#theme-toggle):focus-visible{outline:2px solid #a6ffcd!important;outline-offset:3px!important}
+/* Create and Join share one row. The actual join form opens full width underneath. */
+#shared-ride-setup .mt60-ride-actions{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;margin:12px 0 7px}
+#shared-ride-setup .mt60-ride-actions>*{min-width:0!important;width:100%!important;min-height:45px!important;margin:0!important;padding:9px 8px!important;font-size:clamp(10px,2.75vw,13px)!important;line-height:1.25!important;font-weight:800!important;white-space:normal!important;overflow-wrap:anywhere;border-radius:13px!important}
+html body #shared-ride-setup #join-ride-trigger{background:linear-gradient(120deg,#eef0ff,#ddf3ff)!important;border:1px solid #acc8ec!important;color:#1d4272!important;box-shadow:0 4px 12px #0b3d7810!important}
+html[data-theme=dark] body #shared-ride-setup #join-ride-trigger{background:linear-gradient(120deg,#29466b,#223b58)!important;border-color:#5b89b0!important;color:#f3fcff!important}
+#shared-ride-setup #join-ride-trigger[aria-expanded=true]{outline:2px solid #68dfcb;outline-offset:1px}
+#shared-ride-setup #join-ride-panel[hidden]{display:none!important}
+#shared-ride-setup #join-ride-panel.mt60-join-form{display:block;min-width:0;padding:12px!important;margin:8px 0 13px!important;border-radius:14px!important;border:1px solid #abc9e5!important;background:var(--sub)!important;color:var(--ink)!important;box-shadow:none!important}
+#shared-ride-setup #join-ride-panel.mt60-join-form>label,
+#shared-ride-setup #join-ride-panel.mt60-join-form>.qr-join-actions,
+#shared-ride-setup #join-ride-panel.mt60-join-form>#shared-join,
+#shared-ride-setup #join-ride-panel.mt60-join-form>.shared-scanner-panel{margin-inline:0!important}
+#shared-ride-setup #join-ride-panel.mt60-join-form>#shared-join{width:100%!important}
+/* The destination count no longer appears; Route action is located directly below the End Destination field. */
+#plan .simple-place.dest-fieldset{position:relative}
+#plan #selected-stop-summary.stop-summary{display:block!important;clear:both;border-top:1px dashed var(--edge);margin:11px 0 0!important;padding:9px 0 0!important}
+#plan #selected-stop-summary #planner-route-jump{background:transparent!important;border:0!important;box-shadow:none!important;color:var(--accent)!important;min-height:26px!important;width:auto!important;max-width:100%;margin:0!important;padding:2px 0!important;font-size:clamp(10px,2.8vw,12px)!important;font-weight:750!important;text-align:left!important;white-space:normal!important;line-height:1.45!important;cursor:pointer;text-decoration:none}
+#plan #selected-stop-summary #planner-route-jump:hover{text-decoration:underline}
+/* Maps icon-pill: same compact accessory feel as Bike & Mileage Check. */
+html body #plan a#map.planner-map-link{display:inline-flex!important;align-items:center!important;justify-content:center!important;min-height:36px!important;width:auto!important;max-width:fit-content!important;padding:6px 12px!important;margin:3px 0 13px!important;border-radius:999px!important;border:1px solid var(--edge)!important;background:var(--sub)!important;color:var(--ink)!important;box-shadow:0 4px 12px #17315d12!important;font-size:12px!important;font-weight:750!important;text-decoration:none!important;white-space:nowrap!important}
+@media(max-width:360px){.masthead .mt60-header-actions{gap:5px}.masthead .mt-profile-avatar{flex-basis:25px;width:25px;height:25px}html body .masthead #mt-account-open.mt60-profile-chip{padding:4px 7px 4px 4px!important;min-height:36px!important;font-size:11px!important}html body .masthead #theme-toggle.mt60-theme-pill{flex-basis:36px!important;width:36px!important;height:36px!important;min-height:36px!important}}

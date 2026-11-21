@@ -101,7 +101,7 @@ function renderLists(){
  const waypoints=state.routeStops.slice(0,-1);
  $('route-stop-list').replaceChildren(...waypoints.map((_,i)=>stopRow(i)));
  $('route-count').textContent=waypoints.length+' stop'+(waypoints.length===1?'':'s');
- $('selected-stop-summary').textContent=state.routeStops.length+' destination'+(state.routeStops.length===1?'':'s')+' selected';
+ // Planner keeps its permanent Route-tab link; stop count remains in Route.
  syncRouteInputs();
 }
 function googleURL(points){const names=points.map(p=>{if(typeof p==='string')return p;const c=coord(p);return c?c.lat.toFixed(6)+','+c.lon.toFixed(6):p.name;});let url='https://www.google.com/maps/dir/?api=1&origin='+encodeURIComponent(names[0])+'&destination='+encodeURIComponent(names.at(-1))+'&travelmode=driving';const way=names.slice(1,-1);if(way.length)url+='&waypoints='+way.map(encodeURIComponent).join('%7C');return url;}
@@ -115,7 +115,8 @@ function renderGoogle(){
   link.href=googleURL(items);link.target='_blank';link.rel='noopener noreferrer';link.textContent='Google Maps ↗';row.append(lab,link);container.append(row);
  });
  $('map').href=window.motoGoogleDirections(0);
- $('map').textContent=legs().length>1?'Google Maps · leg 1 ↗':'Google Maps ↗';
+ $('map').textContent=legs().length>1?'🗺️ Maps · 1':'🗺️ Maps';
+ $('map').setAttribute('aria-label',legs().length>1?'Open route leg 1 in Google Maps':'Open route in Google Maps');
 }
 function mapXY(lat,lon,z=view.z){
  const scale=TILE*2**z,phi=boundLat(lat)*Math.PI/180;

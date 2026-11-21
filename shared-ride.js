@@ -346,7 +346,7 @@
  $('shared-qr-toggle').addEventListener('click',()=>showQRCode($('shared-qr-panel').hidden));
  $('shared-leave').addEventListener('click',leave);
  const code=joinToken(location.hash);
- if(code){$('shared-code').value=code;if($('join-ride-panel'))$('join-ride-panel').open=true;message('Invite detected! Enter your name and tap Join Shared Ride.');}
+ if(code){$('shared-code').value=code;const joinPanel=$('join-ride-panel');if(joinPanel)joinPanel.hidden=false;const joinButton=$('join-ride-trigger');if(joinButton)joinButton.setAttribute('aria-expanded','true');message('Invite detected! Enter your name and tap Join Shared Ride.');}
  else if(!configured)message('Offline Bill Split works as usual. To turn on live sharing, MotoTrip owner must configure Firebase.');
  updateUI(false);restore();
 })();
