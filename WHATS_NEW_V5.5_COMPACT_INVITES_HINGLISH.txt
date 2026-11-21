@@ -1,0 +1,13 @@
+MotoTrip V5.5 — One Button Invite Sharing (iPhone + Android)
+
+- Shared Ride banane ke baad sirf bada 'Send Invite' button dikhai dega.
+- Send Invite dabane par chhoti bottom sheet khulegi: WhatsApp, Messages, More apps, Copy link.
+- Ye options default page par nahin dikhenge, isliye screen clean rahegi.
+- More apps device ka native share menu kholta hai jab browser support karta hai.
+- QR code aur Leave Ride 'More ride options' ke andar rahenge.
+- Join Shared Ride ka QR scanner pehle jaise hi rahega.
+- Offline data, Firebase configuration, ownership/privacy pages, icons unchanged.
+- Browser par install hone wali website ke liye GitHub upload ke baad refresh/update check hota hai.
+- Phone par native share apps installed apps aur browser support par depend karte hain.
+
+UPLOAD: ZIP extract karo, repository root mein files upload karo aur Commit changes.

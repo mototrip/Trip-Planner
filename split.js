@@ -231,6 +231,7 @@ function renderSplit(){
  }
  if(!result.payments.length)$('settlements').append(node('p','No outstanding balances.'));
  renderPaymentCorrections(g);
+ if(window.MotoTripUI)window.MotoTripUI.afterSplitRender(g);
  $('expense-form').querySelector('button.primary').disabled=!g.members.length;
  $('payment-form').querySelector('button.primary').disabled=g.members.length<2;
  renderBudget();

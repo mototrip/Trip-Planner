@@ -1,4 +1,4 @@
-/* MotoTrip V5.0 auto-update checker — runs in iOS Safari and Android Chrome.
+/* MotoTrip V5.4 auto-update checker — runs in iOS Safari and Android Chrome.
  * Reloads are performed by the newly activated service worker, no user action needed.
  */
 (() => {

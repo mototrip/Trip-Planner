@@ -1,0 +1,15 @@
+MotoTrip V5.1 — Shared Ride creation feedback and connection timeout fix
+
+Changes:
+- Clear stages while creating: Connecting, Saving ride, Adding rider, Preparing invite.
+- If Firebase is unreachable, app shows a helpful error instead of endless 'Creating...'.
+- Each cloud stage has a 12-second deadline; actual connection duration varies.
+- Retried attempts reuse the same pending private ride ID, reducing duplicate creations.
+- All existing offline trips, bills, payments, exported backups, bike+car icon, owner and policies preserved.
+- Online connection and completed Firebase Firestore database + security rules are still required.
+- If the console shows 'Create database', finish that first. Under Rules, publish FIREBASE_RULES.txt.
+
+WARNING: Timing out cannot cancel a cloud write already in flight. A write might complete later; retrying on the same phone reuses the pending ride ID. Before sharing any invite link, verify the group contents.
+
+GitHub quick update: upload these 3 files and commit: index.html, shared-ride.js, sw.js.
+Users' existing app will update when online and the updated service worker activates; a first relaunch may be necessary.

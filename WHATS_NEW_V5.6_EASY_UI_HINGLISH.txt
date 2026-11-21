@@ -1,0 +1,23 @@
+MotoTrip V5.6 — Easy-to-Use UI Refresh
+© 2026 Satish Kumar Gupta
+
+Kya badla:
+1. Shared Ride mein Create primary, Join invite ek tap se open (invitation links par automatic open).
+2. Bill Split mein Manage riders, Quick expense types, Split between, Paid/Unpaid status aur Reset group extra menus mein.
+3. Amount, Paid by, Add Expense, Balances, Final Settlement screen par visible.
+4. Planner mein Toll aur Other extra costs compact panel mein; Budget vs Actual tap par.
+5. Route mein extra location tools on demand; My Location, Start/End, Add Stop visible.
+6. Trips mein Excel/CSV/PDF reports aur Delete Data extra menus mein. Backup & Restore accessible.
+7. Gear checklist scrollable; Reset checklist extra options mein.
+8. Colors / spacing / mobile bottom tabs improved for iPhone and Android.
+9. Original bike+car icons, privacy/legal pages, Firebase config, Trip & Bill localStorage keys unchanged.
+
+Kya safe rahega:
+- No migration or deletion of old browser storage. MotoTrip existing localStorage keys remain the same.
+- Do not clear browser data before exporting backup.
+- Full ZIP upload ke baad service worker app update karega; initial migration me one refresh possible.
+- Live Firestore Shared Ride, GPS and QR camera on real phones still need manual integration testing.
+
+Upload:
+GitHub repository https://github.com/mototrip/Trip-Planner > Add file > Upload files > extract ZIP ke andar ki files select > Commit.
+Quick ZIP: index.html, style.css, split.js, shared-ride.js, sw.js, ui.js (all six required).

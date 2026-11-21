@@ -1,0 +1,27 @@
+MotoTrip V5.3 — QR Scan and QR Invite for Shared Ride
+
+New:
+- Create Shared Ride > Show QR Code + Copy Invite Link + Share Ride.
+- Join: Scan QR from the in-app rear camera (iPhone Safari / Android Chrome via HTTPS).
+- Join: QR from Photo lets friends choose a saved screenshot on the same phone.
+- Invite link/code paste also remains available.
+- QR valid only for this MotoTrip app, not arbitrary website URLs.
+- No automatic joining: after scanning enter rider name and tap Join Shared Ride.
+- Camera asked for permission only after Scan QR tap; preview stops when closed / tab hidden.
+- Video/photos are processed on your device, never uploaded to MotoTrip servers.
+- A QR decoding script (jsQR 1.4.0, Apache-2.0) loads from jsDelivr on demand in iOS Safari and browsers without native QR detection. This needs internet initially and shares normal network request metadata with the CDN.
+- Cloud Shared Ride needs Firebase Auth + Firestore + published security rules.
+
+Installation:
+1. Download full ZIP, extract.
+2. Go to https://github.com/mototrip/Trip-Planner
+3. Add file > Upload files: upload all extracted app files (not ZIP).
+4. Include new qr-scanner.js and existing qr-code.js and replace index.html/style.css/sw.js etc.
+5. Commit changes, open MotoTrip in normal Safari/Chrome.
+
+Safety:
+- Export Trips backup before updating.
+- Test on two phones: create ride on A, show QR. On B: Bill Split > Scan QR, point camera, enter name, Join.
+- To scan QR shown on same phone use QR from Photo, or paste invite link.
+- Actual iPhone/Android hardware testing and Firebase real-time integration tests still needed.
+- Do not share private ride invitations publicly. Members can edit bills in beta.

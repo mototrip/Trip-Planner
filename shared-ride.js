@@ -7,6 +7,16 @@
  const $ = id => document.getElementById(id);
  const sessionKey = 'mototrip-shared-ride-v1';
  const backupKey = 'mototrip-shared-local-split-backup-v1';
+ // Reuse the same private ride ID if an earlier attempt timed out, avoiding duplicate rides.
+ const pendingCreateKey = 'mototrip-pending-create-v1';
+ const CREATE_STEP_TIMEOUT_MS = 12000;
+ function withTimeout(promise, label, ms = CREATE_STEP_TIMEOUT_MS) {
+  let timer;
+  const deadline = new Promise((_, reject) => {
+   timer = setTimeout(() => reject(new Error(label + ' timed out. Check your internet, Firestore Database and Security Rules.')), ms);
+  });
+  return Promise.race([promise, deadline]).finally(() => clearTimeout(timer));
+ }
  const config = window.MOTOTRIP_FIREBASE_CONFIG || {};
  const configured = ['apiKey','authDomain','projectId','appId'].every(k =>
   typeof config[k] === 'string' && !!config[k].trim() && !/YOUR_|<|>/.test(config[k]));
@@ -89,7 +99,7 @@
  async function activate(rideId,inviteId){
   leaving=false;
   current={rideId,inviteId,name:'Shared Ride'};
-  saveSession();updateUI(true);lastRemote=null;lastLocal=null;
+  saveSession();updateUI(true);showQRCode(false);lastRemote=null;lastLocal=null;
   // Block edits until first authoritative cloud snapshot is received.
   state.split={name:'Connecting to shared ride…',members:[],expenses:[],transfers:[]};
   persist();if(window.renderSplit)window.renderSplit();
@@ -103,16 +113,35 @@
   if((local.expenses.length||local.transfers.length||local.members.length)&&
     !confirm('Your current riders, expenses and payments will be shared with anyone you invite. Continue?'))return;
   try{
-   $('shared-create').disabled=true;message('Creating your shared ride…');
-   const user=await signIn();
-   const rideId=token(),inviteId=token(),r=rideRef(rideId),invite=inviteRef(inviteId);
+   $('shared-create').disabled=true;
+   message('Connecting to Firebase…');
+   if(!navigator.onLine)throw Error('You are offline. Connect to the internet to create a Shared Ride.');
+   const user=await withTimeout(signIn(), 'Firebase sign-in');
+   let pending=null;
+   try{pending=JSON.parse(localStorage.getItem(pendingCreateKey)||'null');}catch(_){/* Ignore corrupt pending record. */}
+   const validId=id=>typeof id==='string'&&/^[a-f0-9]{32}$/.test(id);
+   const rideId=validId(pending?.rideId)?pending.rideId:token();
+   const inviteId=validId(pending?.inviteId)?pending.inviteId:token();
+   // A retry uses the same IDs, even if the prior write eventually reached Firebase.
+   localStorage.setItem(pendingCreateKey,JSON.stringify({rideId,inviteId}));
+   const r=rideRef(rideId),invite=inviteRef(inviteId);
    if(!local.members.some(n=>n.toLowerCase()===name.toLowerCase()))local.members.push(name);
    const now=new Date().toISOString();
-   await sdk.dbM.setDoc(r,{ownerUid:user.uid,createdAt:now,updatedAt:now,...local});
-   await sdk.dbM.setDoc(memberRef(rideId,user.uid),{name,inviteId:'',joinedAt:now});
-   await sdk.dbM.setDoc(invite,{rideId,ownerUid:user.uid,createdAt:now});
+   message('Saving your ride…');
+   await withTimeout(sdk.dbM.setDoc(r,{ownerUid:user.uid,createdAt:now,updatedAt:now,...local}), 'Saving the ride');
+   message('Adding you as a rider…');
+   await withTimeout(sdk.dbM.setDoc(memberRef(rideId,user.uid),{name,inviteId:'',joinedAt:now}), 'Adding rider');
+   message('Preparing invite link…');
+   await withTimeout(sdk.dbM.setDoc(invite,{rideId,ownerUid:user.uid,createdAt:now}), 'Creating invite');
    preserveLocal();await activate(rideId,inviteId);
-  }catch(e){message('Create failed: '+e.message,true);}
+   showQRCode(false);
+   localStorage.removeItem(pendingCreateKey);
+   message('✓ Shared Ride created. Tap Send Invite to invite friends.');
+  }catch(e){
+   const code=typeof e?.code==='string'?e.code:'';
+   const hint=code==='permission-denied'?'Firestore rules have not allowed this request.':code==='not-found'?'Firestore Database might not be created.':String(e?.message||'Connection failed');
+   message('Could not create Shared Ride: '+hint+' Your offline bills are safe. Check Firebase setup and try again.',true);
+  }
   finally{$('shared-create').disabled=false;}
  }
  async function joinRide(){
@@ -195,8 +224,73 @@
   }).catch(e=>{message('Could not sync: '+e.message+'. Check internet and try again.',true);})
    .finally(()=>{busy=Math.max(0,busy-1);if(!busy&&current?.rideId===rid&&lastRemote){display(lastRemote);if(!lastError)message('✓ Saved on all connected phones.');}});
  }
+ function showQRCode(show) {
+  const panel=$('shared-qr-panel'),button=$('shared-qr-toggle'),container=$('shared-qr-image');
+  if(!panel||!button||!container)return;
+  if(!show||!current){panel.hidden=true;button.textContent='▦ Show QR (optional)';button.setAttribute('aria-expanded','false');container.replaceChildren();return;}
+  const invite=inviteURL(current.inviteId);
+  try{
+   if(!window.MotoTripQR)throw Error('QR generator unavailable; reload the app.');
+   // Each invitation QR is generated on-device. No QR service receives the invite token.
+   container.replaceChildren(window.MotoTripQR.create(invite));
+   panel.hidden=false;button.textContent='▦ Hide QR';button.setAttribute('aria-expanded','true');
+  }catch(e){message('QR code could not be shown: '+e.message+'. Use Copy Invite Link instead.',true);}
+ }
+ const inviteMessage = () => 'Join my MotoTrip Shared Ride to plan and split expenses together!\n' + inviteURL(current.inviteId);
+ function closeShareSheet(){
+  const sheet=$('invite-share-sheet');
+  if(!sheet||sheet.hidden)return;
+  sheet.hidden=true;
+  document.documentElement.classList.remove('invite-sheet-open');
+  $('shared-native-share').setAttribute('aria-expanded','false');
+  $('shared-native-share').focus({preventScroll:true});
+ }
+ function openShareSheet(){
+  if(!current)return;
+  const sheet=$('invite-share-sheet');
+  sheet.hidden=false;
+  document.documentElement.classList.add('invite-sheet-open');
+  $('shared-native-share').setAttribute('aria-expanded','true');
+  $('shared-whatsapp').focus({preventScroll:true});
+ }
+ async function shareRide(){
+  if(!current)return;
+  const url=inviteURL(current.inviteId);
+  if(typeof navigator.share!=='function'){
+   closeShareSheet();
+   await copy();
+   message('This browser has no system share menu. Invite link copied — paste it into any app.');
+   return;
+  }
+  // Called directly from the user's More apps tap so the OS share sheet is allowed to open.
+  closeShareSheet();
+  try{
+   await navigator.share({title:'Join my MotoTrip Shared Ride',text:'Join my ride on MotoTrip — plan together and split bills.',url});
+   message('Invite shared.');
+  }catch(e){
+   if(e?.name!=='AbortError')message('System share menu unavailable. Use Send Invite → WhatsApp, Messages or Copy link.',true);
+  }
+ }
+ function shareWhatsApp(){
+  if(!current)return;
+  closeShareSheet();
+  const url='https://wa.me/?text='+encodeURIComponent(inviteMessage());
+  // Synchronous navigation inside a genuine tap avoids mobile popup blockers.
+  const newTab=window.open(url,'_blank');
+  if(newTab){try{newTab.opener=null;}catch(_){/* Browser may restrict opener access. */}}
+  else location.assign(url);
+ }
+ function shareSMS(){
+  if(!current)return;
+  closeShareSheet();
+  const ios=/iPhone|iPad|iPod/i.test(navigator.userAgent);
+  // iOS supports sms:&body= ; Android generally supports sms:?body=.
+  const url='sms:'+(ios?'&':'?')+'body='+encodeURIComponent(inviteMessage());
+  location.href=url;
+ }
  async function copy(){
   if(!current)return;
+  closeShareSheet();
   const url=inviteURL(current.inviteId);
   try{await navigator.clipboard.writeText(url);message('Invite link copied! Share privately with your friends.');}
   catch(e){prompt('Copy this invite link:',url);}
@@ -210,7 +304,7 @@
   const backup=localStorage.getItem(backupKey);
   if(backup){try{state.split=JSON.parse(backup);persist();}catch(e){}localStorage.removeItem(backupKey);}
   if(window.renderSplit)window.renderSplit();
-  updateUI(false);message('You are back to your offline Bill Split.');
+  updateUI(false);showQRCode(false);closeShareSheet();message('You are back to your offline Bill Split.');
   if(location.hash.includes('join='))history.replaceState(null,'',location.pathname+location.search);
  }
  async function restore(){
@@ -228,9 +322,17 @@
  $('shared-create').addEventListener('click',createRide);
  $('shared-join').addEventListener('click',joinRide);
  $('shared-copy').addEventListener('click',copy);
+ $('shared-native-share').addEventListener('click',openShareSheet);
+ $('shared-more').addEventListener('click',shareRide);
+ $('shared-whatsapp').addEventListener('click',shareWhatsApp);
+ $('invite-share-close').addEventListener('click',closeShareSheet);
+ $('invite-share-backdrop').addEventListener('click',closeShareSheet);
+ document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('invite-share-sheet').hidden)closeShareSheet();});
+ $('shared-sms').addEventListener('click',shareSMS);
+ $('shared-qr-toggle').addEventListener('click',()=>showQRCode($('shared-qr-panel').hidden));
  $('shared-leave').addEventListener('click',leave);
  const code=joinToken(location.hash);
- if(code){$('shared-code').value=code;message('Invite detected! Enter your name and tap Join Shared Ride.');}
+ if(code){$('shared-code').value=code;if($('join-ride-panel'))$('join-ride-panel').open=true;message('Invite detected! Enter your name and tap Join Shared Ride.');}
  else if(!configured)message('Offline Bill Split works as usual. To turn on live sharing, MotoTrip owner must configure Firebase.');
  updateUI(false);restore();
 })();

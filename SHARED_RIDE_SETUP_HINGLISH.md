@@ -33,3 +33,21 @@
 - Never switch Firestore rules to `allow read, write: if true`.
 - Existing privacy.html and terms.html mein optional Shared Ride disclosures add hue hain.
 - Production launch se pehle privacy/legal and cloud security assessment karna recommended hai.
+
+
+MotoTrip V5.2 QR Code Invite:
+Ride create hone ke baad Send Invite button show hoga. Friends Camera se scan karenge, naam enter karenge aur Join Shared Ride dabayenge. Copy link aur Share Ride bhi available hain.
+
+
+MotoTrip V5.3 QR Scanner:
+Friend 1: Create Shared Ride -> Show QR. Friend 2: Bill Split -> apna naam -> Scan QR -> camera allow -> QR ke saamne camera -> Join Shared Ride. Same phone par invite link paste karo. Camera/images local process hoti hain. iOS Safari mein jsQR (Apache-2.0) decoder jsDelivr se load hota hai jab Scan button dabate ho.
+
+
+MotoTrip V5.4 SEND INVITE + SCAN QR (EASY SHARE):
+- Shared Ride create karne ke baad bada **Send Invite** button dikhega. iPhone/Android par native share menu khulega (supported browsers mein).
+- WhatsApp button se WhatsApp share screen, Messages se SMS composer, More Apps se phone share menu khulega.
+- Copy Link se invite link copy hota hai. Desktop jahan native share menu nahi hai wahan Send Invite copy-link fallback deta hai.
+- Scan QR ek QR-icon button hai; camera sirf us button ko tap karne par chalta hai. QR-photo picker removed to simplify the screen. Paste invite link remains available.
+- Show QR (optional) chhota button hai; QR automatically pop up nahi hota.
+- Invite secret jaisa treat karein: sirf trusted doston ko share karein. Firebase rules aur access policy production release se pehle review/test karein.
+- Native share destinations browser aur installed applications ke hisaab se dikhte hain. WhatsApp/SMS separately available.

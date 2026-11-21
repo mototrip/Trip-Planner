@@ -1,0 +1,23 @@
+MotoTrip V5.4 — Send Invite & Easy QR Scanner
+© 2026 Satish Kumar Gupta
+
+WHAT'S NEW
+- Shared Ride active: bright Send Invite button opens native iPhone / Android sharing menu (if supported).
+- Direct WhatsApp, Messages (SMS) and More Apps shortcuts.
+- Copy Link one-tap fallback for desktop browsers.
+- QR scanning now has a modern SCAN icon card you can tap; QR from Photo removed.
+- QR generation tucked under optional Show QR button, closed by default.
+- Original personal data format, Firebase config, shared link format, mileage, routing, Paid/Unpaid, Bill Split, export and branding preserved.
+
+GITHUB UPLOAD:
+1. Back up existing local data first (Trips > Export backup).
+2. Extract this ZIP, upload its files to GitHub repo root (do NOT upload ZIP itself).
+3. Replace existing matching files and commit; added files must also be present.
+4. Open app once and test one **test** Shared Ride invite on each phone/browser before public launch.
+
+NOTES:
+- WhatsApp / SMS require compatible apps/phone support.
+- More Apps uses native Web Share API where supported; desktop browsers fallback to copying link.
+- Camera requires HTTPS and permission.
+- Firebase Auth + Firestore + Firestore rules are still required for real-time group sync.
+- QR / sharing is not full permission management. Anyone with the invite may be able to join; share only with trusted friends.

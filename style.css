@@ -322,3 +322,232 @@ html body .payment-correction-row.is-unpaid .payment-undo-btn{border-color:#60bc
 .shared-create-btn{margin-top:10px}.shared-separator{text-align:center;color:#e0ebff;font-size:10px;font-weight:800;letter-spacing:.11em;margin:16px 0 7px}.shared-tip{font-size:12px;line-height:1.5;color:#e2edff;margin:7px 0}.shared-current{background:#091c3585;border:1px solid #99d1db65;border-radius:11px;padding:10px 12px;color:#fff;overflow-wrap:anywhere;font-size:13px}.shared-actions{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin:12px 0}.shared-actions button{min-width:0}.shared-ride-card #shared-message{font-size:12px;line-height:1.5;color:#e5f0ff;margin:8px 0 0;overflow-wrap:anywhere}.shared-ride-card #shared-message:empty{display:none}
 html[data-theme=light] .shared-ride-card{background:linear-gradient(125deg,#e4f9ff,#efecff);border-color:#abbbdb;color:#1b3054}html[data-theme=light] .shared-ride-head p,html[data-theme=light] .shared-tip,html[data-theme=light] .shared-separator,html[data-theme=light] #shared-message{color:#334c6d}html[data-theme=light] .shared-mode{background:#dcecf2;color:#214c69;border-color:#b6d0e0}html[data-theme=light] .shared-current{background:#ffffffa8;color:#183052;border-color:#b1ccdf}html[data-theme=light] .shared-ride-card label{color:#284b67}
 @media(max-width:360px){.shared-ride-card{padding:12px}.shared-actions{grid-template-columns:1fr}}
+
+/* MotoTrip V5.2: simple QR invite design for iOS and Android. */
+.shared-qr-panel{margin:10px 0 14px;padding:15px 12px;background:#fbfdff;color:#23304a;border:1px solid #bfe6ee;border-radius:18px;text-align:center;box-shadow:0 10px 24px #07192b24}
+.shared-qr-panel[hidden]{display:none!important}
+.shared-qr-frame{display:flex;align-items:center;justify-content:center;max-width:100%;margin:0 auto 8px}
+.shared-qr-frame svg{width:min(100%,250px);height:auto;aspect-ratio:1/1;background:#fff;border-radius:9px;display:block}
+.shared-qr-label{font-size:13px;line-height:1.4;font-weight:750;margin:9px 0 5px;color:#243653}
+.shared-qr-notice{font-size:11px;margin:0;color:#6b7690}
+.shared-ride-card #shared-qr-toggle{background:#f0f6ff;color:#183052}
+.shared-ride-card #shared-native-share{background:#e9f6f2;color:#19473c}
+@media(max-width:360px){.shared-actions{grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}.shared-actions button{font-size:12px;padding-inline:5px}}
+
+/* V5.3 – camera QR scanner & safe photo input for Shared Ride invitations. */
+.qr-join-actions{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:9px;margin:11px 0}
+.shared-ride-card .qr-join-actions button{background:#f1f6ff;border:1px solid #b9d1eb;color:#173351;min-height:47px;font-size:13px;white-space:normal}
+.shared-ride-card .qr-join-actions button:first-child{background:linear-gradient(120deg,#bef5aa,#75e2df);border-color:#a4e4cd}
+.shared-scanner-panel{background:#0d2034;border:1px solid #91d8e1;border-radius:17px;margin:12px 0;padding:12px;color:#fff}
+.shared-scanner-panel[hidden]{display:none!important}
+.qr-camera-frame{position:relative;width:100%;max-width:360px;aspect-ratio:1/1;margin:0 auto;background:#030b19;border-radius:12px;overflow:hidden}
+.qr-camera-frame video{width:100%;height:100%;object-fit:cover;display:block}
+.qr-camera-target{position:absolute;inset:14%;border:3px solid #b6f96f;border-radius:18px;box-shadow:0 0 0 999px #0814242e;pointer-events:none}
+.shared-scanner-status{font-size:13px;line-height:1.4;min-height:21px;margin:10px 0;color:#d1edf5;text-align:center}
+.shared-ride-card #shared-scan-stop{max-width:360px;display:block;margin:auto;background:#e8efff;color:#1c3152}
+.shared-join-hint{font-size:11px;line-height:1.5;color:#ecf1ff;margin:8px 0 4px}
+html[data-theme=light] .shared-join-hint{color:#334d6c}
+@media(max-width:340px){.qr-join-actions{gap:6px}.shared-ride-card .qr-join-actions button{padding:7px 5px;font-size:12px}}
+
+
+/* MotoTrip V5.4 | Invite-first sharing, polished tappable QR scanner */
+.shared-ride-card .invite-share-head{display:flex;align-items:center;gap:12px;margin:16px 0 10px}
+.invite-share-symbol{display:grid;place-items:center;flex:0 0 48px;width:48px;height:48px;border-radius:15px;background:linear-gradient(130deg,#70ead8,#c8fa8e);color:#113d42;font-size:29px;font-weight:900;box-shadow:0 8px 22px #071d2b31}
+.invite-share-head strong{display:block;font-size:16px;line-height:1.2;color:inherit}
+.invite-share-head p{margin:5px 0 0;color:inherit;opacity:.82;font-size:12px;line-height:1.35}
+.shared-ride-card #shared-native-share.invite-send-main{display:block;width:100%;min-height:56px!important;font-size:17px!important;letter-spacing:.01em;border-radius:15px!important;background:linear-gradient(110deg,#b6fb85,#69e9cc)!important;color:#123c35!important;box-shadow:0 9px 23px #2ec6b144}
+.invite-quick-actions{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;margin:12px 0}
+.shared-ride-card .invite-quick-actions button{min-width:0;border-radius:14px;min-height:58px;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:4px;background:#f3f7fe;color:#183151;font-size:12px;font-weight:800;padding:8px 3px;overflow-wrap:anywhere}
+.invite-quick-actions button span{display:block;font-size:22px;line-height:1}
+.shared-ride-card .invite-quick-actions .invite-whatsapp{background:#e7fbec;border:1px solid #80db9a;color:#147537}
+.shared-ride-card .invite-quick-actions .invite-sms{background:#e5f5ff;border:1px solid #8dcfe6;color:#125e86}
+.shared-ride-card .invite-quick-actions .invite-more{background:#f1ecff;border:1px solid #c6b9f9;color:#54429b}
+.invite-utility-actions{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:4px}
+.shared-ride-card .invite-utility-actions button{min-width:0;background:#ffffff15!important;color:inherit!important;border:1px solid #cfe4ff75!important;min-height:42px;padding:8px 6px;font-size:12px}
+.shared-ride-card button.invite-leave{min-height:32px;margin-top:7px;background:transparent!important;color:inherit!important;border:0!important;text-decoration:underline;font-weight:600;font-size:11px;opacity:.75}
+.shared-ride-card #shared-scan-toggle.qr-scan-card{width:100%;min-height:102px;display:flex;align-items:center;gap:14px;text-align:left;padding:12px 13px;border-radius:17px;background:linear-gradient(110deg,#ecf9ff,#f5fff0)!important;border:1px solid #77dbdc!important;box-shadow:0 8px 18px #082f3923;color:#17364b!important}
+.qr-join-actions{display:block;margin:10px 0 12px}
+.qr-scan-icon{position:relative;display:block;flex:0 0 73px;width:73px;height:76px}
+.qr-scan-icon svg{width:73px;height:75px;display:block;filter:drop-shadow(0 3px 4px #07283623)}
+.qr-scan-ribbon{position:absolute;bottom:0;left:10px;right:10px;text-align:center;border-radius:0 0 5px 5px;padding:3px 0;background:linear-gradient(90deg,#1cb5d8,#30bd94);color:#fff;letter-spacing:.03em;font-size:9px;font-weight:900}
+.qr-scan-copy{flex:1;min-width:0;display:flex;flex-direction:column;gap:4px}
+.qr-scan-copy strong{font-size:17px;line-height:1.2;letter-spacing:-.02em}
+.qr-scan-copy small{font-size:12px;line-height:1.35;color:#567083;letter-spacing:0;font-weight:500}
+.qr-scan-arrow{font-size:30px;font-weight:400;color:#008d99;line-height:1}
+.shared-ride-card #shared-scan-toggle[aria-expanded=true]{box-shadow:0 0 0 3px #5ee1c55c;background:#dbfaf4!important}
+html[data-theme=light] .shared-ride-card .invite-share-head p{color:#354f6f}
+html[data-theme=light] .shared-ride-card .invite-utility-actions button{background:#ffffffb8!important;color:#24405f!important;border-color:#b8d1e7!important}
+@media(max-width:350px){.invite-quick-actions{gap:6px}.shared-ride-card .invite-quick-actions button{font-size:11px}.qr-scan-copy strong{font-size:15px}.qr-scan-icon,.qr-scan-icon svg{width:62px;height:68px}.qr-scan-icon{flex-basis:62px}.qr-scan-ribbon{left:8px;right:8px}.shared-ride-card #shared-scan-toggle.qr-scan-card{gap:8px;padding:9px}}
+
+/* MotoTrip V5.5 — one-button, on-demand invite sharing. */
+.shared-ride-card #shared-native-share.invite-send-main{position:relative;display:flex;align-items:center;justify-content:center;gap:10px;width:100%;min-height:53px!important;margin:12px 0 4px;font-size:16px!important;box-shadow:0 8px 22px #2ec6b129!important}
+.invite-send-arrow{position:absolute;right:16px;font-size:26px;line-height:1;font-weight:400}
+.shared-extra-tools{margin:5px 0 8px!important;border:0!important;padding:0!important;background:transparent!important}
+.shared-extra-tools>summary{list-style:none;text-align:center;font-size:12px;font-weight:600;opacity:.8;padding:9px!important;cursor:pointer}
+.shared-extra-tools>summary::-webkit-details-marker{display:none}
+.shared-extra-tools>summary::after{content:'  ▾';opacity:.65}
+.shared-extra-actions{display:flex;justify-content:center;gap:9px;flex-wrap:wrap;padding:3px 0 9px}
+.shared-ride-card .shared-extra-actions button{font-size:12px;padding:8px 12px;min-height:39px;border-radius:11px;background:transparent;color:inherit;border:1px solid var(--edge)}
+.shared-ride-card .shared-extra-actions .invite-leave{font-size:12px;opacity:.8;text-decoration:none;margin:0}
+.invite-sheet-open body{overflow:hidden}
+.invite-share-sheet{position:fixed;inset:0;z-index:9999;display:grid;place-items:end center;isolation:isolate}
+.invite-share-sheet[hidden]{display:none!important}
+.invite-share-backdrop{position:absolute;inset:0;z-index:0;width:100%;height:100%;border:0!important;border-radius:0!important;background:rgba(5,14,29,.62)!important;cursor:default}
+.invite-sheet-panel{position:relative;z-index:1;box-sizing:border-box;width:min(100%,440px);padding:18px 18px max(22px,env(safe-area-inset-bottom));background:#f9fbff;color:#1a3150;border:1px solid #c4d3e8;border-radius:24px 24px 0 0;box-shadow:0 -15px 50px #0004}
+.invite-sheet-head{display:flex;align-items:start;justify-content:space-between;gap:12px;margin-bottom:16px}
+.invite-sheet-head strong{display:block;font-size:20px;font-weight:800;letter-spacing:-.03em}
+.invite-sheet-head p{font-size:12px;color:#536987;margin:3px 0 0}
+.shared-ride-card .invite-sheet-close{display:grid;place-items:center;flex:0 0 35px;width:35px;height:35px;min-height:35px;padding:0;border-radius:50%;border:1px solid #cfdaeb;background:#eff3fa!important;color:#3a506c!important;font-size:16px}
+.invite-sheet-options{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.shared-ride-card .invite-sheet-options .invite-choice{display:flex;align-items:center;justify-content:flex-start;gap:10px;min-height:59px;padding:12px;border:1px solid #d0deef;border-radius:15px;color:#213653!important;background:white!important;font-size:14px;font-weight:750;text-align:left}
+.invite-choice span{display:grid;place-items:center;flex:0 0 33px;width:33px;height:33px;border-radius:11px;background:#e8f1f7;font-size:20px;line-height:1}
+.invite-choice-wa span{background:#dcfbe8;color:#179e52}
+.invite-choice-sms span{background:#e4f3ff;color:#157bc5}
+.invite-choice-more span{background:#efe9ff;color:#8051b7}
+.invite-choice-copy span{background:#e9edf4;color:#475979}
+.invite-sheet-safety{margin:14px 2px 0;font-size:11px;line-height:1.45;color:#60708d}
+@media(min-width:650px){.invite-share-sheet{place-items:center}.invite-sheet-panel{border-radius:22px;padding-bottom:22px}}
+@media(max-width:350px){.invite-sheet-panel{padding-inline:12px}.invite-sheet-options{gap:7px}.shared-ride-card .invite-sheet-options .invite-choice{font-size:12px;padding:10px 7px;gap:6px}.invite-choice span{width:30px;flex-basis:30px;height:30px}}
+
+
+/* ==========================================================
+   MotoTrip V5.6 | Clean travel UI • iPhone and Android
+   All existing interactions/IDs kept; optional details hide
+   secondary controls, not forms or saved records.
+   ========================================================== */
+:root{--v56-blue:#4168dc;--v56-teal:#10b8a6;--v56-amber:#ff9a52;--v56-violet:#8b67e9;--v56-soft:#f7f9fe}
+html[data-theme=light]{--bg:#f3f6fd;--panel:#fff;--sub:#f7f9ff;--edge:#dbe4f5;--ink:#172747;--muted:#51647f;--accent:#287d9c;--shadow:0 8px 24px #1b35700d}
+html[data-theme=dark]{--bg:#0d152a;--panel:#192542;--sub:#131e36;--edge:#36466a;--ink:#f3f7ff;--muted:#c0cee7;--accent:#88e6df;--shadow:0 10px 28px #0003}
+html body{background:radial-gradient(ellipse at 0 0,#7290ff18,transparent 410px),radial-gradient(ellipse at 100% 22%,#52dbc316,transparent 560px),var(--bg);line-height:1.55}
+main{max-width:790px}
+.masthead{background:linear-gradient(118deg,#172559 0%,#4146ab 54%,#127f98 100%)!important;border:1px solid #6b83c1!important;box-shadow:0 16px 32px #26357a24!important;padding:20px 22px!important;border-radius:24px!important}
+.masthead:after{opacity:.16}
+.masthead h1{font-size:clamp(40px,8vw,65px)!important;margin:7px 0 2px!important;letter-spacing:-.05em}
+.masthead p{font-size:12px;letter-spacing:.045em}
+.masthead .mast-features{margin-top:10px}
+.masthead .mast-features span{background:#ffffff1d!important;border:1px solid #c6e4ff36!important;color:#f5fffc!important}
+.masthead .top-actions{margin-bottom:5px}
+html body :is(.hero,form,#gear,#trips,.trip,.route-card,.shared-ride-card){box-shadow:0 7px 21px #192b590d!important}
+html body .dashboard .stat{box-shadow:0 4px 13px #142b4f10!important;border:1px solid #c9d7f1!important}
+html body .dashboard .stat:nth-child(1){background:linear-gradient(145deg,#625ce5,#4246a1)!important;color:#fff!important;border-color:#7774dc!important}
+html body .dashboard .stat:nth-child(2){background:linear-gradient(145deg,#087e9b,#145b89)!important;color:#fff!important;border-color:#40b1c9!important}
+html body .dashboard .stat:nth-child(3){background:linear-gradient(145deg,#e98d48,#bf615e)!important;color:#fff!important;border-color:#efb88a!important}
+html body .dashboard .stat :is(small,strong){color:#fff!important}
+html body .hero{background:linear-gradient(135deg,#283e84,#197788)!important;color:#fff!important;border-color:#678dc7!important}
+html body .hero #total{color:#d4ff9d!important;text-shadow:0 2px 10px #0b233523}
+html body .hero :is(small,.muted,#bike-details){color:#ebf7ff!important}
+html body .hero #edit-bike{background:#eef8ff!important;color:#12385d!important;border:1px solid #c2ddfa!important;font-weight:750;box-shadow:0 4px 12px #1c386e15}
+html[data-theme=light] #planner{background:#fff;border-color:#dfebf8}
+#planner .section-kicker{color:#1383a3;font-weight:800}
+#planner h2,#route h2,#gear h2,#trips h2,#split h2{letter-spacing:-.035em}
+html body :is(input:not([type=checkbox]),select){border-radius:12px!important;outline-offset:2px}
+html body input:focus-visible,html body select:focus-visible{outline:2px solid #3ac4b8!important;box-shadow:0 0 0 4px #5bdac225!important}
+html[data-theme=light] :is(.simple-place,.route-card, .budget-panel){border-color:#d7e1f2}
+html body :is(button.primary,#planner button.primary,#expense-form button.primary){background:linear-gradient(110deg,#aaf3a1,#6ce4d4)!important;color:#123b40!important;border:1px solid #5cd1c2!important;font-weight:800}
+html body button:disabled{opacity:.48}
+/* On-demand options: one compact line reveals detailed controls. */
+.ui-disclosure,.ui-mini-disclosure{box-sizing:border-box;min-width:0;border:1px solid var(--edge);border-radius:16px;background:var(--panel);margin:12px 0;box-shadow:0 4px 14px #17294d0a;color:var(--ink)}
+.ui-disclosure>summary,.ui-mini-disclosure>summary{display:flex;align-items:center;justify-content:space-between;gap:10px;list-style:none;cursor:pointer;padding:14px 15px;min-height:48px;font-size:14px;font-weight:800;color:var(--ink);line-height:1.4}
+.ui-disclosure>summary::-webkit-details-marker,.ui-mini-disclosure>summary::-webkit-details-marker{display:none}
+.ui-disclosure>summary::after,.ui-mini-disclosure>summary::after{content:'⌄';color:#19a6a0;background:#1abab314;display:grid;place-items:center;border-radius:9px;flex:0 0 25px;height:25px;font-size:20px;font-weight:500;transition:transform .18s}
+.ui-disclosure[open]>summary::after,.ui-mini-disclosure[open]>summary::after{transform:rotate(180deg)}
+.ui-disclosure[open]>summary,.ui-mini-disclosure[open]>summary{border-bottom:1px solid var(--edge)}
+.ui-disclosure :is(p,.muted){line-height:1.5}
+.ui-mini-disclosure{border-style:dashed;margin:11px 0;background:var(--sub)}
+.ui-mini-disclosure>summary{min-height:44px;padding:11px 13px;font-weight:700;font-size:13px}
+.ui-mini-disclosure>summary::after{width:24px;height:24px}
+.selected-riders-hint{margin-left:auto;font-size:11px;color:var(--muted);font-weight:600;text-align:right;white-space:normal}
+.beneficiary-disclosure #beneficiaries{padding:9px 14px 12px;display:flex;flex-wrap:wrap;gap:5px 13px}
+#expense-form .beneficiary-disclosure #beneficiaries label{flex:0 1 auto;margin:4px 0;padding:7px 9px}
+#expense-form .category-disclosure,.category-disclosure .quick-categories{margin:0}
+#expense-type-panel .quick-categories{padding:10px;display:flex;flex-wrap:wrap;gap:8px}
+#expense-type-panel .category-chip{border-radius:999px!important;min-height:38px}
+#split #rider-panel{background:var(--panel);margin:10px 0 14px}
+#rider-panel #member-form{margin:12px!important;background:var(--sub)!important;box-shadow:none!important;padding:12px!important}
+#rider-panel .members-heading{margin:10px 14px}
+#rider-panel #members{margin:9px 14px 14px}
+#rider-panel .remove-rider{min-height:32px}
+#join-ride-panel{background:#ffffff12;border-color:#e6efff68;margin:13px 0 8px}
+#join-ride-panel>summary{color:inherit!important;min-height:45px;text-align:left}
+#join-ride-panel>summary::after{color:#fff!important;background:#ffffff33!important}
+#join-ride-panel>label,#join-ride-panel>.qr-join-actions,#join-ride-panel>#shared-join,#join-ride-panel>.shared-join-hint,#join-ride-panel>.shared-scanner-panel{margin-inline:12px!important}
+#join-ride-panel>#shared-join{width:calc(100% - 24px)!important}
+#join-ride-panel .qr-scan-card{min-height:84px!important}
+#join-ride-panel .qr-scan-icon{transform:scale(.80);transform-origin:center;flex-basis:65px}
+#join-ride-panel .qr-scan-copy strong{font-size:15px}
+#split .shared-ride-card{border-radius:19px;box-shadow:0 10px 23px #1e497015!important}
+#split #expense-form{padding:clamp(14px,3vw,23px)!important}
+#expense-form>h2{display:flex;align-items:center;gap:9px}
+#expense-form>h2::before{content:'＋';display:grid;place-items:center;width:30px;height:30px;flex:0 0 30px;border-radius:10px;background:#a6edd5;color:#0e5d52;font-size:21px}
+#split #split-summary{gap:8px;margin:13px 0}
+#split-summary .split-stat{padding:15px!important;border-radius:15px;background:linear-gradient(130deg,#393e9a,#2c3c78)!important}
+#split-summary .split-stat:nth-child(2){background:linear-gradient(125deg,#086c7d,#1e566c)!important}
+#split-summary .split-stat strong{font-size:clamp(17px,4vw,25px)}
+#split :is(#balances,#settlements){margin-bottom:10px}
+#split #settlements{max-height:240px;overflow:auto;overscroll-behavior:contain}
+#payment-status-panel .payment-corrections{margin:10px;border:0;padding:0;box-shadow:none}
+#payment-status-panel .payment-correction-head{padding:2px}
+#split-more #new-group{margin:12px;width:calc(100% - 24px)!important;background:#ffeded;color:#a72b43;border:1px solid #edbdc7}
+#route-more-tools .route-map-options{padding:12px;display:flex;flex-wrap:wrap;gap:8px}
+#route-more-tools .route-map-options>*{flex:1 1 140px;min-width:0}
+#route .route-head-simple p{line-height:1.5}
+#route .route-addbar .primary{min-height:46px}
+#route #route-map{height:300px}
+#plan .extra-costs{margin:10px 0 13px;background:var(--sub)}
+#plan .extra-costs-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;padding:12px}
+#plan .extra-costs-grid label{margin:0;font-weight:750;font-size:12px;min-width:0}
+#plan .extra-costs-grid input{min-width:0;margin-top:8px}
+#plan .comparison-panel{padding:0!important;overflow:hidden}
+#plan .comparison-panel summary{font-size:16px;padding:16px 18px}
+#plan .comparison-panel .disclosure-help{margin:0 18px;padding:10px 0;font-size:12px;color:var(--muted)}
+#plan .comparison-panel #budget-actual{margin:0 15px 15px}
+#gear .gear-checklist{box-shadow:none}
+#gear .gear-scroll-list{max-height:280px;overflow-y:auto;padding:5px 12px 12px;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
+#gear #custom-gear{box-shadow:none!important;background:var(--sub)!important}
+#gear #gear-more #reset{margin:12px;width:calc(100% - 24px)!important}
+#trips .export-disclosure .export-panel{margin:0;box-shadow:none;border:0;background:transparent;padding:12px}
+#trips .export-disclosure .export-panel h3{display:none}
+#trips .privacy-controls .data-controls{padding:14px}
+#trips .privacy-controls .data-controls h2{font-size:15px}
+#trips .privacy-controls .danger-action{min-height:43px}
+#trips .backup-panel>summary{padding:14px 15px}
+#trips .backup-panel>p,#trips .backup-panel>label,#trips .backup-panel>button{margin-left:12px;margin-right:12px}
+/* Color-coded navigation for clarity but no rainbow clutter. */
+nav#main-nav button{font-weight:780!important}
+nav#main-nav button.active{background:linear-gradient(135deg,#89eadf,#b9f1b4)!important;border-color:#4ccbb5!important;box-shadow:0 5px 15px #16a99825!important}
+html[data-theme=light] nav#main-nav button:not(.active){background:#fff!important;border-color:#d7e1f5!important;color:#1c2c50!important}
+html[data-theme=dark] nav#main-nav button:not(.active){background:#192743!important;border-color:#3b5379!important;color:#eef5ff!important}
+nav#main-nav button[data-tab=route] span:first-child{color:#159bb7}
+nav#main-nav button[data-tab=split] span:first-child{color:#209c86}
+nav#main-nav button[data-tab=gear] span:first-child{color:#966be9}
+nav#main-nav button[data-tab=trips] span:first-child{color:#ec7492}
+@media(max-width:680px){
+  .masthead{padding:15px 17px!important;border-radius:22px!important}
+  .masthead h1{font-size:clamp(39px,11vw,54px)!important}
+  .masthead .mast-features{margin-top:8px}
+  nav#main-nav{box-shadow:0 -8px 22px #0b245222!important;border-color:var(--edge)!important}
+  nav#main-nav button{min-height:50px!important}
+  #planner .simple-place{padding:12px!important;margin:12px 0!important}
+  #route .easy-route{padding:12px!important}
+  #plan .extra-costs-grid{gap:7px;padding:10px}
+  #plan .extra-costs-grid label{font-size:11px}
+  #split #rider-panel{margin:9px 0}
+  .ui-disclosure>summary{padding:13px 12px}
+}
+@media(max-width:340px){
+  #expense-form .grid,#plan .extra-costs-grid{grid-template-columns:1fr}
+  #plan .extra-costs-grid label{font-size:12px}
+  #join-ride-panel .qr-scan-copy small{font-size:10px}
+  .selected-riders-hint{font-size:10px}
+}
+@media(prefers-reduced-motion:reduce){.ui-disclosure>summary::after,.ui-mini-disclosure>summary::after{transition:none}}
+
+html body .hero #stats .stat{background:#10294e91!important;border:1px solid #a2d6e047!important;color:#f4ffff!important}
+html body .hero #stats .stat small{color:#eaf4ff!important;opacity:.93}
+html body .hero #stats .stat strong{color:#b2f3f7!important;text-shadow:none}
+html body .hero #stats .stat:nth-child(2) strong{color:#e2d4ff!important}
+html body .hero #stats .stat:nth-child(3) strong{color:#ffdda5!important}
+html[data-theme=light] #split select{background:#edf4ff!important;color:#1a2d4b!important;border:1px solid #cbd9eb!important}
+html[data-theme=dark] #split select{background:#1b2b4d!important;color:#f3f7ff!important;border:1px solid #536a8b!important}
+html[data-theme=light] #split select option{background:#fff;color:#172747}
+html[data-theme=dark] #split select option{background:#182844;color:#fff}

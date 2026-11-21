@@ -1,0 +1,21 @@
+MotoTrip V5.2 - Shared Ride QR Invite
+
+New:
+- Shared Ride create karne ke baad QR automatically dikhta hai
+- Existing shared ride mein Show QR Code dabakar QR kholo, Hide QR se band karo
+- Copy Invite Link and Share Ride ke options
+- Dost apne iPhone Camera ya Android Camera/Google Lens se QR scan karke join link kholenge
+- QR phone/browser mein local banta hai. Koi third-party QR service use nahi hoti
+
+How to update GitHub:
+1. My Trips se backup export kar lo.
+2. ZIP extract karo.
+3. GitHub > mototrip/Trip-Planner > Add file > Upload files.
+4. Extracted ZIP ke saare files upload karke Commit changes karo.
+5. New qr-code.js MUST be uploaded along with index.html, shared-ride.js, style.css and sw.js.
+
+Important:
+- Firebase config, Auth, Firestore and Security Rules must be set up to create a Shared Ride.
+- Invite ko trusted friends ko hi share karo; jis ke paas invite link/QR ho, woh join kar sakta hai.
+- Real 3-phone cloud sync and Android device tests are still required.
+- App is a PWA; Google Play AAB is separate.
