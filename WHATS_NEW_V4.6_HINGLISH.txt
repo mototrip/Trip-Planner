@@ -1,0 +1,14 @@
+MotoTrip V4.6 — EASY LOCATION & GPS | 21 November 2026
+Owner: Satish Kumar Gupta
+Contact: satish9648291@gmail.com
+
+NEW: Start, end and intermediate stops smart search with region (state/district/country) suggestions.
+NEW: Same-name cities distinguish via state/country, Photon fuzzy spelling tolerance.
+NEW: Use My Location button for Start, End or adding a stop, with browser permission.
+NEW: Clear selected start/end GPS or place, remove stop with ×.
+NEW: Route map now optional collapsed preview; tapping map will NOT create unexpected pins.
+NEW: Google Maps directions use exact selected coordinates when available.
+PRIVACY: Location used only after tapping location button; coordinates stored on this device and Photon is used for reverse lookup.
+KEEP: V4.5 expense-based mileage, expense splits, routes, existing data key, logo, terms, copyright, support.
+
+IMPORTANT: Location suggestions need internet and the public Photon demo server can throttle use. For production/Play Store scale, configure a properly supported hosted or self-hosted geocoding service. Map tiles are loaded on demand only when preview expanded. GPS requires HTTPS and device permission.

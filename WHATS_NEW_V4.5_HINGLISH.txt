@@ -1,0 +1,28 @@
+MotoTrip V4.4 — Recent Expenses compact update
+
+1. By default Recent expenses ek compact card rehta hai — poori list hidden.
+2. Card par total expense count, amount aur last entered expense dikhti hai.
+3. View dabane par list khulti hai; Hide dabane par band.
+4. 7+ expenses par Search option: expense naam ya payer se dhoondho.
+5. List ki height limited hai; bahut saare expenses hone par card ke andar scroll karo.
+6. Wrong entry ko Remove kar sakte ho; balance turant recalculate hota hai.
+7. Full expense history bhi alag se collapsed section mein available hai.
+8. Purani saved trips, riders, payments aur expenses mein koi format change nahi.
+9. Bike + car original MotoTrip icon, owner Satish Kumar Gupta aur support satish9648291@gmail.com unchanged.
+
+GitHub upload:
+- Pahle My Trips → Export Backup.
+- ZIP extract karke root ki files GitHub repo par overwrite/upload karo.
+- Commit changes karo; refresh/reinstall PWA if old cached display persists.
+
+Note: This is a PWA/web source update, not a signed Android AAB/IPA.
+
+MotoTrip V4.5 — Fuel Expense Based Mileage Calculator
+- Real Mileage Calculator mein Fuel filled (litres) ki jagah Total fuel expense (₹) hai.
+- User distance travelled (km) aur total fuel expense (₹) enter karega.
+- Calculator Planner ke Petrol ₹/L rate ko use karke km/L estimate karega.
+- Example: 320 km, ₹950 fuel expense, ₹95/L => 32 km/L.
+- Price badalne par result refresh hota hai; zero/invalid price ya invalid mileage par Apply disabled hai.
+- 'Use mileage' phir 'Save Bike' press karne par bike mileage save hoga.
+- Existing localStorage key 'mototrip-v1', old trips/expenses, route, privacy/legal docs and the original MotoTrip logo remain unchanged.
+- Agar fuel ka rate alag alag raha ho to mileage ek estimate hai.

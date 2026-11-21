@@ -1,0 +1,24 @@
+MotoTrip V4.7 — UNDO PAID / MARK UNPAID | 21 November 2026
+Owner: Satish Kumar Gupta
+Support: satish9648291@gmail.com
+
+WHAT CHANGED
+- Mark paid now supports Undo / Unpaid in the Final Settlement area.
+- After any settlement is marked paid, a Payment status section appears, displaying the newest payment plus a quick Undo / Unpaid button.
+- Older payment entries are available under View older payments; the full Payment history also contains Undo / Unpaid.
+- Undo does not delete the payment record; the record remains with Unpaid status so it can be marked paid again.
+- Balances and Final Settlement automatically recalculate when status changes.
+- Existing payment records without a status field are treated as Paid (backward compatibility).
+- The local storage key and backup format are unchanged; exported JSON carries the paid/unpaid status.
+
+USAGE
+1. Expense Split > Final settlement > Mark paid.
+2. Payment status > Undo / Unpaid if you tapped by mistake.
+3. The amount becomes outstanding again, and the payment shows Unpaid.
+4. For a genuine payment, use Mark paid again to reactivate that record.
+
+TESTING/SAFETY
+- Confirm before toggling payment status.
+- Past trips, expenses, rider names, GPS route, and MotoTrip legal pages preserved.
+- This is a PWA, not yet a Google Play Android App Bundle (.aab).
+- Export JSON backup before replacing files on GitHub.

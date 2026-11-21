@@ -8,3 +8,7 @@ NEW: Privacy Policy, Terms, Copyright & Ownership pages and original-code propri
 PUBLISH: Private support/privacy email is set to satish9648291@gmail.com. See SECURITY_AND_LEGAL_CHECKLIST_HINGLISH.md, especially third-party map usage. This does NOT make JavaScript/source code impossible to copy or guarantee Google Play review approval.
 
 CONTACT: Temporary public MotoTrip support/privacy email: satish9648291@gmail.com. This email will be visible to anyone viewing the published website.
+
+V4.6: Route tab mein 3+ letters type karne se location suggestions; 📍 My location dabane par browser GPS permission; ✕ Clear to unselect. Map preview by default collapsed. Requires internet, HTTPS, permissions.
+
+V4.7: Final Settlement me Undo / Unpaid option hai. WHATS_NEW_V4.7_HINGLISH.txt dekhen.

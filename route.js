@@ -1,11 +1,13 @@
 /* MotoTrip original application code © 2026 Satish Kumar Gupta. Third-party rights unaffected. */
-/* MotoTrip V4.1 — unified iOS/Android-friendly multi-stop editor. */
+/* MotoTrip V4.6 — GPS with permission + typo-tolerant area-aware search (Photon). */
 (()=>{
 'use strict';
 const $=id=>document.getElementById(id);
 const start=form.elements.from, destination=form.elements.to;
 const mapEl=$('route-map'),tiles=$('map-tiles'),markers=$('map-markers'),overlay=$('route-map-overlay');
 let view={lat:22.9,lon:79.1,z:5},pending=null,mode='add',editIndex=-1,drag=null,geocodeAt=0,geoRequest=0;
+const PHOTON='https://photon.komoot.io';
+let lastSearchAt=0;const searchCache=new Map();
 const TILE=256,MIN_Z=3,MAX_Z=17;
 const boundLat=v=>Math.max(-85.051128,Math.min(85.051128,v));
 const boundLon=v=>((v+540)%360)-180;
@@ -13,7 +15,7 @@ const validCoord=(lat,lon)=>Number.isFinite(lat)&&Number.isFinite(lon)&&lat>=-90
 const coord=s=>s&&validCoord(Number(s.lat),Number(s.lon))&&s.lat!==null&&s.lon!==null?{lat:Number(s.lat),lon:Number(s.lon)}:null;
 function normalizeStops(){
  if(!Array.isArray(state.routeStops))state.routeStops=[];
- state.routeStops=state.routeStops.filter(s=>s&&typeof s.name==='string'&&s.name.trim()).map(s=>({name:s.name.trim().slice(0,180),lat:coord(s)?.lat??null,lon:coord(s)?.lon??null})).slice(0,40);
+ state.routeStops=state.routeStops.filter(s=>s&&typeof s.name==='string').map(s=>({name:s.name.trim().slice(0,180),lat:coord(s)?.lat??null,lon:coord(s)?.lon??null})).slice(0,40);
  if(!state.routeStops.length)state.routeStops=[{name:destination.value.trim()||'Manali',lat:null,lon:null}];
 }
 function setStatus(s){$('route-status').textContent=s;}
@@ -79,7 +81,7 @@ function stopRow(i,compact=false){
  const stop=state.routeStops[i],row=document.createElement('div');row.className=compact?'stop-mini-row':'route-stop-row';
  const grip=document.createElement('button');grip.type='button';grip.className='stop-drag-handle';grip.textContent='⠿';grip.title='Hold and drag to reorder';grip.setAttribute('aria-label','Hold and drag destination '+(i+1));
  const n=document.createElement('span');n.className=compact?'mini-no':'stop-index';n.textContent=compact?(i===state.routeStops.length-1?'END':String(i+1)):String(i+1);
- const field=document.createElement('input');field.type='text';field.maxLength=180;field.value=stop.name;field.setAttribute('aria-label','Destination '+(i+1));
+ const field=document.createElement('input');field.type='text';field.maxLength=180;field.value=stop.name;field.autocomplete='off';field.setAttribute('aria-label','Destination '+(i+1));
  field.onchange=()=>{if(field.value.trim())renameStop(i,field.value);else field.value=state.routeStops[i].name;};
  const btns=document.createElement('div');btns.className='stop-actions';
  const make=(name,title,fn)=>{const el=document.createElement('button');el.type='button';el.className='stop-nav-btn';el.textContent=name;el.title=title;el.setAttribute('aria-label',title+' '+(i+1));el.onclick=fn;btns.append(el);return el;};
@@ -87,7 +89,7 @@ function stopRow(i,compact=false){
  make('↑','Move up',()=>moveStop(i,-1,compact)).disabled=i===0;
  make('↓','Move down',()=>moveStop(i,1,compact)).disabled=i===maxIndex;
  const remove=make('×','Remove destination',()=>deleteStop(i));remove.disabled=state.routeStops.length<2;
- row.append(grip,n,field,btns);
+ row.append(grip,n,field,btns);setupPlaceSuggestions(field,'stop',i);
  attachDrag(grip,row,i,compact?$('inline-stop-list'):$('route-stop-list'),compact);return row;
 }
 function syncRouteInputs(){
@@ -102,8 +104,8 @@ function renderLists(){
  $('selected-stop-summary').textContent=state.routeStops.length+' destination'+(state.routeStops.length===1?'':'s')+' selected';
  syncRouteInputs();
 }
-function googleURL(points){const names=points.map(p=>typeof p==='string'?p:p.name);let url='https://www.google.com/maps/dir/?api=1&origin='+encodeURIComponent(names[0])+'&destination='+encodeURIComponent(names.at(-1))+'&travelmode=driving';const way=names.slice(1,-1);if(way.length)url+='&waypoints='+way.map(encodeURIComponent).join('%7C');return url;}
-function legs(){const points=[{name:start.value.trim()||'Delhi'},...state.routeStops];const segments=[];for(let i=0;i<points.length-1;i+=4)segments.push(points.slice(i,Math.min(i+5,points.length)));return segments;}
+function googleURL(points){const names=points.map(p=>{if(typeof p==='string')return p;const c=coord(p);return c?c.lat.toFixed(6)+','+c.lon.toFixed(6):p.name;});let url='https://www.google.com/maps/dir/?api=1&origin='+encodeURIComponent(names[0])+'&destination='+encodeURIComponent(names.at(-1))+'&travelmode=driving';const way=names.slice(1,-1);if(way.length)url+='&waypoints='+way.map(encodeURIComponent).join('%7C');return url;}
+function legs(){const points=[{name:start.value.trim()||'Delhi',lat:form.elements.fromLat.value?Number(form.elements.fromLat.value):null,lon:form.elements.fromLon.value?Number(form.elements.fromLon.value):null},...state.routeStops];const segments=[];for(let i=0;i<points.length-1;i+=4)segments.push(points.slice(i,Math.min(i+5,points.length)));return segments;}
 window.motoGoogleDirections=(index=0)=>googleURL(legs()[index]||legs()[0]);
 function renderGoogle(){
  const container=$('google-legs');container.replaceChildren();
@@ -144,7 +146,7 @@ function fitStops(){
  const all=[];const startCoords=coord({lat:form.elements.fromLat.value||null,lon:form.elements.fromLon.value||null});if(startCoords)all.push(startCoords);
  for(const s of state.routeStops){const c=coord(s);if(c)all.push(c);}
  if(pending)all.push(pending);
- if(!all.length){view={lat:22.9,lon:79.1,z:5};drawMap();setStatus('Search a place or tap the map to choose location pins.');return;}
+ if(!all.length){view={lat:22.9,lon:79.1,z:5};drawMap();setStatus('Choose a suggested place, or tap My location.');return;}
  if(all.length===1){view={...all[0],z:10};drawMap();return;}
  const lats=all.map(v=>v.lat),lons=all.map(v=>v.lon);view.lat=(Math.max(...lats)+Math.min(...lats))/2;view.lon=(Math.max(...lons)+Math.min(...lons))/2;
  const w=Math.max(180,mapEl.clientWidth-65),h=Math.max(180,mapEl.clientHeight-65);
@@ -152,56 +154,169 @@ function fitStops(){
  drawMap();
 }
 function panBy(dx,dy){const c=mapXY(view.lat,view.lon),v=mapLL(c.x-dx,c.y-dy);view.lat=v.lat;view.lon=v.lon;drawMap();}
-function setMode(newMode,index=-1){mode=newMode;editIndex=index;setStatus(newMode==='start'?'Tap the map to set starting point.':newMode==='edit'?'Tap the map to change destination '+(index+1)+'.':newMode==='end'?'Tap the map to set your final destination.':'Tap the map, then press Add stop.');}
 async function reverseLookup(p){
- const token=++geoRequest;const now=Date.now();if(now-geocodeAt<1100)return null;geocodeAt=now;
- try{const r=await fetch('https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat='+p.lat.toFixed(6)+'&lon='+p.lon.toFixed(6)+'&zoom=14',{headers:{Accept:'application/json'}});if(!r.ok||token!==geoRequest)return null;const d=await r.json();return String(d.name||d.display_name||'').split(',').slice(0,3).join(', ').slice(0,180)||null;}catch{return null;}
-}
-async function selected(p){
- if(!validCoord(p.lat,p.lon))return;
- const token=++geoRequest; // invalidate any prior lookup
- const label=p.lat.toFixed(5)+', '+p.lon.toFixed(5);
- if(mode==='start'){
-  start.value=label;form.elements.fromLat.value=p.lat;form.elements.fromLon.value=p.lon;mode='add';commit();setStatus('Starting point selected. Looking up place name…');
-  const name=await reverseLookup(p);if(!name||token>geoRequest)return;
-  if(start.value===label){start.value=name;commit();setStatus('Starting point: '+name);}
- }else if(mode==='end'){
-  const i=state.routeStops.length-1;state.routeStops[i]={name:label,lat:p.lat,lon:p.lon};mode='add';commit();setStatus('Final destination selected.');
-  const name=await reverseLookup(p);if(name&&state.routeStops[i]?.name===label){state.routeStops[i].name=name;commit();}
- }else if(mode==='edit'&&state.routeStops[editIndex]){
-  const i=editIndex;state.routeStops[i]={name:label,lat:p.lat,lon:p.lon};mode='add';editIndex=-1;commit();setStatus('Destination updated. Looking up place name…');
-  const name=await reverseLookup(p);if(!name||!state.routeStops[i]||state.routeStops[i].name!==label)return;
-  state.routeStops[i].name=name;commit();setStatus('Destination '+(i+1)+': '+name);
- }else{
-  pending=p;$('route-search').value=label;drawMap();setStatus('Pin selected: '+label+'. Press Add stop to save this stop.');
-  const name=await reverseLookup(p);if(!name||!pending||pending.lat!==p.lat||pending.lon!==p.lon)return;
-  if($('route-search').value===label)$('route-search').value=name;
-  setStatus('Selected: '+name+'. Press Add stop to save.');
- }
+ try{
+  const url=PHOTON+'/reverse?lat='+encodeURIComponent(p.lat)+'&lon='+encodeURIComponent(p.lon)+'&limit=1';
+  const response=await fetch(url,{headers:{Accept:'application/json'}});
+  if(!response.ok)return null;
+  const f=(await response.json()).features?.[0];
+  return f?placeLabel(f.properties):null;
+ }catch{return null;}
 }
 function parseCoords(q){
  const s=q.trim();
  const match=(s.match(/^\s*(-?\d{1,2}(?:\.\d+)?)\s*,\s*(-?\d{1,3}(?:\.\d+)?)\s*$/)||s.match(/@(-?\d+(?:\.\d+)?),(-?\d+(?:\.\d+)?)/)||s.match(/!3d(-?\d+(?:\.\d+)?)!4d(-?\d+(?:\.\d+)?)/)||s.match(/[?&](?:q|query|ll)=(-?\d+(?:\.\d+)?)[,%2C]+(-?\d+(?:\.\d+)?)/i));
  if(!match)return null;const lat=Number(match[1]),lon=Number(match[2]);return validCoord(lat,lon)?{lat,lon}:null;
 }
-async function findPlace(){
- const raw=$('route-search').value.trim();if(!raw){setStatus('Type a place to search.');return;}
- const coords=parseCoords(raw);
- if(coords){pending=coords;view={...coords,z:12};$('route-search').value=coords.lat.toFixed(5)+', '+coords.lon.toFixed(5);drawMap();setStatus('Location found. Press Add stop to save.');return;}
- if(/^https?:\/\//i.test(raw)){setStatus('Short Google Maps links cannot be read here. Paste the place name or a full Maps URL with @latitude,longitude.');return;}
- if(Date.now()-geocodeAt<1100){setStatus('Please wait a second before the next map search.');return;}geocodeAt=Date.now();setStatus('Searching for '+raw+'…');$('route-find').disabled=true;
- try{const r=await fetch('https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&q='+encodeURIComponent(raw),{headers:{Accept:'application/json'}});if(!r.ok)throw Error('Geocoding request failed');const result=(await r.json())[0];if(!result)throw Error('No matching place found');const p={lat:Number(result.lat),lon:Number(result.lon)};pending=p;view={...p,z:Math.min(12,Math.max(6,Number(result.type==='city'?10:12)))};drawMap();setStatus('Found: '+String(result.display_name).split(',').slice(0,3).join(', ')+'. Press Add stop to save.');}catch(e){pending=null;setStatus('Map lookup unavailable or no result. You can still add the typed place name.');}finally{$('route-find').disabled=false;}
+async function findPlace(){const field=$('route-search');if(!field.value.trim()){setStatus('Type a city or place to search.');return;}await showPlaceSuggestions(field,'add',-1,true);}
+
+// Place search uses Photon, which is intended for autocomplete. It is NOT backed by
+// the public Nominatim autocomplete (which Nominatim's usage policy forbids).
+function placeLabel(p){
+ const fields=[p.name||p.street||p.city||p.locality||p.county||'Selected location',p.city,p.county,p.state,p.country];
+ return [...new Set(fields.map(x=>String(x||'').trim()).filter(Boolean))].join(', ').slice(0,180);
 }
+function placeDetails(p){return [...new Set([p.city,p.county,p.state,p.country].map(x=>String(x||'').trim()).filter(Boolean))].join(' · ');}
+function candidate(f){
+ const coords=f?.geometry?.coordinates,p=f?.properties||{};
+ if(!Array.isArray(coords)||!validCoord(Number(coords[1]),Number(coords[0])))return null;
+ return {label:placeLabel(p),detail:placeDetails(p),lat:Number(coords[1]),lon:Number(coords[0]),state:String(p.state||''),county:String(p.county||'')};
+}
+async function findSuggestions(q){
+ const key=q.toLowerCase().trim();if(searchCache.has(key))return searchCache.get(key);
+ const now=Date.now();if(now-lastSearchAt<350)await new Promise(res=>setTimeout(res,350-(now-lastSearchAt)));
+ lastSearchAt=Date.now();
+ const url=PHOTON+'/api/?q='+encodeURIComponent(q)+'&limit=6&lang=en&lat=22.9&lon=79.1';
+ const controller=new AbortController(),timeout=setTimeout(()=>controller.abort(),6500);
+ try{
+  const r=await fetch(url,{headers:{Accept:'application/json'},signal:controller.signal});
+  if(!r.ok)throw Error('Location search temporarily unavailable');
+  const result=(await r.json()).features?.map(candidate).filter(Boolean)||[];
+  if(searchCache.size>80)searchCache.clear();searchCache.set(key,result);return result;
+ }finally{clearTimeout(timeout);}
+}
+let activePopup=null;
+function closePlacePopup(){if(activePopup){activePopup.remove();activePopup=null;}}
+function setSelectedPlace(kind,place,index=-1){
+ const name=place.label,lat=place.lat,lon=place.lon;
+ if(kind==='start'||kind==='planner-start'){
+  start.value=name;$('route-start-input').value=name;
+  form.elements.fromLat.value=lat;form.elements.fromLon.value=lon;
+  form.elements.fromState.value=place.state||'';form.elements.fromDistrict.value=place.county||'';
+  state.draft=read();persist();renderGoogle();drawMap();
+ }else if(kind==='end'||kind==='planner-end'){
+  normalizeStops();state.routeStops[state.routeStops.length-1]={name,lat,lon};
+  form.elements.toState.value=place.state||'';form.elements.toDistrict.value=place.county||'';commit();
+ }else if(kind==='stop'){
+  if(!state.routeStops[index])return;
+  state.routeStops[index]={name,lat,lon};commit();
+ }else if(kind==='add'){
+  $('route-search').value=name;pending={lat,lon};drawMap();
+  setStatus('Selected '+name+'. Tap + Add stop to add it to your route.');
+ }
+ if($('map-preview-details').open)requestAnimationFrame(fitStops);
+ if(kind!=='add')setStatus('Selected: '+name+'. You can edit this anytime.');
+}
+function placePopupAt(input,popup){
+ const r=input.getBoundingClientRect(),width=Math.min(Math.max(r.width,260),window.innerWidth-20);
+ popup.style.width=width+'px';popup.style.left=Math.max(10,Math.min(window.innerWidth-width-10,r.left))+'px';
+ const space=window.innerHeight-r.bottom;
+ if(space<220&&r.top>235){popup.style.top='auto';popup.style.bottom=(window.innerHeight-r.top+4)+'px';}
+ else{popup.style.bottom='auto';popup.style.top=(r.bottom+4)+'px';}
+}
+async function showPlaceSuggestions(input,kind,index=-1,forced=false){
+ const value=input.value.trim(),requestKey=value;
+ if(value.length<3){if(!forced)closePlacePopup();return;}
+ if(!input.isConnected)return;
+ closePlacePopup();
+ const popup=document.createElement('div');popup.className='place-suggestions';popup.setAttribute('role','listbox');
+ popup.setAttribute('aria-label','Choose location and state');
+ activePopup=popup;document.body.append(popup);placePopupAt(input,popup);
+ const loading=document.createElement('div');loading.className='place-suggestion-message';loading.textContent='Finding places…';popup.append(loading);
+ let options;
+ try{options=await findSuggestions(value);}catch{options=null;}
+ if(activePopup!==popup||input.value.trim()!==requestKey||!input.isConnected){if(activePopup===popup)closePlacePopup();return;}
+ popup.replaceChildren();
+ if(options===null||options.length===0){const message=document.createElement('div');message.className='place-suggestion-message';message.textContent=options===null?'Search unavailable. You can still enter the full city and state manually.':'No match found. Try city + state (e.g. Bilaspur, Chhattisgarh).';popup.append(message);return;}
+ for(const o of options){
+  const b=document.createElement('button');b.type='button';b.className='place-suggestion';b.setAttribute('role','option');
+  const name=document.createElement('strong');name.textContent=o.label.split(', ')[0];
+  const region=document.createElement('small');region.textContent=o.detail||o.label;
+  b.append(name,region);b.addEventListener('pointerdown',e=>e.preventDefault());
+  b.onclick=()=>{closePlacePopup();setSelectedPlace(kind,o,index);};popup.append(b);
+ }
+}
+function setupPlaceSuggestions(input,kind,index=-1){
+ if(input.dataset.smartPlace)return;input.dataset.smartPlace='1';
+ let timer;
+ input.addEventListener('input',()=>{
+  clearTimeout(timer);closePlacePopup();
+  if(input.value.trim().length>=3)timer=setTimeout(()=>showPlaceSuggestions(input,kind,index),500);
+ });
+ input.addEventListener('blur',()=>{setTimeout(()=>{if(document.activeElement!==input&&!activePopup?.contains(document.activeElement))closePlacePopup();},220);});
+ input.addEventListener('keydown',e=>{if(e.key==='Escape')closePlacePopup();});
+}
+document.addEventListener('pointerdown',e=>{if(activePopup&&!activePopup.contains(e.target)&&!e.target.closest?.('input'))closePlacePopup();});
+window.addEventListener('resize',()=>closePlacePopup());
+function clearLocation(which){
+ closePlacePopup();
+ if(which==='start'){
+  start.value='';$('route-start-input').value='';
+  form.elements.fromLat.value='';form.elements.fromLon.value='';
+  form.elements.fromState.value='';form.elements.fromDistrict.value='';
+  state.draft=read();persist();renderGoogle();drawMap();
+ }else{
+  normalizeStops();state.routeStops[state.routeStops.length-1]={name:'',lat:null,lon:null};
+  destination.value='';$('route-end-input').value='';
+  form.elements.toLat.value='';form.elements.toLon.value='';
+  form.elements.toState.value='';form.elements.toDistrict.value='';
+  state.draft=read();persist();renderGoogle();drawMap();
+ }
+ if($('map-preview-details').open)requestAnimationFrame(fitStops);
+ setStatus('Location cleared. Search again or tap My location.');
+}
+async function useMyLocation(which){
+ closePlacePopup();
+ if(!navigator.geolocation){setStatus('Location not available in this browser. You can still search by city and state.');return;}
+ if(!window.isSecureContext){setStatus('GPS needs HTTPS. Open the live MotoTrip website (not a downloaded file).');return;}
+ const button=which==='start'?$('pick-start'):which==='end'?$('pick-end'):$('route-pin-mode');
+ button.disabled=true;setStatus('Waiting for your phone’s location permission…');
+ navigator.geolocation.getCurrentPosition(async pos=>{
+  button.disabled=false;
+  const p={lat:pos.coords.latitude,lon:pos.coords.longitude};
+  if(!validCoord(p.lat,p.lon)){setStatus('Location was invalid. Try searching for the place instead.');return;}
+  const raw=p.lat.toFixed(6)+', '+p.lon.toFixed(6);
+  const label=await reverseLookup(p)||'My location ('+raw+')';
+  const point={label,lat:p.lat,lon:p.lon,state:'',county:''};
+  if(which==='add'){
+   if(!addStop(label,p)){setStatus('Could not add location; maximum stops may be reached.');return;}
+  }else setSelectedPlace(which,point);
+  view={...p,z:11};if($('map-preview-details').open)fitStops();
+  setStatus('✓ My location selected ('+Math.round(pos.coords.accuracy)+' m reported GPS accuracy). Tap ✕ Clear to remove it, or edit the field.');
+ },err=>{
+  button.disabled=false;
+  const label=err.code===1?'Location permission denied. Enable location in phone settings or type your city.':err.code===3?'GPS timed out. Try outdoors or search by city.':'Could not find GPS location. Search for a city instead.';
+  setStatus(label);
+ },{enableHighAccuracy:true,timeout:14000,maximumAge:30000});
+}
+setupPlaceSuggestions($('route-start-input'),'start');
+setupPlaceSuggestions($('route-end-input'),'end');
+setupPlaceSuggestions($('route-search'),'add');
+setupPlaceSuggestions(start,'planner-start');
+setupPlaceSuggestions(destination,'planner-end');
 function refreshRoute(){normalizeStops();renderLists();renderGoogle();drawMap();}
 window.refreshRoute=refreshRoute;
-window.onRouteTabOpen=()=>{refreshRoute();requestAnimationFrame(()=>{fitStops();});};
+window.onRouteTabOpen=()=>{refreshRoute();if($('map-preview-details').open)requestAnimationFrame(()=>fitStops());};
+$('map-preview-details').addEventListener('toggle',e=>{if(e.target.open)requestAnimationFrame(()=>fitStops());});
 $('route-add').onclick=()=>{const value=$('route-search').value.trim(),co=pending||parseCoords(value);if(addStop(value,co))$('route-search').value='';};
 $('route-find').onclick=findPlace;
 $('route-search').oninput=e=>{$('route-google-search').href='https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(e.target.value.trim()||'India');pending=null;};
 $('route-search').onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();$('route-add').click();}};
-$('route-pin-mode').onclick=()=>{setMode('add');$('route-map').scrollIntoView({block:'center',behavior:'smooth'});};
-$('pick-start').onclick=()=>{setMode('start');$('route-map').scrollIntoView({block:'center',behavior:'smooth'});};
-$('pick-end').onclick=()=>{setMode('end');$('route-map').scrollIntoView({block:'center',behavior:'smooth'});};
+$('route-pin-mode').onclick=()=>useMyLocation('add');
+$('pick-start').onclick=()=>useMyLocation('start');
+$('pick-end').onclick=()=>useMyLocation('end');
+$('clear-route-start').onclick=()=>clearLocation('start');
+$('clear-route-end').onclick=()=>clearLocation('end');
 $('route-back-planner').onclick=()=>{tab('plan');document.querySelector('.dest-fieldset').scrollIntoView({block:'nearest',behavior:'smooth'});};
 $('route-zoom-in').onclick=()=>changeZoom(view.z+1);$('route-zoom-out').onclick=()=>changeZoom(view.z-1);$('route-fit').onclick=fitStops;
 $('route-start-input').addEventListener('input',e=>{start.value=e.target.value;form.elements.fromLat.value='';form.elements.fromLon.value='';state.draft=read();persist();renderGoogle();drawMap();});
@@ -214,7 +329,7 @@ start.addEventListener('input',()=>{form.elements.fromLat.value='';form.elements
 destination.addEventListener('input',()=>{normalizeStops();const s=state.routeStops.at(-1);if(s.name!==destination.value){s.name=destination.value;s.lat=null;s.lon=null;form.elements.toLat.value='';form.elements.toLon.value='';}syncRouteInputs();renderLists();renderGoogle();drawMap();});
 mapEl.addEventListener('pointerdown',e=>{if(e.button!==0&&e.pointerType==='mouse')return;drag={id:e.pointerId,x:e.clientX,y:e.clientY,lastX:e.clientX,lastY:e.clientY,moved:false};mapEl.setPointerCapture(e.pointerId);});
 mapEl.addEventListener('pointermove',e=>{if(!drag||drag.id!==e.pointerId)return;const dx=e.clientX-drag.lastX,dy=e.clientY-drag.lastY;if(Math.abs(e.clientX-drag.x)+Math.abs(e.clientY-drag.y)>8)drag.moved=true;if(drag.moved)panBy(dx,dy);drag.lastX=e.clientX;drag.lastY=e.clientY;});
-mapEl.addEventListener('pointerup',e=>{if(!drag||drag.id!==e.pointerId)return;const moved=drag.moved;drag=null;if(moved)return;const r=mapEl.getBoundingClientRect(),dx=e.clientX-r.left-r.width/2,dy=e.clientY-r.top-r.height/2,c=mapXY(view.lat,view.lon);selected(mapLL(c.x+dx,c.y+dy));});
+mapEl.addEventListener('pointerup',e=>{if(!drag||drag.id!==e.pointerId)return;drag=null;});
 mapEl.addEventListener('pointercancel',()=>drag=null);
 mapEl.addEventListener('wheel',e=>{e.preventDefault();changeZoom(view.z+(e.deltaY<0?1:-1));},{passive:false});
 window.addEventListener('resize',()=>{if(!$('route').hidden)drawMap();});

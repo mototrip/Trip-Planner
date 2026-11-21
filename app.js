@@ -19,14 +19,25 @@ $("cancel-bike").onclick=()=>{$("bike-editor").hidden=true;};
 // Mileage calculator is a helper within Edit Bike; it never changes a saved profile until Save Bike.
 let computedMileage=null;
 function refreshMileageCalculator(){
- const d=Number($("mileage-distance").value),l=Number($("mileage-litres").value);
- computedMileage=Number.isFinite(d)&&Number.isFinite(l)&&d>0&&l>0?d/l:null;
- const usable=computedMileage!==null&&computedMileage>=0.1&&computedMileage<=300;
+ const distanceInput=$("mileage-distance"), expenseInput=$("mileage-expense");
+ const d=Number(distanceInput.value), spend=Number(expenseInput.value);
+ // This is the same fuel rate shown in the Planner; don't treat rupees as litres.
+ const priceInput=form.elements.namedItem('price');
+ const price=Number(priceInput.value);
+ const validRate=priceInput.value.trim()!==''&&Number.isFinite(price)&&price>0;
+ const validValues=distanceInput.value.trim()!==''&&expenseInput.value.trim()!==''&&Number.isFinite(d)&&Number.isFinite(spend)&&d>0&&spend>0;
+ const litres=validRate&&validValues?spend/price:null;
+ computedMileage=litres!==null&&Number.isFinite(litres)&&litres>0?d/litres:null;
+ const usable=computedMileage!==null&&Number.isFinite(computedMileage)&&computedMileage>=0.1&&computedMileage<=300;
+ const rateText=$("mileage-rate-note");
+ rateText.textContent=validRate?`Using Planner fuel price: ₹${price.toLocaleString('en-IN',{maximumFractionDigits:2})}/L. Fuel used ≈ ${litres===null?'—':litres.toFixed(2)} L. If prices varied, mileage is approximate.`:'Set a fuel price greater than ₹0/L in Planner to calculate mileage.';
  $("mileage-result").textContent=usable?computedMileage.toFixed(2)+" km/L":"— km/L";
  $("apply-mileage").disabled=!usable;
- $("mileage-hint").textContent=usable?"Calculated from your actual ride. Tap Use mileage, then Save Bike.":computedMileage!==null?"Result must be between 0.1 and 300 km/L.":"Enter distance and fuel to calculate automatically.";
+ $("mileage-hint").textContent=!validRate?'Enter a valid fuel price in Planner first.':!validValues?'Enter distance travelled and total fuel expense (₹).':!usable?'Result must be between 0.1 and 300 km/L. Check distance, total expense and fuel price.':'Mileage estimated from total fuel expense. Tap Use mileage, then Save Bike.';
 }
-for(const id of ["mileage-distance","mileage-litres"])$(id).addEventListener("input",refreshMileageCalculator);
+for(const id of ["mileage-distance","mileage-expense"])$(id).addEventListener("input",refreshMileageCalculator);
+// Keep the result in sync if the user changes the fuel price in Planner.
+form.elements.namedItem('price').addEventListener('input',refreshMileageCalculator);
 $("apply-mileage").onclick=()=>{
  if(computedMileage===null||computedMileage<0.1||computedMileage>300)return;
  $("bike-mileage").value=Number(computedMileage.toFixed(2));

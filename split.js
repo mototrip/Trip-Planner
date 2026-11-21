@@ -1,5 +1,5 @@
 /* MotoTrip original application code © 2026 Satish Kumar Gupta. Third-party rights unaffected. */
-/* MotoTrip V4.2 — planner trip name is always the expense group name. */
+/* MotoTrip V4.7 — reversible paid/unpaid settlement status with persistent payment history. */
 const expenseTypes=['Hotel','Food','Petrol','Toll','Parking','Tea / Snacks','Breakfast','Lunch','Dinner','Fuel','Other'];
 function group(){
  if(!state.split||!Array.isArray(state.split.members)||!Array.isArray(state.split.expenses))
@@ -26,6 +26,9 @@ function calculateSplit(g){
  }
  rows.forEach(r=>r.net=r.paid-r.share);
  for(const p of g.transfers||[]){
+  // Older MotoTrip payment records have no status and count as paid.
+  // Reversed records stay in history but no longer change outstanding balances.
+  if(p.status==='unpaid')continue;
   const a=rows.find(r=>r.name===p.from),b=rows.find(r=>r.name===p.to);
   if(a&&b&&a!==b&&Number.isSafeInteger(p.amount)&&p.amount>0){a.net+=p.amount;b.net-=p.amount;}
  }
@@ -45,7 +48,52 @@ function saveSplit(){persist();renderSplit();}
 function recordPayment(from,to,amount){
  const g=group();
  if(from===to||!g.members.includes(from)||!g.members.includes(to)||!Number.isSafeInteger(amount)||amount<=0)return false;
- g.transfers.push({from,to,amount,date:new Date().toISOString()});saveSplit();return true;
+ g.transfers.push({from,to,amount,date:new Date().toISOString(),status:'paid'});saveSplit();return true;
+}
+// Toggle one payment, not the expense itself; the accounting is fully recalculated.
+// No history is discarded, so a mistaken Undo can also be corrected.
+function togglePaymentStatus(index){
+ const g=group(),payment=g.transfers[index];if(!payment)return;
+ const isPaid=payment.status!=='unpaid';
+ const action=isPaid?'Mark UNPAID':'Mark PAID again';
+ if(!confirm(action+' for '+payment.from+' → '+payment.to+' ('+cash(payment.amount)+')?'+
+  (isPaid?' This will restore the outstanding balance.':' This will settle that amount again.')))return;
+ payment.status=isPaid?'unpaid':'paid';
+ payment.statusChangedAt=new Date().toISOString();
+ saveSplit();
+}
+function paymentStatusText(payment){return payment.status==='unpaid'?'Unpaid':'Paid';}
+function renderPaymentCorrections(g){
+ const root=$('payment-undo-list');if(!root)return;
+ root.replaceChildren();
+ if(!g.transfers.length)return;
+ const count=g.transfers.filter(p=>p.status!=='unpaid').length;
+ const title=node('div','','payment-correction-head');
+ title.append(node('strong','Payment status'),node('small',count+' paid · '+(g.transfers.length-count)+' unpaid'));
+ root.append(title);
+ const desc=node('p','Wrongly marked paid? Use Undo below. No expense will be deleted.','payment-correction-hint');
+ root.append(desc);
+ function makeRow(index){
+  const p=g.transfers[index];
+  const row=node('div','','payment-correction-row'+(p.status==='unpaid'?' is-unpaid':''));
+  const info=node('div','','payment-correction-info');
+  info.append(node('strong',p.from+' → '+p.to+' · '+cash(p.amount)),
+   node('small',(p.status==='unpaid'?'↶ Unpaid':'✓ Paid')+(p.date?' · '+new Date(p.date).toLocaleDateString('en-IN') : '')));
+  const btn=node('button',p.status==='unpaid'?'Mark paid again':'↶ Undo / Unpaid','payment-undo-btn');
+  btn.type='button';
+  btn.setAttribute('aria-label',(p.status==='unpaid'?'Mark paid again':'Undo paid')+' '+p.from+' to '+p.to+' '+cash(p.amount));
+  btn.onclick=()=>togglePaymentStatus(index);
+  row.append(info,btn);return row;
+ }
+ root.append(makeRow(g.transfers.length-1));
+ if(g.transfers.length>1){
+  const more=node('details','','payment-more');
+  const summary=node('summary','View older payments ('+(g.transfers.length-1)+')');
+  more.append(summary);
+  const list=node('div','','payment-more-list');
+  for(let i=g.transfers.length-2;i>=0;i--)list.append(makeRow(i));
+  more.append(list);root.append(more);
+ }
 }
 function removeRider(name){
  const g=group(),linkedExpenses=g.expenses.filter(e=>e.payer===name||Array.isArray(e.people)&&e.people.includes(name)).length;
@@ -62,18 +110,70 @@ function deleteExpense(index){
  if(!confirm('Delete '+e.name+' ('+cash(e.amount)+')? This will recalculate every rider balance.'))return;
  g.expenses.splice(index,1);saveSplit();
 }
+// UI-only state: expense data stays in the existing localStorage group format.
+// Start collapsed to avoid a long expense list on small iPhone/Android screens.
+let recentExpensesOpen=false;
+let recentExpenseQuery='';
 function recentExpenses(g){
- const root=$('recent-expenses');root.replaceChildren();
+ const root=$('recent-expenses');
+ const old=root.querySelector('details.recent-disclosure');
+ if(old)recentExpensesOpen=old.open;
+ root.replaceChildren();
  if(!g.expenses.length)return;
- const head=node('div','','recent-heading');head.append(node('strong','Recent expenses'),node('small','Wrong entry? Tap Remove'));
- root.append(head);
- for(let i=g.expenses.length-1;i>=Math.max(0,g.expenses.length-3);i--){
-  const e=g.expenses[i],r=node('div','','recent-expense-row');
-  const info=node('div','','recent-expense-info');info.append(node('strong',e.name+' · '+cash(e.amount)),node('small','Paid by '+e.payer));
-  const b=node('button','Remove','recent-remove');b.type='button';b.setAttribute('aria-label','Remove '+e.name+' expense '+cash(e.amount));b.onclick=()=>deleteExpense(i);
-  r.append(info,b);root.append(r);
+
+ const panel=node('details','','recent-disclosure');
+ panel.open=recentExpensesOpen;
+ const head=node('summary','','recent-disclosure-header');
+ const identity=node('span','','recent-disclosure-identity');
+ identity.append(node('strong','Recent expenses'),node('small',g.expenses.length+' '+(g.expenses.length===1?'entry':'entries')+' · '+cash(g.expenses.reduce((t,e)=>t+(Number.isSafeInteger(e.amount)?e.amount:0),0))));
+ const action=node('span',recentExpensesOpen?'Hide':'View','recent-disclosure-action');
+ head.append(identity,action);
+ const latest=g.expenses[g.expenses.length-1];
+ const latestText=node('span','Latest: '+latest.name+' · '+cash(latest.amount)+' · '+latest.payer,'recent-disclosure-latest');
+ identity.append(latestText);
+ panel.append(head);
+
+ const inner=node('div','','recent-disclosure-body');
+ const hint=node('p','Tap Remove to undo a wrong entry. Rider balances update automatically.','recent-disclosure-hint');
+ inner.append(hint);
+ const list=node('div','','recent-disclosure-list');
+ list.setAttribute('role','list');
+ // Scroll inside the card instead of letting a long expense log push the page down.
+ function drawRows(query=''){
+  list.replaceChildren();
+  let shown=0;
+  for(let i=g.expenses.length-1;i>=0;i--){
+   const e=g.expenses[i];
+   if(query&&!((e.name||'')+' '+(e.payer||'')).toLocaleLowerCase().includes(query))continue;
+   const r=node('div','','recent-expense-row');r.setAttribute('role','listitem');
+   const info=node('div','','recent-expense-info');
+   info.append(node('strong',e.name+' · '+cash(e.amount)),node('small','Paid by '+e.payer));
+   const b=node('button','Remove','recent-remove');b.type='button';
+   b.setAttribute('aria-label','Remove '+e.name+' expense '+cash(e.amount));b.onclick=()=>deleteExpense(i);
+   r.append(info,b);list.append(r);shown++;
+  }
+  if(!shown)list.append(node('p','No matching expenses.','recent-empty'));
  }
+ if(g.expenses.length>6){
+  const search=document.createElement('input');search.id='recent-expense-search';
+  search.className='recent-expense-search';search.type='search';search.autocomplete='off';
+  search.placeholder='Search expense or rider';search.setAttribute('aria-label','Search recent expenses');
+  search.value=recentExpenseQuery;
+  search.addEventListener('input',()=>{
+   recentExpenseQuery=search.value.toLocaleLowerCase().trim();drawRows(recentExpenseQuery);
+  });
+  inner.append(search);
+ }else{recentExpenseQuery='';}
+ drawRows(recentExpenseQuery);
+ inner.append(list);
+ panel.append(inner);
+ panel.addEventListener('toggle',()=>{
+  recentExpensesOpen=panel.open;
+  action.textContent=panel.open?'Hide':'View';
+ });
+ root.append(panel);
 }
+
 function renderSplit(){
  const g=group(),previousPayer=$('payer').value,
  prevChecks=new Map([...$('beneficiaries').querySelectorAll('input[type=checkbox]')].map(x=>[x.value,x.checked]));
@@ -98,12 +198,16 @@ function renderSplit(){
   if(!items.length)$(id).append(node('p','No entries yet.'));
   items.forEach((e,i)=>{
    const a=node('article','','trip');a.append(node('strong',describe(e)),node('p',e.date?new Date(e.date).toLocaleString():'Date not recorded'));
+   if(kind==='payment'){
+    const toggle=node('button',e.status==='unpaid'?'Mark paid again':'Undo / Unpaid','payment-history-toggle');
+    toggle.type='button';toggle.onclick=()=>togglePaymentStatus(i);a.append(toggle);
+   }
    const b=node('button','Delete');b.type='button';b.onclick=()=>kind==='expense'?deleteExpense(i):deletePayment(i);
    a.append(b);$(id).append(a);
   });
  }
  history('expense-list',g.expenses,e=>e.name+' · '+cash(e.amount)+' · Paid by '+e.payer+' · Split: '+(Array.isArray(e.people)?e.people.join(', '):''),'expense');
- history('payment-list',g.transfers,e=>e.from+' → '+e.to+' · '+cash(e.amount),'payment');
+ history('payment-list',g.transfers,e=>e.from+' → '+e.to+' · '+cash(e.amount)+' · '+paymentStatusText(e),'payment');
  recentExpenses(g);
  const result=calculateSplit(g);
  for(const [label,value] of [['Total spending',cash(result.total)],['Average per person',cash(g.members.length?Math.round(result.total/g.members.length):0)]]){
@@ -126,6 +230,7 @@ function renderSplit(){
   a.append(b);$('settlements').append(a);
  }
  if(!result.payments.length)$('settlements').append(node('p','No outstanding balances.'));
+ renderPaymentCorrections(g);
  $('expense-form').querySelector('button.primary').disabled=!g.members.length;
  $('payment-form').querySelector('button.primary').disabled=g.members.length<2;
  renderBudget();
