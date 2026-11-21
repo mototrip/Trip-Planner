@@ -9,7 +9,7 @@ function group(){
  // Single source of truth: the Planner's trip name. Keep all existing riders,
  // expenses and payments; only refresh the group's display name.
  const plannerName=form.elements.name.value.trim().slice(0,100);
- if(g.name!==plannerName||g.autoTripName!==plannerName){
+ if(!window.motoTripSharedRide?.active && (g.name!==plannerName||g.autoTripName!==plannerName)){
   g.name=plannerName;g.autoTripName=plannerName;
  }
  return g;
@@ -44,11 +44,11 @@ function calculateSplit(g){
  }
  return {rows,payments,total:rows.reduce((n,r)=>n+r.paid,0)};
 }
-function saveSplit(){persist();renderSplit();}
+function saveSplit(){persist();renderSplit();if(window.motoTripSharedRide?.active)window.motoTripSharedRide.capture();}
 function recordPayment(from,to,amount){
  const g=group();
  if(from===to||!g.members.includes(from)||!g.members.includes(to)||!Number.isSafeInteger(amount)||amount<=0)return false;
- g.transfers.push({from,to,amount,date:new Date().toISOString(),status:'paid'});saveSplit();return true;
+ g.transfers.push({id:crypto.randomUUID(),from,to,amount,date:new Date().toISOString(),status:'paid'});saveSplit();return true;
 }
 // Toggle one payment, not the expense itself; the accounting is fully recalculated.
 // No history is discarded, so a mistaken Undo can also be corrected.
@@ -265,7 +265,7 @@ $('expense-form').onsubmit=e=>{
  if(!people.length||!name||!g.members.includes(payer)||!Number.isSafeInteger(amount)||amount<=0){
   alert('Enter an amount, choose who paid, and select at least one rider.');return;
  }
- g.expenses.push({name,payer,amount,people,date:new Date().toISOString()});
+ g.expenses.push({id:crypto.randomUUID(),name,payer,amount,people,date:new Date().toISOString()});
  $('expense-name').value='';$('expense-amount').value='';$('expense-suggestions').hidden=true;
  saveSplit();
 };

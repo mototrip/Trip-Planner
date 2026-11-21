@@ -1,0 +1,11 @@
+MotoTrip V4.8 — Bill Split & Simple Report Exports
+
+1) NAVIGATION: "Split" => "Bill Split" (tab aur heading).
+2) MY TRIPS: Excel (XLSX), CSV aur PDF buttons.
+3) XLSX: 6 sheets — Overview, Trips, Expenses, Payments, Riders, MotoTrip Backup.
+4) Restore Excel: unedited MotoTrip-exported Excel ko Backup & Restore section se import karein. Legacy JSON restore bhi rahega.
+5) CSV: shareable combined report; PDF: report page -> Print / Save as PDF.
+6) Backups aur current records device par hi rehte hain.
+7) Existing GPS, routes, expense split, paid/unpaid, mileage, logo, privacy/legal pages unchanged.
+
+Google Play aur Apple/iPhone ke liye actual phone testing abhi baaki hai.

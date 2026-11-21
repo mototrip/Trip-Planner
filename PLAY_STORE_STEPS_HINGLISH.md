@@ -43,7 +43,7 @@ This ZIP is an updated **website/PWA package**, not an Android APK or AAB. It is
 - Check current policy again before submitting. No approval is guaranteed.
 
 ## Notes on data safety declarations
-- This **website/PWA code** stores entered trip/rider/budget information in browser local storage; it does not have app-owned analytics/backend requests.
+- The **offline mode** stores trips/riders/budgets in localStorage. The **optional Shared Ride** mode uses Firebase Anonymous Authentication and Cloud Firestore to sync group names, rider names, expenses and payments. That cloud collection is optional but must be disclosed accurately in the final Play Data Safety form when enabled.
 - The Route Map loads map tiles from OpenStreetMap. Place lookup or map click may send user-entered search terms or selected coordinates to Nominatim; clicking **Google Maps directions** opens Google Maps with the entered starting point and up to 3 intermediate waypoints in each mobile route leg. GitHub Pages delivers static assets.
 - Android packaging or third-party SDKs may create other data flows; review the **final AAB**, not just this ZIP, to answer Play Console Data safety questions accurately.
 - Developer support email: satish9648291@gmail.com. Ye email legal pages aur app footer mein set hai; Play Console developer contact mein bhi use karo.
@@ -85,3 +85,8 @@ Owner: Satish Kumar Gupta. Privacy Policy, Terms, Copyright & Ownership pages in
 
 ## V4.3.1 — Support email update
 Temporary contact email: satish9648291@gmail.com. Added to Privacy Policy, Terms, Ownership and app footer; service worker cache bumped so the changes reach installed PWA users.
+
+### V4.9 optional Shared Ride
+- `SHARED_RIDE_SETUP_HINGLISH.md` and `FIREBASE_RULES.txt` give setup details.
+- DO NOT claim no cloud data collection if Firebase Shared Ride is enabled. Review Firebase data processing, user deletion, permissions and policy before publishing.
+- Setup is incomplete until owner creates the Firebase project, publishes rules, fills firebase-config.js and tests with 3 separate phones.

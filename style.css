@@ -299,3 +299,26 @@ html body .payment-correction-row.is-unpaid .payment-undo-btn{border-color:#60bc
 .payment-more-list{max-height:300px;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
 #payment-list .payment-history-toggle{margin-right:8px;font-size:12px}
 @media(max-width:360px){.payment-correction-row{padding:8px;gap:6px}.payment-correction-row .payment-undo-btn{padding:8px!important;font-size:11px!important;max-width:48%!important}}
+
+/* V4.8: compact Bill Split navigation and on-device exports. */
+#main-nav button[data-tab="split"] .nav-name{font-size:clamp(10px,2.6vw,14px);white-space:nowrap}
+.export-panel{margin:18px 0 14px;padding:16px;border-radius:18px;background:var(--panel);border:1px solid var(--edge);box-shadow:var(--shadow)}
+.export-panel h3{font-size:18px;margin:0 0 6px;color:var(--ink)}
+.export-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;margin-top:12px}
+.export-grid .export-option{min-width:0;padding:12px 5px;min-height:64px;border:1px solid var(--edge);color:var(--ink);background:var(--sub);border-radius:14px;font-weight:750;overflow-wrap:anywhere}
+.export-grid .export-excel{border-top:4px solid #18ba7e}.export-grid .export-csv{border-top:4px solid #52b9ec}.export-grid .export-pdf{border-top:4px solid #fc9b63}
+.export-help{line-height:1.5;margin:12px 0 0}
+.backup-panel{padding:14px;border:1px solid var(--edge);background:var(--panel);border-radius:16px;margin-bottom:16px}
+.backup-panel summary{font-weight:750;cursor:pointer}
+.backup-panel #export{margin-bottom:10px}
+.backup-panel label{margin-top:9px}
+@media(max-width:380px){.export-grid{gap:6px}.export-grid .export-option{font-size:11px;padding:10px 3px}#main-nav button[data-tab="split"] .nav-name{font-size:10px}}
+
+/* V4.9 | Shared Ride — compact accessible mobile card */
+.shared-ride-card{border:1px solid var(--edge);background:linear-gradient(135deg,#133f51 0%,#28305c 62%,#39417a 100%);border-radius:18px;padding:16px;margin:14px 0 22px;color:#f9fcff;box-shadow:0 9px 24px #10152b20}
+.shared-ride-head{display:flex;align-items:start;justify-content:space-between;gap:10px}.shared-ride-head strong{font-size:18px}.shared-ride-head p{font-size:12px;color:#e5edff;margin:4px 0 6px}.shared-mode{white-space:nowrap;border:1px solid #afd9ef85;border-radius:99px;background:#0e2846ad;padding:5px 9px;font-size:11px;font-weight:700}
+.shared-ride-card label{display:block;font-size:12px;margin:10px 0 7px;color:#eef5ff}.shared-ride-card input{width:100%;background:#f8fbff!important;color:#193154!important;border:1px solid #c8d5ed!important;border-radius:11px;font-size:15px;min-height:45px;padding:11px 12px}
+.shared-ride-card button{min-height:43px;padding:9px 13px;border-radius:12px;background:#f1f6ff;color:#183052;border:1px solid #dbe6f4;font-weight:750;width:100%;font-size:13px}.shared-ride-card button.primary{background:linear-gradient(120deg,#c6f883,#6fe6dc);color:#143034;border:0}
+.shared-create-btn{margin-top:10px}.shared-separator{text-align:center;color:#e0ebff;font-size:10px;font-weight:800;letter-spacing:.11em;margin:16px 0 7px}.shared-tip{font-size:12px;line-height:1.5;color:#e2edff;margin:7px 0}.shared-current{background:#091c3585;border:1px solid #99d1db65;border-radius:11px;padding:10px 12px;color:#fff;overflow-wrap:anywhere;font-size:13px}.shared-actions{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin:12px 0}.shared-actions button{min-width:0}.shared-ride-card #shared-message{font-size:12px;line-height:1.5;color:#e5f0ff;margin:8px 0 0;overflow-wrap:anywhere}.shared-ride-card #shared-message:empty{display:none}
+html[data-theme=light] .shared-ride-card{background:linear-gradient(125deg,#e4f9ff,#efecff);border-color:#abbbdb;color:#1b3054}html[data-theme=light] .shared-ride-head p,html[data-theme=light] .shared-tip,html[data-theme=light] .shared-separator,html[data-theme=light] #shared-message{color:#334c6d}html[data-theme=light] .shared-mode{background:#dcecf2;color:#214c69;border-color:#b6d0e0}html[data-theme=light] .shared-current{background:#ffffffa8;color:#183052;border-color:#b1ccdf}html[data-theme=light] .shared-ride-card label{color:#284b67}
+@media(max-width:360px){.shared-ride-card{padding:12px}.shared-actions{grid-template-columns:1fr}}

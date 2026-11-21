@@ -1,0 +1,9 @@
+MotoTrip V4.9 — SHARED RIDE (setup-required)
+- Bill Split tab mein optional Shared Ride card
+- Create ride / Join with invite link
+- Live expenses, rider list, and paid/unpaid changes (after Firebase setup)
+- Keep normal offline/local Bill Split unchanged
+- Shared existing data confirmation, local data recovery after leaving
+- Secure anonymous Firebase authentication + invitation-based rules template
+- Original logo and other features preserved
+IMPORTANT: Setup Firebase first. Until configured, live sync is NOT ACTIVE.
