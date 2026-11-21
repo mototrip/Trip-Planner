@@ -1,0 +1,7 @@
+MotoTrip V5.0 | Automatic updates for iPhone and Android
+- Online-first PWA caching replaces cache-first.
+- Firebase config can no longer remain stale just because old cached file exists.
+- New app-update.js checks on opening/resuming/connecting and periodically.
+- Existing local storage and all Shared Ride/Trip Planner/Bill Split features preserved.
+- First migration automatically refreshes old open app windows when supported.
+- Still need to complete Firestore setup for real-time sharing.

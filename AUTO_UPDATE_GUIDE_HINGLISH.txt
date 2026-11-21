@@ -1,0 +1,34 @@
+MOTOTRIP V5.0 — AUTO UPDATE FIX
+
+Owner: Satish Kumar Gupta
+
+PROBLEM: Normal Safari/Chrome mein purana “Setup needed”, private tab mein “Ready to connect”.
+REASON: V4.9 service worker pehle cache se purani HTML/JS load karta tha.
+
+SOLUTION: V5.0 online-first service worker + app-update.js.
+- Phone online ho: latest HTML, JavaScript, firebase-config.js, CSS load honge.
+- Phone offline ho: saved app shell available rahega.
+- App open/resume hone par updates check honge.
+- New update activate hone par open MotoTrip tabs reload honge.
+- Saved trips, bike, riders, expenses aur receipts wala localStorage clear nahin hota.
+
+GITHUB UPLOAD (NO CODING):
+1. ZIP extract karo.
+2. https://github.com/mototrip/Trip-Planner kholo.
+3. Add file > Upload files.
+4. Extracted ZIP ki saari files upload karo; khas taur par:
+   sw.js, app-update.js, index.html, app.js, shared-ride.js, firebase-config.js
+5. Commit changes.
+6. GitHub Pages deploy hone par Safari/Chrome mein MotoTrip normal tarah open karo.
+   Pehli migration par ek automatic refresh ho sakta hai.
+
+IMPORTANT:
+- Old browser data clear karna normally zaroori nahin.
+- Browser/OS restrictions ke karan har phone mein instant auto update guaranteed nahin hai.
+  Agar app ka old installed Home Screen icon khula reh gaya hai, usko close/reopen karo.
+- “Ready to connect” only confirms Firebase config load; Firestore and rules must be set up separately.
+- Public users don't need Firebase console access; only app owner configures it.
+- Original Firebase config stays unchanged.
+
+DIAGNOSTIC:
+Agar 1-2 fresh app opens ke baad bhi stale screen aaye, browser or OS/version aur screen send karo. Site data delete na karo.
