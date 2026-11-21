@@ -1,4 +1,5 @@
-/* MotoTrip V3.9 — multi-stop planner. No external JS dependencies. */
+/* MotoTrip original application code © 2026 Satish Kumar Gupta. Third-party rights unaffected. */
+/* MotoTrip V4.1 — unified iOS/Android-friendly multi-stop editor. */
 (()=>{
 'use strict';
 const $=id=>document.getElementById(id);
@@ -25,35 +26,81 @@ function commit(redraw=true){
 }
 function renameStop(i,text){
  if(!state.routeStops[i])return;
- const name=text.trim().slice(0,180);
+ const name=String(text).trim().slice(0,180);
  if(!name)return;
  if(state.routeStops[i].name!==name){state.routeStops[i].name=name;state.routeStops[i].lat=null;state.routeStops[i].lon=null;}
- commit(false);drawMap();renderGoogle();
+ commit();
 }
+// Insert a waypoint BEFORE the final destination, which remains the final destination.
 function addStop(text,location=null){
  const name=String(text||'').trim().slice(0,180);
- if(!name){setStatus('Enter a destination name or pick a point on the map.');return false;}
+ if(!name){setStatus('Enter a city or select a point on the map.');return false;}
  normalizeStops();if(state.routeStops.length>=40){setStatus('Maximum 40 destinations per trip.');return false;}
- state.routeStops.push({name,lat:location?.lat??null,lon:location?.lon??null});
- pending=null;mode='add';editIndex=-1;commit();setStatus(name+' added as the final destination.');return true;
+ state.routeStops.splice(Math.max(0,state.routeStops.length-1),0,{name,lat:location?.lat??null,lon:location?.lon??null});
+ pending=null;mode='add';editIndex=-1;commit();setStatus('Stop added: '+name);return true;
 }
-function moveStop(i,dir){const j=i+dir;if(j<0||j>=state.routeStops.length)return;[state.routeStops[i],state.routeStops[j]]=[state.routeStops[j],state.routeStops[i]];commit();}
-function deleteStop(i){if(state.routeStops.length===1){setStatus('Keep at least one destination.');return;}state.routeStops.splice(i,1);commit();}
+function moveStop(i,dir,compact=false){
+ const j=i+dir,limit=compact?state.routeStops.length:state.routeStops.length-1;
+ if(j<0||j>=limit)return;
+ [state.routeStops[i],state.routeStops[j]]=[state.routeStops[j],state.routeStops[i]];commit();
+}
+function deleteStop(i){
+ if(state.routeStops.length===1){setStatus('Keep at least one final destination.');return;}
+ state.routeStops.splice(i,1);commit();
+}
+function reorderStop(from,to,compact){
+ const limit=compact?state.routeStops.length:state.routeStops.length-1;
+ if(from===to||from<0||to<0||from>=limit||to>=limit)return;
+ const [item]=state.routeStops.splice(from,1);state.routeStops.splice(to,0,item);commit();setStatus('Stop order updated.');
+}
+// Pointer Events work with both touchscreen browsers and a desktop mouse.
+function attachDrag(handle,row,index,list,compact){
+ let active=false,hit=-1,id=null;
+ handle.onpointerdown=e=>{
+  if(e.button!==0)return;
+  active=true;id=e.pointerId;hit=index;
+  handle.setPointerCapture?.(id);row.classList.add('dragging');e.preventDefault();
+ };
+ handle.onpointermove=e=>{
+  if(!active||id!==e.pointerId)return;
+  const rows=[...list.children].filter(el=>el.classList.contains('route-stop-row')||el.classList.contains('stop-mini-row'));
+  const p=rows.findIndex(el=>{const r=el.getBoundingClientRect();return e.clientY>=r.top&&e.clientY<=r.bottom;});
+  if(p>=0){hit=p;rows.forEach((el,n)=>el.classList.toggle('drop-target',n===p&&n!==index));}
+ };
+ handle.onpointerup=e=>{
+  if(!active||id!==e.pointerId)return;
+  active=false;handle.releasePointerCapture?.(id);row.classList.remove('dragging');
+  [...list.children].forEach(el=>el.classList.remove('drop-target'));
+  reorderStop(index,hit,compact);
+ };
+ handle.onpointercancel=()=>{active=false;row.classList.remove('dragging');[...list.children].forEach(el=>el.classList.remove('drop-target'));};
+}
 function stopRow(i,compact=false){
  const stop=state.routeStops[i],row=document.createElement('div');row.className=compact?'stop-mini-row':'route-stop-row';
- const n=document.createElement('span');n.className=compact?'mini-no':'stop-index';n.textContent=i+1;
- const field=document.createElement('input');field.type='text';field.maxLength=180;field.value=stop.name;field.setAttribute('aria-label','Destination '+(i+1));field.onchange=()=>{if(field.value.trim())renameStop(i,field.value);else field.value=state.routeStops[i].name;refreshRoute();};
+ const grip=document.createElement('button');grip.type='button';grip.className='stop-drag-handle';grip.textContent='⠿';grip.title='Hold and drag to reorder';grip.setAttribute('aria-label','Hold and drag destination '+(i+1));
+ const n=document.createElement('span');n.className=compact?'mini-no':'stop-index';n.textContent=compact?(i===state.routeStops.length-1?'END':String(i+1)):String(i+1);
+ const field=document.createElement('input');field.type='text';field.maxLength=180;field.value=stop.name;field.setAttribute('aria-label','Destination '+(i+1));
+ field.onchange=()=>{if(field.value.trim())renameStop(i,field.value);else field.value=state.routeStops[i].name;};
  const btns=document.createElement('div');btns.className='stop-actions';
- const b=(name,title,action)=>{const el=document.createElement('button');el.type='button';el.textContent=name;el.title=title;el.setAttribute('aria-label',title+' destination '+(i+1));el.onclick=action;btns.append(el);return el;};
- if(!compact){b('↑','Move up',()=>moveStop(i,-1)).disabled=i===0;b('↓','Move down',()=>moveStop(i,1)).disabled=i===state.routeStops.length-1;b('📍','Pick location on map',()=>{mode='edit';editIndex=i;tab('route');setStatus('Tap the map to update destination '+(i+1)+' ('+stop.name+').');});}
- b('×','Remove',()=>deleteStop(i)).disabled=state.routeStops.length<2;
- row.append(n,field,btns);return row;
+ const make=(name,title,fn)=>{const el=document.createElement('button');el.type='button';el.className='stop-nav-btn';el.textContent=name;el.title=title;el.setAttribute('aria-label',title+' '+(i+1));el.onclick=fn;btns.append(el);return el;};
+ const maxIndex=(compact?state.routeStops.length:state.routeStops.length-1)-1;
+ make('↑','Move up',()=>moveStop(i,-1,compact)).disabled=i===0;
+ make('↓','Move down',()=>moveStop(i,1,compact)).disabled=i===maxIndex;
+ const remove=make('×','Remove destination',()=>deleteStop(i));remove.disabled=state.routeStops.length<2;
+ row.append(grip,n,field,btns);
+ attachDrag(grip,row,i,compact?$('inline-stop-list'):$('route-stop-list'),compact);return row;
+}
+function syncRouteInputs(){
+ const rStart=$('route-start-input'),rEnd=$('route-end-input');
+ if(document.activeElement!==rStart)rStart.value=start.value;
+ if(document.activeElement!==rEnd)rEnd.value=destination.value;
 }
 function renderLists(){
- $('route-stop-list').replaceChildren(...state.routeStops.map((_,i)=>stopRow(i)));
- $('inline-stop-list').replaceChildren(...state.routeStops.map((_,i)=>stopRow(i,true)));
- $('route-count').textContent=state.routeStops.length+' destination'+(state.routeStops.length===1?'':'s');$('selected-stop-summary').textContent=state.routeStops.length+' destination'+(state.routeStops.length===1?'':'s')+' selected';
- $('route-start-label').textContent=start.value.trim()||'Choose starting point';
+ const waypoints=state.routeStops.slice(0,-1);
+ $('route-stop-list').replaceChildren(...waypoints.map((_,i)=>stopRow(i)));
+ $('route-count').textContent=waypoints.length+' stop'+(waypoints.length===1?'':'s');
+ $('selected-stop-summary').textContent=state.routeStops.length+' destination'+(state.routeStops.length===1?'':'s')+' selected';
+ syncRouteInputs();
 }
 function googleURL(points){const names=points.map(p=>typeof p==='string'?p:p.name);let url='https://www.google.com/maps/dir/?api=1&origin='+encodeURIComponent(names[0])+'&destination='+encodeURIComponent(names.at(-1))+'&travelmode=driving';const way=names.slice(1,-1);if(way.length)url+='&waypoints='+way.map(encodeURIComponent).join('%7C');return url;}
 function legs(){const points=[{name:start.value.trim()||'Delhi'},...state.routeStops];const segments=[];for(let i=0;i<points.length-1;i+=4)segments.push(points.slice(i,Math.min(i+5,points.length)));return segments;}
@@ -66,7 +113,7 @@ function renderGoogle(){
   link.href=googleURL(items);link.target='_blank';link.rel='noopener noreferrer';link.textContent='Google Maps ↗';row.append(lab,link);container.append(row);
  });
  $('map').href=window.motoGoogleDirections(0);
- $('map').textContent=legs().length>1?'Open Google Maps · first route leg ↗':'Open full route in Google Maps ↗';
+ $('map').textContent=legs().length>1?'Google Maps · leg 1 ↗':'Google Maps ↗';
 }
 function mapXY(lat,lon,z=view.z){
  const scale=TILE*2**z,phi=boundLat(lat)*Math.PI/180;
@@ -105,7 +152,7 @@ function fitStops(){
  drawMap();
 }
 function panBy(dx,dy){const c=mapXY(view.lat,view.lon),v=mapLL(c.x-dx,c.y-dy);view.lat=v.lat;view.lon=v.lon;drawMap();}
-function setMode(newMode,index=-1){mode=newMode;editIndex=index;setStatus(newMode==='start'?'Tap the map to set starting point.':newMode==='edit'?'Tap the map to change destination '+(index+1)+'.':'Tap the map, then press Add destination.');}
+function setMode(newMode,index=-1){mode=newMode;editIndex=index;setStatus(newMode==='start'?'Tap the map to set starting point.':newMode==='edit'?'Tap the map to change destination '+(index+1)+'.':newMode==='end'?'Tap the map to set your final destination.':'Tap the map, then press Add stop.');}
 async function reverseLookup(p){
  const token=++geoRequest;const now=Date.now();if(now-geocodeAt<1100)return null;geocodeAt=now;
  try{const r=await fetch('https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat='+p.lat.toFixed(6)+'&lon='+p.lon.toFixed(6)+'&zoom=14',{headers:{Accept:'application/json'}});if(!r.ok||token!==geoRequest)return null;const d=await r.json();return String(d.name||d.display_name||'').split(',').slice(0,3).join(', ').slice(0,180)||null;}catch{return null;}
@@ -118,15 +165,18 @@ async function selected(p){
   start.value=label;form.elements.fromLat.value=p.lat;form.elements.fromLon.value=p.lon;mode='add';commit();setStatus('Starting point selected. Looking up place name…');
   const name=await reverseLookup(p);if(!name||token>geoRequest)return;
   if(start.value===label){start.value=name;commit();setStatus('Starting point: '+name);}
+ }else if(mode==='end'){
+  const i=state.routeStops.length-1;state.routeStops[i]={name:label,lat:p.lat,lon:p.lon};mode='add';commit();setStatus('Final destination selected.');
+  const name=await reverseLookup(p);if(name&&state.routeStops[i]?.name===label){state.routeStops[i].name=name;commit();}
  }else if(mode==='edit'&&state.routeStops[editIndex]){
   const i=editIndex;state.routeStops[i]={name:label,lat:p.lat,lon:p.lon};mode='add';editIndex=-1;commit();setStatus('Destination updated. Looking up place name…');
   const name=await reverseLookup(p);if(!name||!state.routeStops[i]||state.routeStops[i].name!==label)return;
   state.routeStops[i].name=name;commit();setStatus('Destination '+(i+1)+': '+name);
  }else{
-  pending=p;$('route-search').value=label;drawMap();setStatus('Pin selected: '+label+'. Press Add destination to save this stop.');
+  pending=p;$('route-search').value=label;drawMap();setStatus('Pin selected: '+label+'. Press Add stop to save this stop.');
   const name=await reverseLookup(p);if(!name||!pending||pending.lat!==p.lat||pending.lon!==p.lon)return;
   if($('route-search').value===label)$('route-search').value=name;
-  setStatus('Selected: '+name+'. Press Add destination to save.');
+  setStatus('Selected: '+name+'. Press Add stop to save.');
  }
 }
 function parseCoords(q){
@@ -137,27 +187,31 @@ function parseCoords(q){
 async function findPlace(){
  const raw=$('route-search').value.trim();if(!raw){setStatus('Type a place to search.');return;}
  const coords=parseCoords(raw);
- if(coords){pending=coords;view={...coords,z:12};$('route-search').value=coords.lat.toFixed(5)+', '+coords.lon.toFixed(5);drawMap();setStatus('Location found. Press Add destination to save.');return;}
+ if(coords){pending=coords;view={...coords,z:12};$('route-search').value=coords.lat.toFixed(5)+', '+coords.lon.toFixed(5);drawMap();setStatus('Location found. Press Add stop to save.');return;}
  if(/^https?:\/\//i.test(raw)){setStatus('Short Google Maps links cannot be read here. Paste the place name or a full Maps URL with @latitude,longitude.');return;}
  if(Date.now()-geocodeAt<1100){setStatus('Please wait a second before the next map search.');return;}geocodeAt=Date.now();setStatus('Searching for '+raw+'…');$('route-find').disabled=true;
- try{const r=await fetch('https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&q='+encodeURIComponent(raw),{headers:{Accept:'application/json'}});if(!r.ok)throw Error('Geocoding request failed');const result=(await r.json())[0];if(!result)throw Error('No matching place found');const p={lat:Number(result.lat),lon:Number(result.lon)};pending=p;view={...p,z:Math.min(12,Math.max(6,Number(result.type==='city'?10:12)))};drawMap();setStatus('Found: '+String(result.display_name).split(',').slice(0,3).join(', ')+'. Press Add destination to save.');}catch(e){pending=null;setStatus('Map lookup unavailable or no result. You can still add the typed place name.');}finally{$('route-find').disabled=false;}
+ try{const r=await fetch('https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&q='+encodeURIComponent(raw),{headers:{Accept:'application/json'}});if(!r.ok)throw Error('Geocoding request failed');const result=(await r.json())[0];if(!result)throw Error('No matching place found');const p={lat:Number(result.lat),lon:Number(result.lon)};pending=p;view={...p,z:Math.min(12,Math.max(6,Number(result.type==='city'?10:12)))};drawMap();setStatus('Found: '+String(result.display_name).split(',').slice(0,3).join(', ')+'. Press Add stop to save.');}catch(e){pending=null;setStatus('Map lookup unavailable or no result. You can still add the typed place name.');}finally{$('route-find').disabled=false;}
 }
 function refreshRoute(){normalizeStops();renderLists();renderGoogle();drawMap();}
 window.refreshRoute=refreshRoute;
 window.onRouteTabOpen=()=>{refreshRoute();requestAnimationFrame(()=>{fitStops();});};
-$('edit-destinations').onclick=()=>{const panel=$('inline-stops'),open=panel.hidden;panel.hidden=!open;$('edit-destinations').setAttribute('aria-expanded',String(open));$('edit-destinations').textContent=open?'Close Stops':'Edit Stops';if(open)renderLists();};
-$('inline-open-map').onclick=()=>tab('route');
-$('inline-add-stop').onclick=()=>{if(addStop($('inline-stop-name').value))$('inline-stop-name').value='';};
-$('inline-stop-name').onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();$('inline-add-stop').click();}};
 $('route-add').onclick=()=>{const value=$('route-search').value.trim(),co=pending||parseCoords(value);if(addStop(value,co))$('route-search').value='';};
 $('route-find').onclick=findPlace;
-$('route-search').oninput=e=>{$('route-google-search').href='https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(e.target.value.trim()||'India');pending=null;};$('route-search').onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();findPlace();}};
-$('route-pin-mode').onclick=()=>setMode('add');
-$('pick-start').onclick=()=>setMode('start');
+$('route-search').oninput=e=>{$('route-google-search').href='https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(e.target.value.trim()||'India');pending=null;};
+$('route-search').onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();$('route-add').click();}};
+$('route-pin-mode').onclick=()=>{setMode('add');$('route-map').scrollIntoView({block:'center',behavior:'smooth'});};
+$('pick-start').onclick=()=>{setMode('start');$('route-map').scrollIntoView({block:'center',behavior:'smooth'});};
+$('pick-end').onclick=()=>{setMode('end');$('route-map').scrollIntoView({block:'center',behavior:'smooth'});};
 $('route-back-planner').onclick=()=>{tab('plan');document.querySelector('.dest-fieldset').scrollIntoView({block:'nearest',behavior:'smooth'});};
 $('route-zoom-in').onclick=()=>changeZoom(view.z+1);$('route-zoom-out').onclick=()=>changeZoom(view.z-1);$('route-fit').onclick=fitStops;
-start.addEventListener('input',()=>{form.elements.fromLat.value='';form.elements.fromLon.value='';$('route-start-label').textContent=start.value;renderGoogle();drawMap();});
-destination.addEventListener('input',()=>{normalizeStops();const s=state.routeStops.at(-1);if(s.name!==destination.value){s.name=destination.value;s.lat=null;s.lon=null;form.elements.toLat.value='';form.elements.toLon.value='';}renderLists();renderGoogle();drawMap();});
+$('route-start-input').addEventListener('input',e=>{start.value=e.target.value;form.elements.fromLat.value='';form.elements.fromLon.value='';state.draft=read();persist();renderGoogle();drawMap();});
+$('route-end-input').addEventListener('input',e=>{
+ normalizeStops();const last=state.routeStops.at(-1);last.name=e.target.value;last.lat=null;last.lon=null;
+ destination.value=e.target.value;form.elements.toLat.value='';form.elements.toLon.value='';state.draft=read();persist();renderGoogle();drawMap();
+});
+$('route-end-input').addEventListener('change',e=>{if(!e.target.value.trim()){e.target.value=destination.value;return;}state.routeStops.at(-1).name=e.target.value.trim();commit();});
+start.addEventListener('input',()=>{form.elements.fromLat.value='';form.elements.fromLon.value='';$('route-start-input').value=start.value;renderGoogle();drawMap();});
+destination.addEventListener('input',()=>{normalizeStops();const s=state.routeStops.at(-1);if(s.name!==destination.value){s.name=destination.value;s.lat=null;s.lon=null;form.elements.toLat.value='';form.elements.toLon.value='';}syncRouteInputs();renderLists();renderGoogle();drawMap();});
 mapEl.addEventListener('pointerdown',e=>{if(e.button!==0&&e.pointerType==='mouse')return;drag={id:e.pointerId,x:e.clientX,y:e.clientY,lastX:e.clientX,lastY:e.clientY,moved:false};mapEl.setPointerCapture(e.pointerId);});
 mapEl.addEventListener('pointermove',e=>{if(!drag||drag.id!==e.pointerId)return;const dx=e.clientX-drag.lastX,dy=e.clientY-drag.lastY;if(Math.abs(e.clientX-drag.x)+Math.abs(e.clientY-drag.y)>8)drag.moved=true;if(drag.moved)panBy(dx,dy);drag.lastX=e.clientX;drag.lastY=e.clientY;});
 mapEl.addEventListener('pointerup',e=>{if(!drag||drag.id!==e.pointerId)return;const moved=drag.moved;drag=null;if(moved)return;const r=mapEl.getBoundingClientRect(),dx=e.clientX-r.left-r.width/2,dy=e.clientY-r.top-r.height/2,c=mapXY(view.lat,view.lon);selected(mapLL(c.x+dx,c.y+dy));});

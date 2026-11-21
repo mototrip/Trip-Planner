@@ -122,3 +122,86 @@ nav button{min-height:56px}
 #selected-stop-summary{font-size:11px;color:var(--muted);font-weight:700;margin:0 0 4px}#route-stop-list input{font-weight:600}#route-map:active{cursor:grabbing}.dest-fieldset .small-action:focus-visible{outline:2px solid var(--accent)}
 
 .route-google-search{display:inline-block;color:var(--accent);font-size:12px;font-weight:700;margin-top:10px;text-decoration:none}.route-google-search:focus-visible{outline:2px solid var(--accent);outline-offset:3px}.route-google-search:hover{text-decoration:underline}
+
+/* V4.0 — modern mobile-first iOS + Android UI, safe area layout */
+:root{--v4blue:#4776fb;--v4mint:#49d9c1;--v4orange:#ff9a45;--v4violet:#aa7fff}
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%;scroll-padding-bottom:96px}
+body{overflow-x:hidden}main{max-width:850px;padding-top:max(16px,env(safe-area-inset-top));padding-bottom:max(36px,env(safe-area-inset-bottom))}
+button,a,input,select{-webkit-tap-highlight-color:transparent}button{touch-action:manipulation}input,select,textarea{font-size:16px!important}
+.masthead{padding:20px 22px 22px!important;background:radial-gradient(circle at 80% 20%,#35ced13b,transparent 42%),linear-gradient(128deg,#252d74,#393c9d 56%,#007e92)!important;border-color:#7c88d0!important;border-radius:26px!important}
+.masthead h1{font-size:clamp(46px,10vw,74px)!important;letter-spacing:-.075em!important;margin:8px 0 4px!important}
+.masthead .top-actions{margin-bottom:18px}.masthead p{font-size:13px;letter-spacing:.02em;text-transform:none;font-weight:600;margin:0 0 14px}
+.mast-features{display:flex;gap:7px;flex-wrap:wrap}.mast-features span{background:#ffffff1f;border:1px solid #ffffff4b;color:#fff;padding:6px 10px;border-radius:999px;font-size:11px;font-weight:750}
+nav#main-nav{display:grid;grid-template-columns:repeat(5,minmax(0,1fr))!important;gap:9px!important;margin:16px 0 22px;background:transparent}
+nav#main-nav button{min-width:0!important;min-height:67px;border-radius:17px!important;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:3px;white-space:normal!important;font-size:12px!important;line-height:1.15!important;font-weight:760;box-shadow:0 6px 14px #0d1d3d0f;padding:9px 3px!important}
+nav#main-nav button>span:first-child{display:block!important;font-size:23px!important;margin:0!important;line-height:1!important}
+nav#main-nav button .nav-name{display:block;white-space:nowrap}
+nav#main-nav button[data-tab=plan]>span:first-child{color:#687afa}nav#main-nav button[data-tab=route]>span:first-child{color:#00b8b2}nav#main-nav button[data-tab=split]>span:first-child{color:#e09825}nav#main-nav button[data-tab=gear]>span:first-child{color:#ad75ed}nav#main-nav button[data-tab=trips]>span:first-child{color:#fd6b95}
+nav#main-nav button.active{background:linear-gradient(145deg,#a4eeed,#a5f4c4)!important;color:#10253b!important;border-color:#55d0c8!important;box-shadow:0 8px 20px #34baa32d}
+nav#main-nav button.active>span:first-child{color:#10253b!important}
+html[data-theme=light] nav#main-nav button:not(.active){background:#fff!important;color:#1a2b4b!important;border-color:#d2dcf4!important}
+html[data-theme=dark] nav#main-nav button:not(.active){background:#202b4b!important;color:#e9f2ff!important;border-color:#405578!important}
+html body .dashboard .stat{border-radius:20px!important;box-shadow:0 5px 18px #131d4221}.dashboard .stat strong{font-size:clamp(17px,4vw,26px);line-height:1.3}
+html body :is(.hero,form,#gear,#trips,.trip){box-shadow:0 9px 26px #111d3620!important}
+#bike-editor{margin-top:14px}.bike-row{flex-wrap:wrap}.bike-row button{max-width:100%;white-space:normal;font-weight:720}
+#route{max-width:850px}.route-head-simple{padding:3px 0 12px}.route-eyebrow{color:#1b9db6;font-size:12px;font-weight:900;letter-spacing:.14em}.route-head-simple h2{font-size:clamp(27px,6vw,36px);margin:5px 0}.route-head-simple>p{color:var(--muted);margin:0 0 8px;font-size:14px;line-height:1.5}
+#route .route-card{background:var(--panel);border:1px solid var(--edge);border-radius:22px;padding:clamp(13px,3vw,22px);margin:12px 0;box-shadow:0 8px 25px #081b3020}
+#route .easy-route{padding:18px 16px}.easy-location{display:grid;grid-template-columns:12px minmax(0,1fr) 47px;gap:12px;align-items:center}.easy-location label{margin:0;min-width:0}.easy-location label span{font-size:12px;font-weight:800;color:var(--muted)}.easy-location label input{margin-top:5px!important;font-size:16px!important;font-weight:650;min-width:0}.route-dot{width:12px;height:12px;border-radius:50%;border:3px solid #38bfaa;position:relative}.route-dot:after{content:"";position:absolute;left:50%;top:12px;height:35px;width:2px;transform:translateX(-50%);background:linear-gradient(#4fd1bb,#a98dfe)}.end-dot{border-color:#ff8951}.end-dot:after{display:none}
+#route .route-small-map{width:47px;height:48px;border-radius:13px;background:#e2f8ef;border-color:#9dcfbd;color:#173d44;padding:4px;font-size:20px}
+.easy-waypoints{padding:8px 0 12px 25px;border-left:2px dashed #9da9c7;margin:8px 0 8px 5px}.route-list-title{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:0 0 8px!important}.route-list-title h3{font-size:16px;margin:0}.route-list-title small{color:var(--muted);font-size:12px!important}.route-addbar{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:8px}.route-addbar input{margin-top:0!important;width:100%;min-width:0}.route-addbar button{margin:0;padding:12px;min-height:47px;white-space:nowrap}.route-map-options{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:12px 0 0}.route-map-options :is(button,a){background:var(--sub);border:1px solid var(--edge);border-radius:12px;padding:9px 11px;color:var(--ink);font-size:12px;font-weight:700;text-decoration:none;min-height:40px}
+#route .route-status{margin:12px 0 0;padding:10px 12px;font-size:12px;border:1px solid var(--edge);border-radius:12px;background:var(--sub);color:var(--muted)}
+#route-stop-list:empty:before{content:"No stops yet — you can go straight to your destination.";display:block;color:var(--muted);font-size:13px;padding:8px 0 14px}
+.scroll-stops{max-height:310px;overflow-y:auto;overscroll-behavior-y:contain;padding:2px 3px 2px 0;scrollbar-width:thin}
+.route-stop-row,.stop-mini-row{display:grid!important;grid-template-columns:31px minmax(0,1fr) auto!important;align-items:center;gap:8px;margin:6px 0!important;padding:8px;border:1px solid var(--edge);border-radius:15px;background:var(--sub)}
+.stop-drag-handle{font-size:22px!important;line-height:1!important;width:30px;min-height:45px;padding:0!important;touch-action:none;color:#788aaa!important;border:0!important;background:transparent!important;cursor:grab}
+.stop-drag-handle:active{cursor:grabbing}.stop-mini-row .mini-no,.route-stop-row .stop-index{display:none}.route-stop-row input,.stop-mini-row input{min-width:0!important;width:100%;margin:0!important;font-size:16px!important;background:var(--panel)!important}
+.stop-actions{display:flex;gap:3px;grid-column:auto!important;margin:0!important}.stop-actions .stop-nav-btn{min-width:34px;min-height:44px;padding:5px!important;border-radius:10px!important;font-size:17px;background:var(--panel)!important;color:var(--ink);border:1px solid var(--edge)}
+.stop-actions .stop-nav-btn:last-child{color:#e56a6a!important}.scroll-stops .dragging{opacity:.65;outline:2px solid #40d1bd}.scroll-stops .drop-target{outline:2px dashed #ffac52;background:#ffac5214}
+#inline-stops{min-width:0}.compact-stops{margin:8px 0 10px;max-height:295px}.stop-add-inline{align-items:end}
+#route .map-card-head{display:flex;align-items:center;justify-content:space-between;gap:10px}.map-card-head h3{font-size:18px;margin:0}.map-card-head p{font-size:12px;margin:3px 0 0}#route .map-buttons{display:flex;gap:5px}#route .map-buttons button{min-width:38px;min-height:39px;padding:6px 8px}
+#route #route-map{height:clamp(250px,46vw,390px);border-radius:17px;touch-action:none;background:#b7dce0;overflow:hidden}
+.google-card h3{font-size:18px}.google-card>p{font-size:13px}.google-leg{align-items:center}.google-leg a{min-height:41px;display:inline-flex;align-items:center}
+/* iPhone and Android handheld navigation: five equal tabs in one compact bottom bar */
+@media(max-width:680px){main{padding-bottom:calc(104px + env(safe-area-inset-bottom))!important}.masthead{padding:17px 18px 19px!important}.masthead h1{font-size:clamp(44px,12vw,58px)!important}.mast-features{gap:5px}.mast-features span{font-size:10px;padding:5px 8px}
+ nav#main-nav{position:fixed!important;left:0;right:0;bottom:0;top:auto;z-index:100!important;display:grid;grid-template-columns:repeat(5,minmax(0,1fr))!important;gap:4px!important;margin:0!important;padding:9px max(8px,env(safe-area-inset-left)) calc(7px + env(safe-area-inset-bottom)) max(8px,env(safe-area-inset-right))!important;background:var(--panel)!important;border-top:1px solid var(--edge);box-shadow:0 -12px 28px #070f2f25}
+ nav#main-nav button{min-height:51px;padding:5px 1px!important;gap:4px;border-radius:13px!important;font-size:clamp(10px,2.7vw,12px)!important;box-shadow:none!important}
+ nav#main-nav button>span:first-child{font-size:22px!important}.dashboard{margin-top:16px}.dashboard .stat{padding:12px 8px!important}.dashboard small{font-size:9px!important}.dashboard .stat strong{font-size:clamp(15px,3.6vw,22px)!important}
+ #route .easy-route{padding:15px 10px}.easy-waypoints{padding-left:13px}.route-stop-row,.stop-mini-row{gap:4px;padding:6px;grid-template-columns:27px minmax(0,1fr) auto!important}.stop-drag-handle{width:26px}.stop-actions{gap:1px}.stop-actions .stop-nav-btn{min-width:29px;min-height:43px;padding:4px!important;font-size:16px}.route-addbar{grid-template-columns:1fr}.route-addbar button{width:100%}.route-map-options{gap:6px}.route-map-options :is(button,a){flex:1;white-space:nowrap;text-align:center;font-size:11px;padding:8px 5px}.easy-location{grid-template-columns:10px minmax(0,1fr) 40px;gap:9px}.route-small-map{width:40px!important}
+}
+@media(max-width:370px){nav#main-nav button{font-size:10px!important}.stop-actions .stop-nav-btn{min-width:28px}.dashboard .stat strong{font-size:14px!important}.easy-waypoints{padding-left:10px}.route-stop-row,.stop-mini-row{padding:4px}}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+
+/* MotoTrip V4.1 — quick and safe expense editing, compact map link */
+.trip-sync-hint,.group-sync-hint{margin:4px 0 12px;color:var(--muted);font-size:12px;line-height:1.4}
+.group-name-row{display:flex;align-items:end;gap:8px}.group-name-row label{flex:1;min-width:0;margin-bottom:0}.group-name-row input{width:100%}.group-name-row .use-trip-name{flex:0 0 auto;max-width:130px;min-height:44px;padding:8px 10px;font-size:12px;font-weight:750;border-radius:11px;color:var(--ink);background:var(--sub);border-color:var(--edge);white-space:normal}
+.members-heading,.recent-heading{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:16px 0 9px}.members-heading strong,.recent-heading strong{font-size:15px}.members-heading span,.recent-heading small{color:var(--muted);font-size:12px}
+#members{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:8px}.no-riders{font-size:13px;color:var(--muted);margin:6px 0}
+#members .rider-chip{display:inline-flex;align-items:center;gap:7px;max-width:100%;background:var(--sub);border-color:var(--edge);padding:5px 5px 5px 12px;border-radius:16px;color:var(--ink);font-weight:650;overflow-wrap:anywhere}
+#members .remove-rider{display:grid;place-items:center;width:32px;height:32px;min-height:32px;padding:0;border-radius:11px;background:#fce7e7!important;color:#aa3445!important;border:1px solid #edbcc4!important;font-weight:800;font-size:20px;line-height:1}
+.quick-categories{display:flex;gap:7px;overflow-x:auto;white-space:nowrap;margin:10px 0 6px;padding-bottom:4px;-webkit-overflow-scrolling:touch;scrollbar-width:thin}
+#split .category-chip{flex:0 0 auto;border-radius:30px;min-height:39px;padding:8px 14px;font-size:13px;font-weight:700;color:var(--ink);background:var(--sub);border-color:var(--edge)}
+#split .category-chip:active{background:#d6f5ec;color:#154441}
+.expense-suggestions{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0;padding:10px;border:1px solid var(--edge);border-radius:12px;background:var(--sub)}
+.expense-suggestions[hidden]{display:none!important}
+#split .expense-suggestion{border-radius:10px;padding:7px 12px;min-height:40px;border:1px solid var(--edge);background:var(--panel);color:var(--ink);font-size:13px;font-weight:650}
+#recent-expenses{margin:8px 0 15px}.recent-expense-row{display:flex;align-items:center;justify-content:space-between;gap:12px;border:1px solid var(--edge);border-radius:14px;padding:10px 12px;margin:7px 0;background:var(--panel)}
+.recent-expense-info{min-width:0;overflow-wrap:anywhere}.recent-expense-info strong{font-size:14px;display:block;color:var(--ink)}.recent-expense-info small{font-size:12px;display:block;margin-top:2px;color:var(--muted)}
+#split .recent-remove{flex:0 0 auto;background:#ffeded;border:1px solid #f0c7c7;color:#a92e3e;border-radius:11px;min-height:42px;padding:9px 12px;font-size:12px;font-weight:800}
+/* Keep Google Maps easily tappable without full-width oversized button. */
+#plan a#map.planner-map-link{width:fit-content;max-width:100%;min-height:44px;display:inline-flex;align-items:center;justify-content:center;white-space:normal;padding:9px 14px;margin:1px 0 14px;font-size:12px;font-weight:700;border-radius:12px;line-height:1.25}
+#plan .simple-place.dest-fieldset .stop-summary{font-size:12px;margin:7px 0 0;color:var(--muted)}
+@media(max-width:460px){.group-name-row{align-items:end;gap:6px}.group-name-row .use-trip-name{max-width:102px;font-size:11px;padding:8px 6px}.recent-expense-row{padding:10px}.recent-expense-info strong{font-size:13px}}
+
+#split-summary .split-stat small{color:#ecf3ff!important;opacity:.95;font-size:11px}#split-summary .split-stat strong{color:#fff!important}
+
+/* V4.2: clearly communicate one-way automatic trip-name sync. */
+.group-name-row{display:block}
+.group-name-row label{display:block;width:100%;max-width:100%}
+#group-name[readonly]{cursor:default;background:var(--sub);opacity:1}
+.group-sync-hint{font-size:12px;line-height:1.5}
+
+/* V4.3: low-clutter legal links, accessible on both phone platforms. */
+.owner-notice{margin:14px 0 8px!important;font-size:12px;color:var(--muted);line-height:1.5;letter-spacing:0}
+.footer-links{display:flex;flex-wrap:wrap;justify-content:center;gap:9px 16px;margin-top:10px}
+.footer-links a{font-size:12px;font-weight:650;text-decoration:underline;text-underline-offset:3px;min-height:30px;display:inline-flex;align-items:center}
+@media(max-width:350px){.footer-links{gap:7px 12px}}

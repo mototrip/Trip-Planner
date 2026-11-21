@@ -1,0 +1,13 @@
+MotoTrip — Proprietary Rights Notice (2026)
+
+Publisher / asserted owner: Satish Kumar Gupta
+Project: https://mototrip.github.io/Trip-Planner/
+
+Copyright (c) 2026 Satish Kumar Gupta, for original project content and components to the extent legally held by the publisher. All rights reserved.
+
+No open-source license is granted for original proprietary MotoTrip code, branding or other owned creative work. Public accessibility of the repository and browser-delivered code should not be confused with an affirmative license to reproduce, resell, redistribute or publish derivative products.
+
+EXCEPTIONS AND THIRD-PARTY RIGHTS
+This file does not override pre-existing licenses, lawful user rights, public-domain materials, or rights held by others. OpenStreetMap contributors retain their data and attribution rights under OpenStreetMap terms; Google Maps and GitHub products remain subject to their respective policies. Code, media or other material originating from third parties must be separately reviewed and credited as required.
+
+The source is distributed for execution of the publicly available MotoTrip web app, but should not be assumed to be privately hidden or technically copy-proof. The rights statement alone is not a certification of copyright or registered trademark status.
