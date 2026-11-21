@@ -761,3 +761,70 @@ html body #plan #selected-stop-summary.mt61-route-tip #planner-route-jump{paddin
   #planner .simple-place{margin:12px 0 8px!important;padding:12px!important}
   #plan #selected-stop-summary.mt61-route-tip{margin:0 0 10px!important}
 }
+
+
+/* MotoTrip V6.2.1 — keep Start and End side by side, perfectly equal size. */
+#planner .mt621-place-grid {
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0,1fr)) !important;
+  gap: 10px;
+  align-items: stretch;
+  margin: 10px 0 2px;
+}
+#planner .mt621-place-grid > fieldset.simple-place {
+  display: block !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  min-height: 119px !important;
+  height: 100% !important;
+  margin: 0 !important;
+  padding: 10px 12px 12px !important;
+  box-sizing: border-box !important;
+  border-radius: 15px;
+}
+#planner .mt621-place-grid > fieldset.simple-place + fieldset.simple-place {
+  margin: 0 !important;
+}
+#planner .mt621-place-grid .mt61-place-label,
+#planner .mt621-place-grid .dest-fieldset > label {
+  margin: 3px 0 0 !important;
+  display: block;
+  min-width: 0;
+  font-size: 11px;
+  line-height: 1.3;
+}
+#planner .mt621-place-grid .mt61-place-label > input {
+  margin-top: 7px !important;
+  width: 100% !important;
+  min-width: 0;
+  min-height: 42px !important;
+  font-size: 14px !important;
+  padding: 9px 31px 9px 10px !important;
+}
+#planner .mt621-place-grid .mt61-search-icon {
+  right: 7px;
+  bottom: 9px;
+  font-size: 18px;
+}
+#planner .mt621-place-grid legend {
+  font-size: 12px;
+  line-height: 1.25;
+  padding-inline: 4px;
+}
+#planner #selected-stop-summary.mt61-route-tip {
+  margin: 0 0 11px !important;
+  padding: 0 !important;
+  clear: both;
+}
+#planner #selected-stop-summary.mt61-route-tip #planner-route-jump {
+  margin: 0 !important;
+  padding: 0 2px !important;
+  font-size: 11px !important;
+  line-height: 1.35 !important;
+}
+@media (max-width: 370px) {
+  #planner .mt621-place-grid {gap: 7px;}
+  #planner .mt621-place-grid > fieldset.simple-place {padding: 9px 8px 10px !important;}
+  #planner .mt621-place-grid legend {font-size: 11px;}
+  #planner .mt621-place-grid .mt61-place-label {font-size: 10px;}
+}

@@ -1,0 +1,1 @@
+MotoTrip V6.2.1 — Start aur End Destination ek row mein half-half rakhe hain, dono cards bilkul equal-height, search inputs aligned, aur Route tab instruction line cards ke bilkul neeche. Saved trips/bills/data format unchanged.
