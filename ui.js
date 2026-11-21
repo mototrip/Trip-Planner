@@ -3,11 +3,6 @@
  'use strict';
  const $=id=>document.getElementById(id);
  let previousPayments=null;
- const rider=$('rider-panel');
- try {
-   const g=(typeof group==='function')?group():null;
-   if(rider&&g)rider.open=!g.members.length;
- } catch (_) { if(rider)rider.open=true; }
  function selectionStatus(){
    const container=$('beneficiaries'),hint=$('selected-riders-hint');
    if(!container||!hint)return;
@@ -37,8 +32,6 @@
  });
  // Small usability: selecting a quick expense closes the choices, focuses amount.
  document.querySelectorAll('.category-chip').forEach(button=>{
-   button.addEventListener('click',()=>{
-     const panel=$('expense-type-panel');if(panel)panel.open=false;
-   });
+   button.addEventListener('click',()=>{});
  });
 })();

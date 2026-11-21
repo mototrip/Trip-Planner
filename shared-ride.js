@@ -61,7 +61,7 @@
    import(`https://www.gstatic.com/firebasejs/${version}/firebase-app.js`),
    import(`https://www.gstatic.com/firebasejs/${version}/firebase-auth.js`),
    import(`https://www.gstatic.com/firebasejs/${version}/firebase-firestore.js`)]);
-  const app=appM.initializeApp(config);
+  const app=appM.getApps().length ? appM.getApp() : appM.initializeApp(config);
   auth=authM.getAuth(app);db=dbM.getFirestore(app);
   sdk={authM,dbM};
  }
@@ -104,6 +104,7 @@
   state.split={name:'Connecting to shared ride…',members:[],expenses:[],transfers:[]};
   persist();if(window.renderSplit)window.renderSplit();
   listen();
+  window.dispatchEvent(new Event('mototrip-ride-change'));
  }
  async function createRide(){
   if(enabled())return;
@@ -227,19 +228,20 @@
  function showQRCode(show) {
   const panel=$('shared-qr-panel'),button=$('shared-qr-toggle'),container=$('shared-qr-image');
   if(!panel||!button||!container)return;
-  if(!show||!current){panel.hidden=true;button.textContent='▦ Show QR (optional)';button.setAttribute('aria-expanded','false');container.replaceChildren();return;}
+  if(!show||!current){panel.hidden=true;button.innerHTML='<span aria-hidden="true">▦</span> Show QR';button.setAttribute('aria-expanded','false');container.replaceChildren();return;}
   const invite=inviteURL(current.inviteId);
   try{
    if(!window.MotoTripQR)throw Error('QR generator unavailable; reload the app.');
    // Each invitation QR is generated on-device. No QR service receives the invite token.
    container.replaceChildren(window.MotoTripQR.create(invite));
-   panel.hidden=false;button.textContent='▦ Hide QR';button.setAttribute('aria-expanded','true');
+   panel.hidden=false;button.innerHTML='<span aria-hidden="true">▦</span> Hide QR';button.setAttribute('aria-expanded','true');
   }catch(e){message('QR code could not be shown: '+e.message+'. Use Copy Invite Link instead.',true);}
  }
  const inviteMessage = () => 'Join my MotoTrip Shared Ride to plan and split expenses together!\n' + inviteURL(current.inviteId);
  function closeShareSheet(){
   const sheet=$('invite-share-sheet');
   if(!sheet||sheet.hidden)return;
+  showQRCode(false); // QR stays inside Send Invite and closes with the sheet.
   sheet.hidden=true;
   document.documentElement.classList.remove('invite-sheet-open');
   $('shared-native-share').setAttribute('aria-expanded','false');
@@ -295,16 +297,26 @@
   try{await navigator.clipboard.writeText(url);message('Invite link copied! Share privately with your friends.');}
   catch(e){prompt('Copy this invite link:',url);}
  }
- function leave(){
+ async function leave(){
   if(!current)return;
-  if(!confirm('Leave Shared Ride on this phone? Remote group will remain for your friends. Your old offline Bill Split will be restored.'))return;
+  if(!confirm('Leave Shared Ride? Your shared safety info and location will be removed, and your saved offline Bill Split will be restored.'))return;
   leaving=true;
+  try{
+   if(window.motoTripSafety?.removeMySafety)await window.motoTripSafety.removeMySafety();
+   // Revoke this device's cloud membership when leaving (not just local session).
+   await withTimeout(sdk.dbM.deleteDoc(memberRef(current.rideId,me.uid)), 'Revoking ride access');
+  }catch(e){
+   leaving=false;
+   message('Could not securely leave the ride: '+String(e?.message||e)+'. Check internet and try again; your access remains until revocation succeeds.',true);
+   return;
+  }
   if(subscription){subscription();subscription=null;}
   localStorage.removeItem(sessionKey);current=null;lastRemote=null;lastLocal=null;busy=0;
   const backup=localStorage.getItem(backupKey);
   if(backup){try{state.split=JSON.parse(backup);persist();}catch(e){}localStorage.removeItem(backupKey);}
   if(window.renderSplit)window.renderSplit();
-  updateUI(false);showQRCode(false);closeShareSheet();message('You are back to your offline Bill Split.');
+  updateUI(false);showQRCode(false);closeShareSheet();message('You are back to your offline Bill Split. Group access on this account was revoked.');
+  window.dispatchEvent(new Event('mototrip-ride-change'));
   if(location.hash.includes('join='))history.replaceState(null,'',location.pathname+location.search);
  }
  async function restore(){
@@ -318,7 +330,9 @@
    preserveLocal();await activate(session.rideId,session.inviteId);
   }catch(e){message('Reconnect failed: '+e.message+'. Try again online.',true);}
  }
- window.motoTripSharedRide={get active(){return enabled();},capture};
+ window.motoTripSharedRide={get active(){return enabled();},capture,
+  safetyContext(){return current&&me&&sdk?{rideId:current.rideId,uid:me.uid,db,dbM:sdk.dbM}:null;}
+ };
  $('shared-create').addEventListener('click',createRide);
  $('shared-join').addEventListener('click',joinRide);
  $('shared-copy').addEventListener('click',copy);

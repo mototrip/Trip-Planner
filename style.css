@@ -551,3 +551,148 @@ html[data-theme=light] #split select{background:#edf4ff!important;color:#1a2d4b!
 html[data-theme=dark] #split select{background:#1b2b4d!important;color:#f3f7ff!important;border:1px solid #536a8b!important}
 html[data-theme=light] #split select option{background:#fff;color:#172747}
 html[data-theme=dark] #split select option{background:#182844;color:#fff}
+
+/* MotoTrip V5.7 | Mobile-first rider account/profile. All selectors scoped. */
+html.mt-account-open{overflow:hidden}
+.mt-account-open{max-width:150px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:0 1 auto}
+.mt-account-overlay[hidden],.mt-account-panel[hidden],#mt-emergency-call[hidden]{display:none!important}
+.mt-account-overlay{position:fixed;z-index:9999;inset:0;display:flex;align-items:center;justify-content:center;padding:clamp(10px,3vw,22px);font:15px/1.4 system-ui,-apple-system,BlinkMacSystemFont,sans-serif}
+.mt-account-scrim{position:absolute;inset:0;background:rgba(8,15,34,.78);backdrop-filter:blur(9px)}
+.mt-account-dialog{position:relative;width:100%;max-width:460px;max-height:calc(100dvh - 18px);overflow:auto;overscroll-behavior:contain;border:1px solid #6b94d2;background:linear-gradient(160deg,#182b55,#182344 50%,#111b35);border-radius:24px;padding:clamp(17px,4vw,29px);box-shadow:0 24px 90px #020a23bd;color:#f7fbff}
+.mt-account-top{display:flex;align-items:center;gap:9px;margin-bottom:10px}.mt-account-symbol{background:#3d6d8c70;padding:8px;border:1px solid #3cbec4a0;border-radius:12px}.mt-account-kicker{letter-spacing:.11em;font-size:10px;font-weight:850;color:#9edfea}.mt-account-x{margin-left:auto;border:1px solid #7c94c1!important;background:transparent!important;color:#fff!important;width:36px;height:36px;padding:0!important;border-radius:10px!important}
+.mt-account-dialog h2{font-size:clamp(25px,6vw,31px);font-weight:850;margin:8px 0;color:#f8fcff;letter-spacing:-.03em}.mt-account-intro{font-size:13px;color:#cfdbfa;margin:0 0 18px}
+.mt-account-benefits{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:19px}.mt-account-benefits span{background:#87c5e11b;border:1px solid #77b3d45a;padding:8px 10px;border-radius:12px;font-weight:650;font-size:12px}
+.mt-account-panel{margin:0!important;padding:0!important;border:none!important;background:transparent!important;box-shadow:none!important}
+.mt-account-dialog label{display:block;font-size:12px;letter-spacing:0;color:#e1eafb;font-weight:700;margin:11px 0}
+.mt-account-dialog input,.mt-account-dialog select{display:block;width:100%;border:1px solid #8199ca!important;border-radius:12px!important;background:#edf7ff!important;color:#17304d!important;min-height:48px;padding:10px 13px!important;font-size:16px!important;font-family:inherit;margin:6px 0 0!important}
+.mt-account-dialog input:focus-visible,.mt-account-dialog select:focus-visible,.mt-account-dialog button:focus-visible{outline:2px solid #91f3d7;outline-offset:2px}
+.mt-account-dialog button.mt-account-primary,.mt-account-dialog button.mt-account-secondary{display:block;text-align:center;width:100%;min-height:46px;margin:11px 0 0!important;padding:11px!important;border-radius:12px!important;font-size:14px!important;font-weight:800}
+.mt-account-dialog button.mt-account-primary{background:linear-gradient(105deg,#adfa83,#6be5dc)!important;border-color:#99efbd!important;color:#112c31!important}
+.mt-account-dialog button.mt-account-secondary{background:#2b4870!important;border-color:#678caf!important;color:#f6fcff!important}
+.mt-account-dialog button.mt-account-text-btn{display:block;margin:13px auto 5px!important;padding:6px!important;border:none!important;background:transparent!important;color:#a9e9f3!important;font-weight:650!important;font-size:12px!important;text-align:center}
+.mt-account-dialog button.mt-account-danger{display:block;width:100%;background:#522739!important;border:1px solid #b8647a!important;color:#ffe2ea!important;padding:10px!important;border-radius:10px!important;font-size:12px!important;margin-top:12px!important}
+.mt-account-dialog button:disabled{opacity:.55;cursor:wait}
+.mt-account-fine,.mt-account-small{font-size:11px!important;color:#bfcce3!important;font-weight:450!important;line-height:1.5}.mt-account-fine{margin:12px 0!important}.mt-account-required{color:#ffc38b}
+.mt-account-fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.mt-account-fields label{min-width:0}
+.mt-emergency-box{background:#224a6859;border:1px solid #689fbd82;border-radius:16px;padding:12px;margin:15px 0 10px}.mt-emergency-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:5px}.mt-emergency-head strong{font-size:14px;color:#f8fcff}.mt-emergency-head span{font-size:10px;color:#b9f5d2;white-space:nowrap}
+.mt-emergency-call{display:block;text-align:center;padding:11px;border-radius:10px;background:#106f60!important;color:#e8fff9!important;font-weight:750;margin:12px 0;text-decoration:none}
+.mt-account-status{font-size:12px;color:#8cf8cc;padding:9px 12px;border-radius:12px;background:#143f4680;border:1px solid #398b83a1}
+.mt-account-actions{margin:14px 0;padding-top:10px;border-top:1px solid #6983ac66}.mt-account-message{font-size:12px;color:#8ff0c9;margin:13px 0 0;min-height:15px;overflow-wrap:anywhere}.mt-account-message[data-bad=true]{color:#ffc3bc}
+.mt-account-links{font-size:11px;text-align:center;margin-top:15px}.mt-account-links a{color:#c6ebff;text-decoration:underline}
+@media(max-width:390px){.mt-account-dialog{padding:16px;border-radius:18px}.mt-account-fields{grid-template-columns:1fr}.mt-account-benefits{gap:5px}.mt-account-benefits span{padding:7px;font-size:11px}.top-actions{gap:6px}.mt-account-open{font-size:11px!important;padding:8px!important}}
+@media(prefers-reduced-motion:reduce){.mt-account-dialog *{scroll-behavior:auto!important}}
+
+
+/* V5.8 Group Safety — expanded only when riders need it, phone-first */
+.mt-safety{margin:12px 0;border:1px solid #8bcac0;border-radius:16px;background:linear-gradient(130deg,#edfdf7,#edf4ff);color:#143641;overflow:hidden;box-shadow:0 5px 18px #0d4e5320}
+.mt-safety>summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:9px;min-height:50px;padding:12px 14px;font-weight:800;font-size:15px}
+.mt-safety>summary::-webkit-details-marker{display:none}.mt-safety>summary:after{content:'⌄';margin-left:auto;color:#17585a;font-size:20px}.mt-safety[open]>summary:after{content:'⌃'}
+.mt-safety-mini{font-size:11px;color:#2d5e67;font-weight:650;white-space:nowrap}.mt-safety-body{border-top:1px solid #b6dcd8;padding:12px;display:grid;gap:10px}
+.mt-safety-intro,.mt-safety-note{font-size:12px;line-height:1.55;color:#335765;margin:0}.mt-safety-note{border-top:1px solid #c6dcdc;padding-top:10px}
+.mt-safety-controls{background:#fff;border:1px solid #d4e7ed;border-radius:13px;padding:10px;display:grid;gap:10px}
+.mt-safety-consent{display:flex;align-items:flex-start;gap:9px;margin:0;color:#153d43;cursor:pointer;font-size:13px}.mt-safety-consent input{flex:none;margin-top:4px;width:19px;height:19px;accent-color:#078f7b}.mt-safety-consent span{display:grid;gap:2px}.mt-safety-consent small{font-size:11px;color:#526e78;font-weight:500}
+html body .mt-safety-location{background:#087b78;border-color:#087b78;color:#fff;min-height:46px;font-weight:750;padding:10px}.mt-safety-location.is-live{background:#a31c38!important;border-color:#a31c38!important;color:#fff!important}
+.mt-safety-status{font-size:12px;line-height:1.5;color:#255766;margin:0}
+.mt-safety-riders-header{display:flex;justify-content:space-between;align-items:center;gap:10px;color:#153d43;font-size:14px}.mt-safety-riders-header span{color:#466c74;font-size:11px}
+.mt-safety-riders{display:grid;gap:9px}.mt-safety-empty{font-size:12px;color:#526c76;margin:0}.mt-safety-rider{background:#fff;border:1px solid #c9dfe6;border-radius:12px;padding:12px;display:grid;gap:8px}
+.mt-safety-rider-head{display:flex;align-items:center;justify-content:space-between;gap:8px}.mt-safety-rider-head strong{color:#173e53;font-size:14px}.mt-safety-rider-head span{background:#def5f0;border-radius:100px;padding:3px 8px;color:#176a65;font-size:10px}
+.mt-safety-tags{display:flex;gap:6px;flex-wrap:wrap}.mt-safety-tag{display:inline-block;background:#f0f5fc;border-radius:8px;padding:6px 9px;font-size:12px;color:#274357}.mt-safety-links{display:flex;gap:7px;flex-wrap:wrap}
+.mt-safety-links a{display:inline-flex;align-items:center;text-decoration:none;background:#0e7585;color:white!important;font-size:12px;font-weight:750;border-radius:9px;min-height:36px;padding:8px 11px}.mt-safety-links a:first-child{background:#157e57}
+.mt-safety-stale{color:#9a4c26;font-size:11px}.mt-safety-live{color:#177c5d;font-size:11px}.mt-safety-off{font-size:11px;color:#5e7582}
+html[data-theme=dark] .mt-safety{background:linear-gradient(130deg,#142a38,#1d2947);border-color:#326d75;color:#edfaff}
+html[data-theme=dark] .mt-safety>summary,html[data-theme=dark] .mt-safety-riders-header{color:#e5f8fb}
+html[data-theme=dark] .mt-safety-mini,html[data-theme=dark] .mt-safety>summary:after,html[data-theme=dark] .mt-safety-intro,html[data-theme=dark] .mt-safety-note{color:#a9d3db}
+html[data-theme=dark] .mt-safety-controls,html[data-theme=dark] .mt-safety-rider{background:#152b39;border-color:#35556c}
+html[data-theme=dark] .mt-safety-consent,html[data-theme=dark] .mt-safety-rider-head strong{color:#eaf9fb}
+html[data-theme=dark] .mt-safety-consent small,html[data-theme=dark] .mt-safety-status,html[data-theme=dark] .mt-safety-riders-header span{color:#b7d2db}
+html[data-theme=dark] .mt-safety-tag{background:#26394a;color:#e1f2ff}
+html[data-theme=dark] .mt-safety-rider-head span{background:#1d5048;color:#c4ffe8}
+@media(max-width:380px){.mt-safety-mini{font-size:10px}.mt-safety>summary{padding:11px 9px;gap:5px}}
+
+
+/* =========================== MotoTrip V5.9 ============================
+   Clean layout: no unnecessary dropdowns. Riders, split options, budget
+   and route fields stay visible while invite QR is inside the share sheet.
+   Visual changes only; trip data, auth, safety and payments are unchanged.
+   =================================================================== */
+:root{--mt59-mint:#53dcbf;--mt59-blue:#67b7ea;--mt59-purple:#aa8ef4;--mt59-warm:#ffbf77}
+#split .mt-block-title,#trips .mt-block-title,#route .mt-block-title,#plan .mt-block-title{font-size:14px;font-weight:820;line-height:1.3;letter-spacing:-.015em;margin:0;color:var(--ink)}
+/* QR is not a long block under Shared Ride. Tapping Send Invite opens the same
+   share sheet used by WhatsApp/SMS/Copy. QR is one choice in that sheet. */
+.shared-ride-card .mt-leave-ride{display:block;width:auto;max-width:max-content;margin:3px auto 4px!important;padding:7px 12px!important;min-height:30px!important;font-size:11px!important;color:var(--muted)!important;border:none!important;background:transparent!important;box-shadow:none!important}
+.shared-ride-card .mt-leave-ride:hover{text-decoration:underline}
+.invite-share-sheet .invite-sheet-panel{max-height:min(92dvh,720px);overflow-y:auto;overscroll-behavior:contain}
+.shared-ride-card .invite-sheet-options .invite-choice-qr{grid-column:1/-1;min-height:46px;justify-content:center!important;background:#ecf7ff!important;border:1px dashed #83bdcc!important}
+.invite-choice-qr span{background:#dbf6ec;color:#118c83}
+.invite-share-sheet .shared-qr-panel{margin:10px 0 3px;padding:9px 8px;border-radius:14px;box-shadow:none;background:#fff}
+.invite-share-sheet .shared-qr-frame svg{width:min(100%,180px);height:auto}
+.invite-share-sheet .shared-qr-label{margin:6px 0 3px;font-size:12px}
+.invite-share-sheet .shared-qr-notice{font-size:10px}
+/* Compact always-visible rider management. */
+#split .mt-rider-card{border:1px solid var(--edge);border-radius:16px;padding:12px;margin:12px 0 14px;background:var(--panel);box-shadow:0 5px 16px #102e570d}
+#rider-panel>.mt-block-title{display:flex;align-items:center;gap:7px;margin-bottom:8px;font-size:14px}
+#rider-panel>.mt-block-title:before{content:'👥';font-size:15px}
+#split #rider-panel #member-form{display:grid;grid-template-columns:minmax(0,1fr) 92px;align-items:end;gap:8px;margin:0 0 9px!important;padding:0!important;background:transparent!important;border:none!important;border-radius:0!important;box-shadow:none!important}
+#rider-panel #member-form .mt-rider-input-label{margin:0!important;min-width:0;font-size:11px;line-height:1.3;color:var(--muted)}
+#rider-panel #member-name{margin-top:4px!important;min-height:42px!important;padding:8px 10px!important}
+#rider-panel #member-form button{min-height:42px!important;height:42px!important;padding:5px 9px!important;width:100%!important;margin:0!important;font-size:12px!important;white-space:nowrap}
+#rider-panel .members-heading{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:6px 0!important;font-size:12px}
+#rider-panel #rider-count{font-size:11px;color:var(--muted);font-weight:600}
+#rider-panel #members{display:flex;gap:6px;flex-wrap:wrap;margin:5px 0 0!important}
+#rider-panel #members .rider-chip{padding:3px 3px 3px 9px!important;font-size:12px;border-radius:11px}
+#rider-panel #members .remove-rider{width:25px!important;height:25px!important;min-height:25px!important;font-size:17px!important;border-radius:8px!important}
+#rider-panel #members .no-riders{margin:0;color:var(--muted)}
+/* Type-to-search suggestions only; no persistent category box. */
+#expense-form .mt-field-hint{display:block;color:var(--muted);font-size:11px;margin:-4px 0 9px;line-height:1.4}
+#expense-form #expense-suggestions{padding:7px;margin:5px 0 10px;border:1px solid #a9d9d6;background:var(--panel);gap:6px;box-shadow:0 6px 17px #163d6a15}
+#expense-form #expense-suggestions .expense-suggestion{min-height:34px;padding:6px 9px;border-radius:9px;font-size:12px;background:var(--sub);color:var(--ink);border:1px solid var(--edge)}
+/* Keep all selected riders visible as dense chips, not stacked labels. */
+#expense-form .mt-split-between{margin:10px 0 12px;padding:10px 11px;border:1px solid var(--edge);border-radius:14px;background:var(--sub)}
+#expense-form .mt-split-between .mt-block-title{display:flex;flex-wrap:wrap;gap:8px;align-items:center;font-size:13px;margin:0 0 8px}
+#expense-form .mt-split-between #selected-riders-hint{margin-left:auto;font-size:10px;font-weight:600;white-space:normal}
+#expense-form #beneficiaries{display:grid;grid-template-columns:repeat(auto-fit,minmax(96px,1fr));gap:7px;padding:0;margin:0}
+#expense-form #beneficiaries .check{display:flex;align-items:center;gap:6px;min-width:0;max-width:100%;font-size:12px;line-height:1.3;margin:0;padding:7px 8px!important;border:1px solid var(--edge);border-radius:11px;background:var(--panel);color:var(--ink);overflow-wrap:anywhere;cursor:pointer}
+#expense-form #beneficiaries .check:has(input:checked){border-color:#5cbdad;background:#d9f6ed;color:#0e4d48}
+#expense-form #beneficiaries .check input{accent-color:#0ea88f;flex:0 0 17px;width:17px;height:17px;margin:0}
+html[data-theme=dark] #expense-form #beneficiaries .check:has(input:checked){background:#1d534d;color:#eafff6;border-color:#3ab59e}
+/* Single compact reset action; not tucked behind a detail. */
+#split .mt-reset-row{display:flex;justify-content:flex-end;margin:8px 0 3px;padding:2px 0;background:transparent;border:0;box-shadow:none}
+#split .mt-reset-row #new-group{display:inline-flex;width:auto!important;max-width:100%;margin:0!important;min-height:35px!important;padding:7px 12px!important;font-size:11px!important;border-radius:11px;color:#b02846;background:#ffedf0;border:1px solid #edc5ce}
+html[data-theme=dark] #split .mt-reset-row #new-group{background:#472537;color:#ffd1d7;border-color:#815367}
+/* Location tools are right below stop search, no extra tap. */
+#route .mt-route-tools{margin:9px 0 5px;padding:9px;border:1px solid var(--edge);background:var(--sub);border-radius:13px}
+#route .mt-route-tools>.mt-block-title{font-size:11px;color:var(--muted);margin:0 0 7px}
+#route .mt-route-tools .route-map-options{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;padding:0;margin:0}
+#route .mt-route-tools .route-map-options>*{display:grid;place-items:center;min-width:0;min-height:37px!important;padding:6px 4px!important;font-size:11px!important;line-height:1.3;white-space:normal;text-align:center;border-radius:9px!important}
+/* Toll & other costs are ordinary fields, consistent with fuel/hotel. */
+#plan .mt-extra-costs{margin:10px 0 13px;padding:10px 10px 11px;border:1px solid var(--edge);border-radius:14px;background:var(--sub)}
+#plan .mt-extra-costs>.mt-block-title{font-size:13px;margin:0 0 9px}
+#plan .mt-extra-costs .extra-costs-grid{padding:0;gap:9px}
+#plan .mt-extra-costs .extra-costs-grid label{background:var(--panel);padding:9px!important;border:1px solid var(--edge);border-top:3px solid var(--mt59-warm);border-radius:12px;font-size:12px}
+#plan .mt-extra-costs .extra-costs-grid label:nth-child(2){border-top-color:var(--mt59-purple)}
+#plan .mt-extra-costs .extra-costs-grid input{margin-top:6px}
+/* Budget appears expanded on first visit; native summary still lets user hide it. */
+#plan .comparison-panel[open]{border-color:#79ced1;box-shadow:0 6px 20px #0c8c9e14}
+#plan .comparison-panel>summary{background:linear-gradient(100deg,#b3f0e01b,#75baff19)}
+/* Report / privacy / backup controls remain visible, with no dropdowns. */
+#trips .mt-utility-stack{display:grid;grid-template-columns:1fr;gap:10px;margin:13px 0 17px}
+#trips .mt-utility-card{margin:0;padding:12px;background:var(--panel);border:1px solid var(--edge);border-radius:14px;min-width:0;box-shadow:0 4px 12px #12395d0b}
+#trips .mt-utility-card>.mt-block-title{margin:0 0 7px;display:flex;align-items:center;gap:8px;font-size:13px}
+#trips .mt-reports-card{border-top:3px solid var(--mt59-blue)}
+#trips .mt-backup-card{border-top:3px solid var(--mt59-purple)}
+#trips .mt-privacy-card{border-top:3px solid var(--mt59-mint)}
+#trips .mt-utility-card .export-panel,#trips .mt-utility-card .data-controls{background:transparent;border:0;box-shadow:none;padding:0;margin:0}
+#trips .mt-utility-card .export-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin:8px 0}
+#trips .mt-utility-card .export-grid button{font-size:12px;min-width:0;min-height:42px;padding:8px 5px;overflow-wrap:anywhere;border-radius:10px}
+#trips .mt-utility-card .mt-compact-help,#trips .mt-utility-card .export-help,#trips .mt-utility-card .data-controls p{font-size:11px;line-height:1.4;margin:4px 0 9px;color:var(--muted)}
+#trips .mt-backup-card>button,#trips .mt-backup-card>label{display:block;width:100%;margin:6px 0!important;box-sizing:border-box}
+#trips .mt-backup-card #export{min-height:39px!important;padding:8px;font-size:12px;border-radius:10px}
+#trips .mt-backup-card label{font-size:12px}
+#trips .mt-backup-card input[type=file]{width:100%;max-width:100%;min-height:40px!important;margin:5px 0 0!important;box-sizing:border-box;font-size:12px!important;padding:6px!important}
+#trips .mt-privacy-card .danger-action{min-height:36px!important;padding:7px 12px;font-size:11px;border-radius:9px;width:auto}
+@media(max-width:360px){
+ #rider-panel #member-form{grid-template-columns:minmax(0,1fr) 82px!important}
+ #expense-form #beneficiaries{grid-template-columns:repeat(2,minmax(0,1fr))}
+ #trips .mt-utility-card .export-grid button{font-size:11px}
+ #route .mt-route-tools .route-map-options>*{font-size:10px!important}
+}

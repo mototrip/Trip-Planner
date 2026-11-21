@@ -45,6 +45,39 @@ service cloud.firestore {
     allow delete: if loggedIn() && (request.auth.uid == userId ||
      get(/databases/$(database)/documents/sharedRides/$(rideId)).data.ownerUid == request.auth.uid);
    }
+   // V5.8: Explicitly opted-in rider safety cards. ONLY ride members may read.
+   // A user can create/update/delete ONLY their own record.
+   match /safety/{userId} {
+    function validSafety(d) {
+     return d.keys().hasAll(['uid','name','emergencyShared','blood','emergencyName','emergencyPhone',
+       'locationShared','latitude','longitude','accuracy','locationUpdatedAt','updatedAt'])
+      && d.keys().hasOnly(['uid','name','emergencyShared','blood','emergencyName','emergencyPhone',
+       'locationShared','latitude','longitude','accuracy','locationUpdatedAt','updatedAt'])
+      && d.uid == userId
+      && d.name is string && d.name.size() > 0 && d.name.size() <= 80
+      && d.emergencyShared is bool && d.locationShared is bool
+      && d.blood is string && d.blood in ['', 'A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-']
+      && d.emergencyName is string && d.emergencyName.size() <= 80
+      && d.emergencyPhone is string && d.emergencyPhone.size() <= 22
+      && d.locationUpdatedAt is string && d.locationUpdatedAt.size() <= 35
+      && d.updatedAt is string && d.updatedAt.size() <= 35
+      && (d.emergencyShared || (d.blood == '' && d.emergencyName == '' && d.emergencyPhone == ''))
+      && (
+        (d.locationShared && d.latitude is number && d.latitude >= -90 && d.latitude <= 90
+         && d.longitude is number && d.longitude >= -180 && d.longitude <= 180
+         && d.accuracy is number && d.accuracy >= 0 && d.accuracy <= 100000
+         && d.locationUpdatedAt.size() > 0)
+        || (!d.locationShared && d.latitude == null && d.longitude == null
+           && d.accuracy == null && d.locationUpdatedAt == '')
+       );
+    }
+    allow get, list: if isMember(rideId);
+    allow create: if isMember(rideId) && request.auth.uid == userId
+       && validSafety(request.resource.data);
+    allow update: if isMember(rideId) && request.auth.uid == userId
+       && validSafety(request.resource.data);
+    allow delete: if isMember(rideId) && request.auth.uid == userId;
+   }
   }
   match /sharedRideInvites/{inviteId} {
    allow get: if loggedIn();

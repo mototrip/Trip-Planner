@@ -1,0 +1,11 @@
+MotoTrip V5.7 — Login & Rider Profile (iPhone / Android web app)
+
+NEW: Friendly first-use welcome screen: Create Account / Log In / Continue as Guest.
+NEW: Email + Password signup, login, password reset, sign out, account delete (requires enabling Firebase Authentication -> Email/Password provider).
+NEW: Private rider profile with rider name, optional vehicle type, gender, emergency contact name and phone, and blood group.
+NEW: One-tap emergency number call from profile, where a phone number is available.
+NEW: Separate local trip/bill data for Guest and each Firebase account, preserving guest data at mototrip-v1.
+IMPORTANT: Emergency / blood-group data stay on the local device only. Not synced to Firebase or Shared Ride; not encrypted.
+IMPORTANT: Existing Firebase Shared Ride uses Anonymous sign-in. New Sign Up attempts to link anonymous credentials to preserve the ride membership. Logging into another account is blocked while actively in a Shared Ride, until Leave Ride.
+IMPORTANT: Login does not automatically sync private trips or profile across phones. Excel/JSON backup remains available.
+Owner: Satish Kumar Gupta; Contact: satish9648291@gmail.com

@@ -1,0 +1,13 @@
+MotoTrip V5.8 — Group Safety (optional)
+
+1. Bill Split → Shared Ride create/join → Group Safety expand.
+2. My Profile has name, blood group and emergency contact saved locally. Those DO NOT automatically go to the cloud.
+3. Toggle "Share my emergency info" ON to explicitly share name, blood group and emergency contact to joined ride members. Toggle OFF to remove that info. Changes to your local rider profile update the shared safety card while sharing remains on.
+4. Tap "Share My Location" and permit location access to send GPS position to joined friends while app is open. Tap "Stop Sharing Location" to remove it. Stale location is labelled as stale.
+5. Group Safety cards show member name, blood group and emergency contact with one-tap Call, and Open in Maps for recent positions. No gender/email is shared.
+6. CRITICAL: Firebase Firestore → Rules → REPLACE the existing rules with the COMPLETE included FIREBASE_RULES.txt and Publish. WITHOUT updated rules, saving safety info will fail with permission-denied.
+7. User consent matters. Do not share emergency data for others without their permission. Only invite trusted friends. Anyone with a working invite link may gain membership; access revocation/admin tools are not complete and feature requires security review before public launch.
+8. Phone web/PWA does NOT track in background. Internet, browser GPS permissions and location services are necessary. Always call local emergency services for actual emergencies. Blood group is self-reported: medically verify it before treatment.
+9. Original expense split, trips, backup and Firebase config intact. Local saved data key has not been changed.
+
+Owner: Satish Kumar Gupta | Support: satish9648291@gmail.com

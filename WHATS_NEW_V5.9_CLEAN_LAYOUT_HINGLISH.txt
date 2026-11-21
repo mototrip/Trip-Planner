@@ -1,0 +1,21 @@
+MotoTrip V5.9 — Clean Layout Update
+Owner: Satish Kumar Gupta
+
+1. QR Code is now inside Send Invite; tap Show QR to display it.
+2. Reset group expenses is visible as a compact danger action, not a dropdown.
+3. Expense type suggestions appear when typing in Expense name (Hotel/Food/Petrol/Toll/Parking).
+4. Download Reports, Backup/Restore and Data & Privacy are direct visible compact cards, not dropdowns.
+5. Add Rider is compact with name and Add button on one row; rider chips wrap.
+6. Split Between shows multiple rider-selection chips per row; no dropdown.
+7. Location tools are directly visible near route editing.
+8. Toll/Other costs are direct fields, not a dropdown.
+9. Budget vs Actual is OPEN by default, but users can tap title to hide it.
+
+All shared-ride Firebase rules, safety privacy, login, QR scanning and data formats remain unchanged.
+
+GitHub: extract ZIP and upload all app files to repository root (do not upload ZIP itself).
+Small update: replace index.html, style.css, shared-ride.js, ui.js and sw.js.
+Keep your FIREBASE_RULES.txt as published for V5.8, unchanged in V5.9.
+Before updating: export your trips backup.
+
+The existing design may have cached UI. Check latest V5.9 displayed in app.
