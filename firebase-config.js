@@ -1,12 +1,9 @@
-/* MotoTrip V4.9 — user supplied Firebase project settings.
- * Copy Firebase Console > Project settings > Your apps > Web app config into this object.
- * Firebase web API keys are identifiers, not secrets. Firestore security rules
- * (see FIREBASE_RULES.txt) must be deployed before enabling Shared Ride.
- * Leave the values blank to keep the existing fully-offline Bill Split experience.
- */
+/* MotoTrip V4.9 Firebase web configuration.
+   The Shared Ride script initializes Firebase automatically.
+   Firebase web configuration is public; protect data with Firestore rules. */
 window.MOTOTRIP_FIREBASE_CONFIG = {
-  apiKey: "",
-  authDomain: "",
-  projectId: "",
-  appId: ""
+  apiKey: "AIzaSyB0FTqz2gs3WUMIl9hnb6LFffKl-CVmq74",
+  authDomain: "mototrip-13b38.firebaseapp.com",
+  projectId: "mototrip-13b38",
+  appId: "1:763209956136:web:24c537a109cb07d4c72e1d"
 };

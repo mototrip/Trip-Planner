@@ -1,0 +1,15 @@
+MotoTrip V4.9 — GitHub Upload Steps (Hinglish)
+
+1) Is ZIP ko Windows par right-click > Extract All karo.
+2) https://github.com/mototrip/Trip-Planner kholo, apne account se sign in karo.
+3) main branch par Add file > Upload files dabao.
+4) Extracted folder ke ANDAR ki SAARI files select karke upload karo; folder ko ZIP ke form mein mat upload karna.
+5) Neeche Commit changes dabao. Purani same-name files overwrite/replace ho sakti hain.
+6) https://mototrip.github.io/Trip-Planner/ open karna. Naya version load na ho to refresh/clear cache.
+
+Firebase config already added to firebase-config.js for project mototrip-13b38.
+Firebase Authentication Anonymous already enabled.
+NEXT: Firebase Console > Firestore Database > Create database (production mode), fir FIREBASE_RULES.txt se Rules tab mein carefully publish karo.
+Shared Ride bina Firestore aur secure rules publish kiye live sync nahi karega.
+Do not use allow read, write: if true, and do not upload Firebase Admin keys.
+Existing saved data phone ke browser mein hi rahta hai. Backup export first.
