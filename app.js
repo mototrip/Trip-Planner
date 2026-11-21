@@ -13,8 +13,25 @@ function renderTheme(){document.documentElement.dataset.theme=state.theme==='lig
 $('theme-toggle').onclick=()=>{state.theme=state.theme==='light'?'dark':'light';persist();renderTheme();};
 function dashboard(){const totals=state.trips.reduce((a,t)=>{const c=calc(t.data);a.km+=c.km;a.total+=c.total;return a;},{km:0,total:0});$('dash-trips').textContent=state.trips.length;$('dash-km').textContent=totals.km.toLocaleString('en-IN')+' km';$('dash-budget').textContent=money(totals.total);}
 
-$("edit-bike").onclick=()=>{$("bike-name").value=bikeName();const b=profile();$("bike-cc").value=b.cc;$("bike-tank").value=b.tank;$("bike-mileage").value=b.mileage;$("bike-message").textContent="";$("bike-editor").hidden=false;$("bike-name").focus();};
+$("edit-bike").onclick=()=>{$("bike-name").value=bikeName();const b=profile();$("bike-cc").value=b.cc;$("bike-tank").value=b.tank;$("bike-mileage").value=b.mileage;$("bike-message").textContent="";refreshMileageCalculator();$("bike-editor").hidden=false;$("bike-name").focus();};
 $("cancel-bike").onclick=()=>{$("bike-editor").hidden=true;};
+// Mileage calculator is a helper within Edit Bike; it never changes a saved profile until Save Bike.
+let computedMileage=null;
+function refreshMileageCalculator(){
+ const d=Number($("mileage-distance").value),l=Number($("mileage-litres").value);
+ computedMileage=Number.isFinite(d)&&Number.isFinite(l)&&d>0&&l>0?d/l:null;
+ const usable=computedMileage!==null&&computedMileage>=0.1&&computedMileage<=300;
+ $("mileage-result").textContent=usable?computedMileage.toFixed(2)+" km/L":"— km/L";
+ $("apply-mileage").disabled=!usable;
+ $("mileage-hint").textContent=usable?"Calculated from your actual ride. Tap Use mileage, then Save Bike.":computedMileage!==null?"Result must be between 0.1 and 300 km/L.":"Enter distance and fuel to calculate automatically.";
+}
+for(const id of ["mileage-distance","mileage-litres"])$(id).addEventListener("input",refreshMileageCalculator);
+$("apply-mileage").onclick=()=>{
+ if(computedMileage===null||computedMileage<0.1||computedMileage>300)return;
+ $("bike-mileage").value=Number(computedMileage.toFixed(2));
+ $("bike-message").textContent="Mileage applied. Tap Save Bike to update your trip estimates.";
+};
+
 $("save-bike").onclick=()=>{const n=$("bike-name").value.trim();if(!n){$("bike-message").textContent="Enter a bike name.";return;}const fields=['bike-cc','bike-tank','bike-mileage'].map($);if(fields.some(x=>!x.value||!x.checkValidity())){$('bike-message').textContent='Enter valid positive bike specifications.';return;}const old={...state};state.bikeName=n;state.bikeProfile={cc:Number(fields[0].value),tank:Number(fields[1].value),mileage:Number(fields[2].value)};const previous=form.elements.mileage.value;form.elements.mileage.value=state.bikeProfile.mileage;state.draft=read();if(!persist()){state=old;form.elements.mileage.value=previous;$("bike-message").textContent="Could not save. Please try again.";return;}renderBike();update(false);$("bike-editor").hidden=true;notice("Bike profile saved on this device.");};
 $("bike-name").addEventListener("keydown",e=>{if(e.key==="Enter")$("save-bike").click();});
 function persist(){try{localStorage.setItem(key,JSON.stringify(state));return true;}catch(e){notice('Storage unavailable. Export a backup before closing.');return false;}}

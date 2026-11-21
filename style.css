@@ -61,3 +61,34 @@ html body #planner :is(.journey-grid,.cost-grid) input{margin-top:8px;background
 html[data-theme=light] #planner .journey-grid label,html[data-theme=light] #planner .cost-grid label{background:color-mix(in srgb,var(--tile) 12%,white);color:var(--ink)}
 @media(min-width:760px){#planner .journey-grid,#planner .cost-grid{grid-template-columns:repeat(3,minmax(0,1fr))}#planner .journey-grid label:first-child{grid-column:auto}}
 @media(max-width:380px){#planner .journey-grid label,#planner .cost-grid label{padding:9px;font-size:11px}}
+
+/* V3.7 | premium mobile polish, high-contrast light mode and mileage calculator */
+html{scroll-behavior:smooth}body{background:radial-gradient(circle at 95% 0%,#32427b36,transparent 40%),var(--bg);color:var(--ink);-webkit-font-smoothing:antialiased}
+main{max-width:760px;padding-left:clamp(12px,3vw,23px);padding-right:clamp(12px,3vw,23px)}
+.masthead{position:relative;overflow:hidden;box-shadow:0 18px 35px #0306172e}
+.masthead:after{content:"";position:absolute;right:-45px;bottom:-100px;width:250px;height:250px;border:1px solid #a5f7aa22;border-radius:50%;pointer-events:none}
+nav{position:relative;z-index:2}nav button{transition:transform .15s ease,box-shadow .15s ease;border-radius:15px}nav button:active,.primary:active{transform:scale(.98)}nav button.active{box-shadow:0 6px 20px #8fe89027}
+.dashboard .stat{min-width:0}.dashboard .stat strong{overflow-wrap:anywhere;font-variant-numeric:tabular-nums}
+.hero,#planner,.budget-panel,#gear,#trips,#split{box-shadow:0 10px 30px #0207181c}
+#bike-editor{margin:16px 0;padding:clamp(12px,3vw,20px);border:1px solid var(--edge);border-radius:20px;background:var(--sub)}
+#bike-editor>.grid{margin-top:10px}#bike-editor>label{font-weight:700}
+.mileage-lab{margin:20px 0 14px;padding:clamp(12px,3vw,18px);background:linear-gradient(125deg,#162c40,#28234e);border:1px solid #65789e88;border-radius:19px;color:#eef5ff;box-shadow:0 10px 25px #050d2533}
+.mileage-lab-head{display:flex;align-items:center;gap:12px}.mileage-lab-symbol{width:42px;height:42px;flex:none;display:grid;place-items:center;border-radius:13px;background:#a8f58c22;font-size:23px}.mileage-lab-head strong{font-size:clamp(15px,3.5vw,19px)}.mileage-lab-head p{font-size:12px;margin:4px 0 0;color:#c9d8e9}
+.mileage-lab-fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:12px}.mileage-lab-fields label{min-width:0;font-size:12px;font-weight:650;color:#d8e5f8}.mileage-lab-fields input{min-width:0;width:100%;font-size:16px!important;background:#121b33!important;color:white!important;border:1px solid #7486a6!important}
+.mileage-lab-result{display:flex;align-items:center;gap:10px;justify-content:space-between;border-top:1px solid #ffffff26;padding-top:14px;margin-top:7px;flex-wrap:wrap}.mileage-lab-result small{font-size:10px;color:#cbdaed;letter-spacing:.06em}.mileage-lab-result strong{display:block;font-size:clamp(23px,6vw,32px);color:#acff84;font-variant-numeric:tabular-nums;margin-top:4px}
+#apply-mileage{background:linear-gradient(110deg,#adf66e,#62dfc2);color:#122634;border:0;font-weight:800;padding:11px 14px;border-radius:12px}#apply-mileage:disabled{opacity:.38;cursor:not-allowed}.mileage-hint{font-size:12px;line-height:1.5;color:#cbdaed;margin-bottom:0}
+#bike-editor .bike-actions{gap:10px;flex-wrap:wrap}#bike-editor .bike-actions button{min-width:0}
+#planner .journey-grid label,#planner .cost-grid label{transition:border-color .2s ease,transform .2s ease;box-shadow:0 3px 10px #0000000d}
+#planner .journey-grid label:focus-within,#planner .cost-grid label:focus-within{border-color:var(--tile);transform:translateY(-1px)}
+input:focus-visible,select:focus-visible,button:focus-visible{outline:2px solid #7addd0;outline-offset:2px}
+#breakdown .line{gap:10px}#breakdown .line strong{font-variant-numeric:tabular-nums}
+.budget-panel{overflow-x:auto}.budget-table{font-variant-numeric:tabular-nums}.budget-table td,.budget-table th{white-space:nowrap}.budget-table td:first-child,.budget-table th:first-child{white-space:normal}
+#split .primary,#planner .primary{background:linear-gradient(105deg,#b1fa7d,#59dfbd);color:#112639;border:0;font-weight:800}
+#gear .check{border-radius:12px}#trips .trip{transition:box-shadow .2s ease}
+html[data-theme=light] body{background:radial-gradient(circle at top right,#d8e8ff,transparent 40%),#f4f7fd}
+html[data-theme=light] .mileage-lab{background:linear-gradient(125deg,#e9f6fc,#eee9fc);border-color:#c2c7e6;color:#1e3151;box-shadow:0 10px 25px #1d355416}
+html[data-theme=light] .mileage-lab-head p,html[data-theme=light] .mileage-lab-fields label,html[data-theme=light] .mileage-lab-result small,html[data-theme=light] .mileage-hint{color:#43526c}
+html[data-theme=light] .mileage-lab-result{border-color:#a3b2ce}html[data-theme=light] .mileage-lab-result strong{color:#176d48}
+@media(max-width:520px){.mileage-lab-fields{grid-template-columns:1fr 1fr}.mileage-lab-result{align-items:flex-end}nav button{line-height:1.24}#bike-editor>.grid{grid-template-columns:1fr 1fr}#bike-editor>.grid label:last-child{grid-column:1/-1}}
+@media(max-width:360px){.mileage-lab-fields{grid-template-columns:1fr}.mileage-lab-result{display:block}#apply-mileage{margin-top:10px;width:100%}}
+@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}}
