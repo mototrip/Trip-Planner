@@ -1,0 +1,11 @@
+MotoTrip V6.5 — Rider Profile Restore After Logout/Login
+
+1) Same Firebase email account se login karne par private device profile (name, vehicle, gender, emergency contact, blood group) automatically form me wapas dikhegi.
+2) Existing account login ke baad My Rider Profile screen khud open hogi.
+3) Pehle Guest/anonymous scope me saved profile milne par app permission lekar account me COPY karegi. Purana profile delete nahi hoga; existing signed-in profile overwrite nahi hogi.
+4) Agar aapne pehle Restore decline kiya tha, Profile screen me 'Restore previous profile saved on this device' button use kar sakte ho.
+5) Profile details ab bhi sirf isi device ke browser storage me rehti hain; Firebase par automatically upload nahi hoti. Logout profile ko delete nahi karta. App uninstall/clear site data/different device par original data milna guaranteed nahi hai.
+6) Rider Profile name Shared Ride mein automatically pick hota rahega. Existing shared rides, safety consent aur local trips untouched hain.
+
+GitHub quick update: index.html, account.js, sw.js upload & Commit.
+Before changes, export important trips/bills. Profile details are NOT included in trip backup. Never uninstall the app only to update it.

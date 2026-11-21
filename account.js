@@ -1,4 +1,4 @@
-/* MotoTrip V5.7 | Optional Firebase email login + PRIVATE device-only rider profile with optional opt-in Group Safety sharing.
+/* MotoTrip V6.5 | Optional Firebase email login + PRIVATE device-only rider profile with optional opt-in Group Safety sharing.
    © 2026 Satish Kumar Gupta. Profile details go to Firestore only after separate Group Safety consent. */
 (() => {
  'use strict';
@@ -12,7 +12,11 @@
  const legacyKey = 'mototrip-v1';
  let scope = 'guest', auth, modules, loadPromise, busy = false, focusBefore = null;
  try { scope = localStorage.getItem(scopeKey) || 'guest'; } catch (_) { /* Storage may be disabled */ }
- const savedProfileKey = () => 'mototrip-rider-profile-v1-' + scope;
+ const profilePrefix = 'mototrip-rider-profile-v1-';
+ const savedProfileKey = () => profilePrefix + scope;
+ const accountProfileKey = uid => profilePrefix + 'uid-' + uid;
+ const afterLoginKey = 'mototrip-show-profile-after-login-v65';
+ const declinedRestoreKey = uid => 'mototrip-declined-profile-restore-v65-' + uid;
  const privateTripKey = uid => 'mototrip-v1-uid-' + uid;
  const groupIsActive = () => Boolean(window.motoTripSharedRide?.active);
  const panels = ['welcome', 'signup', 'login', 'profile'];
@@ -20,6 +24,43 @@
  function readProfile() {
    try { const val = JSON.parse(localStorage.getItem(savedProfileKey()) || 'null'); return val && typeof val === 'object' ? val : {}; }
    catch (_) { return {}; }
+ }
+ // Keep each signed-in rider's private profile under their stable Firebase UID.
+ // Older Guest/anonymous-account profiles remain on the device; never overwrite
+ // an existing account profile and never send medical/emergency data to a server.
+ function parseStoredProfile(key) {
+   try {
+     const p = JSON.parse(localStorage.getItem(key) || 'null');
+     return p && typeof p === 'object' && !Array.isArray(p) && typeof p.name === 'string' && p.name.trim() ? p : null;
+   } catch (_) { return null; }
+ }
+ function restoreCandidate(uid) {
+   try {
+     if (!uid || localStorage.getItem(accountProfileKey(uid)) !== null) return null;
+     const guestKey = profilePrefix + 'guest';
+     if (parseStoredProfile(guestKey)) return guestKey;
+     // Older builds could have saved under a previous anonymous UID. Only offer
+     // automatic discovery when exactly one such profile exists on this device.
+     const found = [];
+     for (let i = 0; i < localStorage.length; i++) {
+       const key = localStorage.key(i);
+       if (key?.startsWith(profilePrefix + 'uid-') && key !== accountProfileKey(uid) && parseStoredProfile(key)) found.push(key);
+     }
+     return found.length === 1 ? found[0] : null;
+   } catch (_) { return null; }
+ }
+ function restorePreviousProfile(uid, ask = true) {
+   const key = restoreCandidate(uid);
+   if (!key) return false;
+   if (ask && !confirm('A previous Rider Profile was found on this device. Copy it into this account? Choose OK only if it belongs to you. Your original data will stay saved.')) return false;
+   try {
+     // Recheck immediately before writing, so nothing previously saved is lost.
+     if (localStorage.getItem(accountProfileKey(uid)) !== null) return false;
+     const source = localStorage.getItem(key);
+     if (!source) return false;
+     localStorage.setItem(accountProfileKey(uid), source);
+     return true;
+   } catch (_) { return false; }
  }
  function openDialog(which = 'welcome') {
    focusBefore = document.activeElement;
@@ -93,17 +134,28 @@
          localStorage.setItem(privateTripKey(uid), prior);
        }
      }
-     const oldProfile = localStorage.getItem('mototrip-rider-profile-v1-guest');
-     const target = 'mototrip-rider-profile-v1-uid-' + uid;
-     if (oldProfile && !localStorage.getItem(target)) localStorage.setItem(target, oldProfile);
    } catch (e) { throw Error('Storage full/unavailable. Export a JSON backup before creating your account.'); }
  }
  function switchAndReload(uid, isNew = false) {
    // Saved offline trips MUST remain scoped to the original rider, not mixed with another login.
    if (isNew) copyGuestDataIfRequested(uid);
+   // If the account already has a profile, leave it untouched. A former Guest
+   // or old anonymous profile can be copied after explicit user confirmation.
+   if (localStorage.getItem(accountProfileKey(uid)) === null) {
+     if (isNew && parseStoredProfile(profilePrefix + 'guest')) restorePreviousProfile(uid, false);
+     else {
+       let declined = false;
+       try { declined = sessionStorage.getItem(declinedRestoreKey(uid)) === 'yes'; } catch (_) {}
+       if (!declined && restoreCandidate(uid) && !restorePreviousProfile(uid, true)) {
+         try { sessionStorage.setItem(declinedRestoreKey(uid), 'yes'); } catch (_) {}
+       }
+     }
+   }
    setScope(uid);
    markSeen();
-   if (isNew) { try { sessionStorage.setItem('mototrip-finish-rider-profile', 'yes'); } catch (_) {} }
+   // An existing account should re-open the profile too, not land in Planner
+   // with its private fields hidden and appearing to have vanished.
+   try { sessionStorage.setItem(afterLoginKey, 'yes'); } catch (_) {}
    location.reload();
  }
  async function signup(event) {
@@ -141,6 +193,8 @@
    $('mt-profile-login').hidden = registered;
    $('mt-profile-logout').hidden = !registered;
    $('mt-profile-delete-account').hidden = !registered;
+   const restoreButton = $('mt-profile-restore');
+   if (restoreButton) restoreButton.hidden = !registered || !!p.name || !restoreCandidate(scope.slice(4));
    updateEmergencyCall(p.icePhone || '');
  }
  function updateEmergencyCall(raw) {
@@ -213,6 +267,18 @@
      location.reload();
    });
  }
+ function restoreProfileFromDevice() {
+   if (!scope.startsWith('uid-')) return;
+   if (!restorePreviousProfile(scope.slice(4))) {
+     setMessage('No previous device profile was restored. Your account profile was not changed.');
+     return;
+   }
+   renderProfile();
+   fillLabel();
+   if (typeof window.motoTripRefreshRiderName === 'function') window.motoTripRefreshRiderName();
+   window.dispatchEvent(new Event('mototrip-profile-updated'));
+   setMessage('✓ Your previous device profile has been restored.');
+ }
  function clearProfile() {
    if (!confirm('Remove your rider name, emergency contact and blood group saved on this browser? Your trips and expenses will NOT be deleted.')) return;
    try { localStorage.removeItem(savedProfileKey()); } catch (_) {}
@@ -252,13 +318,20 @@
  $('mt-profile-logout').addEventListener('click', logout);
  $('mt-profile-delete-account').addEventListener('click', deleteAccount);
  $('mt-profile-clear').addEventListener('click', clearProfile);
+ $('mt-profile-restore')?.addEventListener('click', restoreProfileFromDevice);
  $('mt-reset-password').addEventListener('click', resetPassword);
  $('mt-emergency-phone').addEventListener('input', e => updateEmergencyCall(e.target.value));
  fillLabel();
  let welcomed = false;
  try { welcomed = Boolean(localStorage.getItem(welcomeKey)); } catch (_) {}
  let finishProfile = false;
- try { finishProfile = sessionStorage.getItem('mototrip-finish-rider-profile') === 'yes'; sessionStorage.removeItem('mototrip-finish-rider-profile'); } catch (_) {}
- if (finishProfile) openDialog('profile');
- else if (!welcomed) openDialog('welcome');
+ try {
+   finishProfile = sessionStorage.getItem(afterLoginKey) === 'yes' || sessionStorage.getItem('mototrip-finish-rider-profile') === 'yes';
+   sessionStorage.removeItem(afterLoginKey);
+   sessionStorage.removeItem('mototrip-finish-rider-profile');
+ } catch (_) {}
+ if (finishProfile) {
+   openDialog('profile');
+   setMessage(readProfile().name ? '✓ Your saved Rider Profile is ready.' : 'Add your name to finish your private Rider Profile.');
+ } else if (!welcomed) openDialog('welcome');
 })();
