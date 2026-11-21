@@ -743,3 +743,21 @@ html body #plan #selected-stop-summary.mt61-route-tip #planner-route-jump{displa
 #plan .simple-place.dest-fieldset{padding-bottom:14px}
 .place-suggestions{border-color:#a5bed9;box-shadow:0 13px 35px #0a254e45}
 @media(max-width:350px){#planner .mt61-plan-heading{gap:5px}html body #plan a#map.mt61-map-action{font-size:11px!important;padding:6px 9px!important}}
+
+
+/* MotoTrip V6.2 — planner box height + route tip spacing fix */
+#planner .simple-place{box-sizing:border-box}
+#planner .simple-place legend{line-height:1.2}
+#planner .mt61-place-label{display:block;margin-top:2px}
+#planner .mt61-place-label input{margin-top:8px}
+#plan #selected-stop-summary.mt61-route-tip{margin:2px 0 10px!important;padding:0!important}
+html body #plan #selected-stop-summary.mt61-route-tip #planner-route-jump{padding:0!important;min-height:22px!important;line-height:1.25!important;font-size:12px!important}
+@media(min-width:760px){
+  #planner .simple-place{display:flex;flex-direction:column;justify-content:flex-start;min-height:132px;margin:12px 0 8px!important;padding:12px 14px!important}
+  #planner .simple-place label{margin:0}
+  #planner fieldset+fieldset{margin-left:10px}
+}
+@media(max-width:759px){
+  #planner .simple-place{margin:12px 0 8px!important;padding:12px!important}
+  #plan #selected-stop-summary.mt61-route-tip{margin:0 0 10px!important}
+}
