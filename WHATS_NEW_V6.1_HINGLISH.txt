@@ -1,0 +1,11 @@
+MotoTrip V6.1 — Smart Planner Search & Compact Maps
+
+1. Planner ka Maps action ab Bike & Mileage Check jaisa chhota top-right button hai.
+2. Duplicate location tip removed. Single clickable line: ↗ To add more stops, go to the Route tab.
+3. Planner ke Starting point aur End Destination mein Route page wale real place suggestions.
+4. Existing Delhi/Manali field ko focus karne par bhi location dropdown khulta hai.
+5. Suggestions se jagah choose karne par Map link aur saved coordinates dono update honge.
+6. V6.1 cache version updates automatically. Saved trips, expense history, group data untouched.
+
+Upload GitHub: Extract ZIP; upload index.html, style.css, route.js, sw.js (and other complete ZIP files if doing a full replace), then Commit changes.
+Note: Place suggestions need internet; live Photon server availability varies.

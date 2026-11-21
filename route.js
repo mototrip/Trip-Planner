@@ -196,15 +196,15 @@ async function findSuggestions(q){
   if(searchCache.size>80)searchCache.clear();searchCache.set(key,result);return result;
  }finally{clearTimeout(timeout);}
 }
-let activePopup=null;
-function closePlacePopup(){if(activePopup){activePopup.remove();activePopup=null;}}
+let activePopup=null,activeInput=null;
+function closePlacePopup(){if(activeInput)activeInput.setAttribute('aria-expanded','false');if(activePopup){activePopup.remove();activePopup=null;}activeInput=null;}
 function setSelectedPlace(kind,place,index=-1){
  const name=place.label,lat=place.lat,lon=place.lon;
  if(kind==='start'||kind==='planner-start'){
   start.value=name;$('route-start-input').value=name;
   form.elements.fromLat.value=lat;form.elements.fromLon.value=lon;
   form.elements.fromState.value=place.state||'';form.elements.fromDistrict.value=place.county||'';
-  state.draft=read();persist();renderGoogle();drawMap();
+  state.draft=read();persist();update(false);renderGoogle();drawMap();
  }else if(kind==='end'||kind==='planner-end'){
   normalizeStops();state.routeStops[state.routeStops.length-1]={name,lat,lon};
   form.elements.toState.value=place.state||'';form.elements.toDistrict.value=place.county||'';commit();
@@ -232,7 +232,7 @@ async function showPlaceSuggestions(input,kind,index=-1,forced=false){
  closePlacePopup();
  const popup=document.createElement('div');popup.className='place-suggestions';popup.setAttribute('role','listbox');
  popup.setAttribute('aria-label','Choose location and state');
- activePopup=popup;document.body.append(popup);placePopupAt(input,popup);
+ activePopup=popup;activeInput=input;input.setAttribute('aria-expanded','true');document.body.append(popup);placePopupAt(input,popup);
  const loading=document.createElement('div');loading.className='place-suggestion-message';loading.textContent='Finding places…';popup.append(loading);
  let options;
  try{options=await findSuggestions(value);}catch{options=null;}
@@ -240,7 +240,7 @@ async function showPlaceSuggestions(input,kind,index=-1,forced=false){
  popup.replaceChildren();
  if(options===null||options.length===0){const message=document.createElement('div');message.className='place-suggestion-message';message.textContent=options===null?'Search unavailable. You can still enter the full city and state manually.':'No match found. Try city + state (e.g. Bilaspur, Chhattisgarh).';popup.append(message);return;}
  for(const o of options){
-  const b=document.createElement('button');b.type='button';b.className='place-suggestion';b.setAttribute('role','option');
+  const b=document.createElement('button');b.type='button';b.className='place-suggestion';b.setAttribute('role','option');b.tabIndex=0;
   const name=document.createElement('strong');name.textContent=o.label.split(', ')[0];
   const region=document.createElement('small');region.textContent=o.detail||o.label;
   b.append(name,region);b.addEventListener('pointerdown',e=>e.preventDefault());
@@ -249,13 +249,20 @@ async function showPlaceSuggestions(input,kind,index=-1,forced=false){
 }
 function setupPlaceSuggestions(input,kind,index=-1){
  if(input.dataset.smartPlace)return;input.dataset.smartPlace='1';
+ input.setAttribute('aria-autocomplete','list');input.setAttribute('aria-expanded','false');
  let timer;
- input.addEventListener('input',()=>{
+ function queue(immediate=false){
   clearTimeout(timer);closePlacePopup();
-  if(input.value.trim().length>=3)timer=setTimeout(()=>showPlaceSuggestions(input,kind,index),500);
- });
+  if(input.value.trim().length>=3)timer=setTimeout(()=>showPlaceSuggestions(input,kind,index),immediate?0:400);
+ }
+ // Also show matches when a user taps an already-filled Delhi/Manali field.
+ input.addEventListener('focus',()=>queue(true));
+ input.addEventListener('input',()=>queue(false));
  input.addEventListener('blur',()=>{setTimeout(()=>{if(document.activeElement!==input&&!activePopup?.contains(document.activeElement))closePlacePopup();},220);});
- input.addEventListener('keydown',e=>{if(e.key==='Escape')closePlacePopup();});
+ input.addEventListener('keydown',e=>{
+  if(e.key==='Escape')closePlacePopup();
+  if(e.key==='ArrowDown'&&activePopup&&activeInput===input){const first=activePopup.querySelector('button.place-suggestion');if(first){e.preventDefault();first.focus();}}
+ });
 }
 document.addEventListener('pointerdown',e=>{if(activePopup&&!activePopup.contains(e.target)&&!e.target.closest?.('input'))closePlacePopup();});
 window.addEventListener('resize',()=>closePlacePopup());

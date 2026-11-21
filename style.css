@@ -728,3 +728,18 @@ html[data-theme=dark] body #shared-ride-setup #join-ride-trigger{background:line
 /* Maps icon-pill: same compact accessory feel as Bike & Mileage Check. */
 html body #plan a#map.planner-map-link{display:inline-flex!important;align-items:center!important;justify-content:center!important;min-height:36px!important;width:auto!important;max-width:fit-content!important;padding:6px 12px!important;margin:3px 0 13px!important;border-radius:999px!important;border:1px solid var(--edge)!important;background:var(--sub)!important;color:var(--ink)!important;box-shadow:0 4px 12px #17315d12!important;font-size:12px!important;font-weight:750!important;text-decoration:none!important;white-space:nowrap!important}
 @media(max-width:360px){.masthead .mt60-header-actions{gap:5px}.masthead .mt-profile-avatar{flex-basis:25px;width:25px;height:25px}html body .masthead #mt-account-open.mt60-profile-chip{padding:4px 7px 4px 4px!important;min-height:36px!important;font-size:11px!important}html body .masthead #theme-toggle.mt60-theme-pill{flex-basis:36px!important;width:36px!important;height:36px!important;min-height:36px!important}}
+
+
+/* MotoTrip V6.1 — compact Maps action + shared smart location search */
+#planner .mt61-plan-heading{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin:0 0 3px}
+#planner .mt61-plan-heading h2{margin:2px 0 4px;min-width:0}
+html body #plan a#map.mt61-map-action{display:inline-flex!important;align-items:center!important;justify-content:center!important;flex:0 0 auto;width:auto!important;min-height:36px!important;margin:0!important;padding:6px 11px!important;border-radius:11px!important;background:#eef8ff!important;color:#12385d!important;border:1px solid #c2ddfa!important;box-shadow:0 4px 12px #1c386e15!important;font-size:12px!important;font-weight:750!important;line-height:1.2!important;white-space:nowrap!important}
+html[data-theme=dark] body #plan a#map.mt61-map-action{background:#234668!important;color:#e9faff!important;border-color:#5884ac!important}
+#planner .mt61-place-label{position:relative}
+#planner .mt61-place-label input{padding-right:43px!important}
+#planner .mt61-search-icon{position:absolute;right:13px;bottom:11px;display:grid;place-items:center;width:25px;height:25px;border-radius:50%;font-size:23px;color:var(--muted);pointer-events:none;line-height:1}
+#planner .mt61-route-tip{clear:both;display:block;margin:0 0 10px!important;padding:4px 0 0!important;border:0!important;background:none!important}
+html body #plan #selected-stop-summary.mt61-route-tip #planner-route-jump{display:inline-flex!important;align-items:center!important;width:auto!important;min-height:28px!important;padding:3px 2px!important;margin:0!important;background:transparent!important;border:0!important;box-shadow:none!important;color:var(--accent)!important;font-size:clamp(11px,2.7vw,13px)!important;font-weight:750!important;text-align:left!important;text-decoration:none!important;white-space:normal!important;line-height:1.4!important}
+#plan .simple-place.dest-fieldset{padding-bottom:14px}
+.place-suggestions{border-color:#a5bed9;box-shadow:0 13px 35px #0a254e45}
+@media(max-width:350px){#planner .mt61-plan-heading{gap:5px}html body #plan a#map.mt61-map-action{font-size:11px!important;padding:6px 9px!important}}
