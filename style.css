@@ -1312,3 +1312,9 @@ html body #plan .mt80-trip-card .mt80-trip-budget small{color:#172c40!important;
 #plan .mt80-cost-note{font-size:10px;color:var(--muted);text-align:center;margin:7px 0 0;line-height:1.35;}
 @media(max-width:365px){#plan .mt80-trip-card{grid-template-columns:60px minmax(0,1fr) minmax(99px,36%);gap:6px;padding:7px;}#plan .mt80-scene,#plan .mt80-trip-art{min-height:78px;}#plan .mt80-trip-budget{padding-left:4px;}#plan .mt80-trip-budget>span{padding:4px 3px;}#plan .mt80-calc-row{font-size:11px!important;}#plan .mt80-calc-symbol{font-size:16px;width:21px;flex-basis:21px;}#plan .mt80-entry{min-width:104px;padding:3px 5px;}}
 @media(min-width:540px){#plan .mt80-trip-card{padding:13px;gap:15px;}#plan .mt80-calc-row{min-height:53px;}}
+
+
+/* MotoTrip V8.1 — planner toggles above inputs; lower mileage/petrol removed */
+.mt81-choice-row{display:flex;flex-wrap:wrap;gap:10px;margin:8px 0 12px}.mt81-choice-row .check{margin:0;padding:9px 12px!important;border:1px solid var(--edge);border-radius:12px;background:var(--sub)}
+.mt81-cost-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.mt81-cost-grid>label{min-width:0}
+@media (max-width:640px){.mt81-cost-grid{grid-template-columns:1fr}}

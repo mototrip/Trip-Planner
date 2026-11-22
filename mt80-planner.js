@@ -32,7 +32,7 @@
       el('mt80-riders').textContent=riderCount();
       el('mt80-per-person').textContent='≈ '+pretty(c.total/riderCount())+' / Rider';
       for(const [kind,name] of [['fuel','fuel'],['stay','stay'],['food','food'],['toll','toll']])el('mt80-'+kind).textContent=pretty(c[name]);
-      el('mt80-cost-note').textContent=Number(c.other)>0?'Other expenses ('+pretty(c.other)+') are included in the total. Edit above or below — both stay in sync.':'Edit above or below — both estimates stay in sync.';
+      el('mt80-cost-note').textContent=Number(c.other)>0?'Other expenses ('+pretty(c.other)+') are included in the total. Edit above — estimate cards stay in sync.':'Edit above — estimate cards stay in sync.';
       const start=field('departDate')?.value||'',end=field('endDate')?.value||'';
       if(document.activeElement!==el('mt80-start-date'))el('mt80-start-date').value=start;
       if(document.activeElement!==el('mt80-end-date'))el('mt80-end-date').value=end;

@@ -5,12 +5,12 @@
 const CACHE_NAME = 'mototrip-v8.0';
 const PREVIOUS_CACHE_PREFIX = 'mototrip-';
 const APP_SHELL = [
-  './index.html','./app-update.js?v=80','./style.css?v=80',
-  './app.js?v=80','./account.js?v=80','./split.js?v=80','./route.js?v=80','./ui.js?v=80',
+  './index.html','./app-update.js?v=80','./style.css?v=81',
+  './app.js?v=81','./account.js?v=80','./split.js?v=80','./route.js?v=80','./ui.js?v=80',
   './exports.js?v=80','./firebase-config.js?v=80','./qr-code.js?v=80','./shared-ride.js?v=80','./group-gear.js?v=80','./safety.js?v=80','./qr-scanner.js?v=80',
   './report.html','./report.js?v=80','./privacy.html',
   './terms.html','./ownership.html','./manifest.json',
-  './mt80-planner.js?v=80','./icon-192.png','./icon-512.png'
+  './mt80-planner.js?v=81','./icon-192.png','./icon-512.png'
 ];
 const appIndex = new URL('./index.html', self.registration.scope).href;
 
