@@ -24,6 +24,9 @@ function refreshMileageCalculator(){
  const d=Number(distanceInput.value), spend=Number(expenseInput.value);
  // This is the same fuel rate shown in the Planner; don't treat rupees as litres.
  const priceInput=form.elements.namedItem('price');
+ const visibleRate=$('mileage-petrol-price');
+ // The mileage card and Planner share one fuel price, including restored trip drafts.
+ if(visibleRate && document.activeElement!==visibleRate && visibleRate.value!==priceInput.value)visibleRate.value=priceInput.value;
  const price=Number(priceInput.value);
  const validRate=priceInput.value.trim()!==''&&Number.isFinite(price)&&price>0;
  const validValues=distanceInput.value.trim()!==''&&expenseInput.value.trim()!==''&&Number.isFinite(d)&&Number.isFinite(spend)&&d>0&&spend>0;
@@ -31,13 +34,22 @@ function refreshMileageCalculator(){
  computedMileage=litres!==null&&Number.isFinite(litres)&&litres>0?d/litres:null;
  const usable=computedMileage!==null&&Number.isFinite(computedMileage)&&computedMileage>=0.1&&computedMileage<=300;
  const rateText=$("mileage-rate-note");
- rateText.textContent=validRate?`Using Planner fuel price: ₹${price.toLocaleString('en-IN',{maximumFractionDigits:2})}/L. Fuel used ≈ ${litres===null?'—':litres.toFixed(2)} L. If prices varied, mileage is approximate.`:'Set a fuel price greater than ₹0/L in Planner to calculate mileage.';
+ rateText.textContent=validRate?`↗ Synced with Planner · Est. fuel used: ${litres===null?'—':litres.toFixed(2)} L`:'↗ Synced with Planner · Enter a petrol price above ₹0/L.';
  $("mileage-result").textContent=usable?computedMileage.toFixed(2)+" km/L":"— km/L";
  $("apply-mileage").disabled=!usable;
- $("mileage-hint").textContent=!validRate?'Enter a valid fuel price in Planner first.':!validValues?'Enter distance travelled and total fuel expense (₹).':!usable?'Result must be between 0.1 and 300 km/L. Check distance, total expense and fuel price.':'Mileage estimated from total fuel expense. Tap Use mileage to apply it to the Planner.';
+ $("mileage-hint").textContent=!validRate?'Enter a petrol price above ₹0/L.':!validValues?'Fill distance, fuel spend and petrol price to see mileage.':!usable?'Result must be between 0.1 and 300 km/L. Check distance, total expense and fuel price.':'✓ Ready! Use mileage to update the Planner.';
 }
 for(const id of ["mileage-distance","mileage-expense"])$(id).addEventListener("input",refreshMileageCalculator);
-// Keep the result in sync if the user changes the fuel price in Planner.
+// Keep the price editable in both places; no separate duplicate field in saved data.
+const mileageRateInput=$('mileage-petrol-price');
+if(mileageRateInput)mileageRateInput.addEventListener('input',()=>{
+ const next=mileageRateInput.value;
+ if(next!=='' && (!Number.isFinite(Number(next)) || Number(next)<0))return;
+ const plannerPrice=form.elements.namedItem('price');
+ plannerPrice.value=next;
+ plannerPrice.dispatchEvent(new Event('input',{bubbles:true}));
+ refreshMileageCalculator();
+});
 form.elements.namedItem('price').addEventListener('input',refreshMileageCalculator);
 $("apply-mileage").onclick=()=>{
  if(computedMileage===null||!Number.isFinite(computedMileage)||computedMileage<0.1||computedMileage>300)return;

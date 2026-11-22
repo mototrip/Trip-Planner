@@ -1598,3 +1598,59 @@ html[data-theme=dark] #route .mt96-map-action{background:#234668!important;borde
 #route .mt96-trip-label input{margin-top:7px!important;min-height:48px!important;padding:12px 14px!important;border-radius:14px!important;font-size:17px!important;font-weight:800!important}
 #route .mt89-trip-sync{display:none!important}
 @media(max-width:520px){#route .mt96-route-head h2{font-size:24px!important}#route .mt96-trip-head h3{font-size:22px!important}}
+
+
+/* MotoTrip V9.7: three-field mileage calculator, linked petrol rate. */
+#bike-editor .mileage-lab{overflow:hidden}
+#bike-editor .mileage-lab-fields{
+  grid-template-columns:repeat(3,minmax(0,1fr))!important;
+  align-items:start;
+  gap:8px!important;
+}
+#bike-editor .mileage-lab-fields>label{min-width:0!important;flex:none}
+#bike-editor .mileage-lab-fields>label>span:not(.mt97-price-wrap){text-overflow:ellipsis;overflow:hidden}
+#bike-editor .mileage-lab-fields>.mt97-price-field{position:relative}
+#bike-editor .mileage-lab-fields>.mt97-price-field>span.mileage-label-full,
+#bike-editor .mileage-lab-fields>.mt97-price-field>span.mileage-label-short{color:#8ff4d3!important}
+#bike-editor .mt97-price-wrap{position:relative;display:block!important;width:100%;min-width:0;margin-top:7px}
+#bike-editor .mileage-lab-fields .mt97-price-wrap input{
+  height:42px!important;min-height:42px!important;margin:0!important;
+  border:1px solid #53cdaa!important;border-radius:11px!important;
+  padding:8px 22px!important;background:#153e49!important;color:#e9fff5!important;
+  box-shadow:inset 0 1px 2px #05233135,0 0 0 2px #22c79512!important;
+  font-weight:800!important;font-variant-numeric:tabular-nums;
+}
+#bike-editor .mt97-price-wrap .mt97-rupee,#bike-editor .mt97-price-wrap .mt97-unit{
+  position:absolute;top:50%;transform:translateY(-50%);pointer-events:none;
+  font-size:11px;font-weight:800;color:#9ef6d7;line-height:1;
+}
+#bike-editor .mt97-price-wrap .mt97-rupee{left:8px}
+#bike-editor .mt97-price-wrap .mt97-unit{right:7px}
+html[data-theme=light] #bike-editor .mileage-lab-fields>.mt97-price-field>span.mileage-label-full,
+html[data-theme=light] #bike-editor .mileage-lab-fields>.mt97-price-field>span.mileage-label-short{color:#136e5b!important}
+html[data-theme=light] #bike-editor .mileage-lab-fields .mt97-price-wrap input{
+  background:linear-gradient(145deg,#edfff7,#ddf8ed)!important;color:#0d5d4e!important;
+  border-color:#73d6b5!important;box-shadow:inset 0 1px 1px #b4e8d059!important;
+}
+html[data-theme=light] #bike-editor .mt97-price-wrap .mt97-rupee,
+html[data-theme=light] #bike-editor .mt97-price-wrap .mt97-unit{color:#24816f}
+#bike-editor .mileage-lab-fields input:focus-visible{outline:2px solid #25caa5!important;outline-offset:2px}
+@media(max-width:390px){
+ #bike-editor .mileage-lab-fields{gap:6px!important}
+ #bike-editor .mileage-lab-fields>label{font-size:10px!important}
+ #bike-editor .mileage-lab-fields input{font-size:13px!important;padding:7px 6px!important}
+ #bike-editor .mileage-lab-fields .mt97-price-wrap input{font-size:13px!important;padding:7px 18px!important}
+ #bike-editor .mt97-price-wrap .mt97-rupee{left:5px}
+ #bike-editor .mt97-price-wrap .mt97-unit{right:4px}
+}
+@media(max-width:345px){
+ #bike-editor .mileage-lab-fields{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+ #bike-editor .mileage-lab-fields>.mt97-price-field{grid-column:1/-1}
+ #bike-editor .mileage-lab-fields>.mt97-price-field .mt97-price-wrap{max-width:none}
+}
+
+/* V9.7 finishing touches — readable results in light mode and a strong apply action */
+html[data-theme=light] #bike-editor .mileage-lab-result small{color:#526786!important;opacity:1!important}
+html[data-theme=dark] #bike-editor .mileage-lab-result small{color:#c5dcf4!important;opacity:1!important}
+#bike-editor #apply-mileage:not(:disabled){background:linear-gradient(110deg,#aaf59c,#61e1be)!important;border:1px solid #65cda7!important;color:#13382e!important;box-shadow:0 5px 12px #138a6d17!important}
+#bike-editor .mileage-hint{margin-top:7px!important;font-size:11px!important;line-height:1.35!important}

@@ -1,0 +1,3 @@
+MotoTrip V9.7 — Stylish Petrol Price in Real Mileage Calculator
+
+Real Mileage Calculator mein Petrol Price (₹/L) ka third, highlighted editable column add kiya. Yeh Planner ke Petrol Price se 2-way sync rehta hai. Distance aur total fuel expense se mileage automatic calculate hoti hai. Purane saved trips, UI sections aur local storage keys same hain.
