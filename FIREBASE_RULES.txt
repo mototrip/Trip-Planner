@@ -45,7 +45,7 @@ service cloud.firestore {
     allow delete: if loggedIn() && (request.auth.uid == userId ||
      get(/databases/$(database)/documents/sharedRides/$(rideId)).data.ownerUid == request.auth.uid);
    }
-   // V7.6: Group packing board. All verified joined members can view and add items.
+   // V7.7: Group packing board. All verified joined members can view and add items.
    // Each member can update ONLY their own packed checklist, never another rider's status.
    match /packingBoard/{boardId} {
     function validPackingBoard(d) {

@@ -1,0 +1,18 @@
+MotoTrip V7.7 — Group Packing Cloud Sync Fix
+
+ISSUE: Screenshot mein Group packing checklist ki red warning hai kyunki Firebase project par group packing ke /packing aur /packingBoard rules abhi active nahi hain (ya app logged-in user verified member nahi hai).
+
+REQUIRED FIREBASE STEP (APP ZIP ALONE CANNOT CHANGE CLOUD RULES):
+1. Open https://console.firebase.google.com/project/mototrip-13b38/firestore/rules
+2. Backup existing rules. Firebase Rules editor ke andar click karke Ctrl+A.
+3. Is ZIP mein FIREBASE_RULES.txt ka COMPLETE content paste karo.
+4. Publish. Firebase rules update ko apply hone mein roughly 1 minute lag sakta hai.
+5. MotoTrip mein Gear > Retry sync. Login usi identity se ho jisne Shared Ride join kiya hai.
+
+FIXES:
+- Firestore permissions issue ke waqt misleading disabled table nahi dikhayegi. 'Retry sync' plus personal offline packing checklist usable rahegi.
+- Group cloud connected hone par original shared columns aur per-rider ticks/added group items wapas active.
+- Profile aur Shared Ride ledger name same rider ke do aliases hone par duplicate column avoid.
+- App features, account data, saved trips, bills and group data untouched.
+
+IMPORTANT: Test 2 phones with separate joined accounts after publishing. Do not change to allow read, write: if true.

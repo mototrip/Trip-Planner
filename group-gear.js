@@ -1,4 +1,4 @@
-/* MotoTrip V7.6: per-rider collaborative packing board.
+/* MotoTrip V7.7: per-rider collaborative packing board with offline fallback.
  * Copyright (c) 2026 Satish Kumar Gupta.
  * Each joined member writes only their own packing document. The shared list of
  * custom gear is separate so concurrent checked items cannot overwrite each other.
@@ -13,16 +13,22 @@
  const create=(tag,cls,text)=>{const el=document.createElement(tag);if(cls)el.className=cls;if(text!==undefined)el.textContent=text;return el;};
  let ctx=null,rideId='',uid='',myName='',custom=[],packing=new Map(),unsubs=[],sequence=0;
  let boardReady=false,packingReady=false,boardFromCache=false,packingFromCache=false,pending=false,cloudError='';
+ let lastFallback=false;
  const ownRecord=()=>packing.get(uid)||{packed:[]};
  const clean=s=>String(s||'').trim().slice(0,80);
  const allItems=()=>[...defaults,...custom.filter(x=>!defaults.some(y=>y.toLowerCase()===x.toLowerCase()))];
  const online=()=>navigator.onLine!==false;
  function alertStatus(text,isError=false){status.textContent=text;status.classList.toggle('error',isError);$('mt76-retry-sync').hidden=!isError;}
  function displayError(error){
-  cloudError=String(error?.message||error||'Could not synchronize group checklist.');
-  if(error?.code==='permission-denied'||/insufficient permissions/i.test(cloudError))
-   cloudError='Group checklist needs the updated Firestore Rules. Ask the owner to publish V7.6 FIREBASE_RULES.txt.';
-  alertStatus(cloudError,true);
+  const raw=String(error?.message||error||'Group sync unavailable.');
+  const code=String(error?.code||'');
+  if(code==='permission-denied'||/insufficient permissions/i.test(raw))
+   cloudError='Cloud sync blocked by Firestore permissions. Publish the V7.7 Rules in Firebase, then tap Retry sync. Your personal checklist still works below.';
+  else if(/not a member|membership/i.test(raw))
+   cloudError='This account is not verified in the Shared Ride. Log in with the same account or rejoin using the invite link.';
+  else
+   cloudError='Group sync unavailable: '+raw.slice(0,150)+'. Check your internet, then tap Retry sync.';
+  render();
  }
  function showPersonal(on){
   for(const id of ['gear-checklist','custom-gear','gear-more']){
@@ -33,14 +39,16 @@
  function stop(){
   ++sequence;for(const unsub of unsubs.splice(0))try{unsub();}catch(_){/* unsubscribe */}
   ctx=null;rideId='';uid='';myName='';custom=[];packing.clear();boardReady=false;packingReady=false;
-  pending=false;cloudError='';showPersonal(true);
+  pending=false;cloudError='';lastFallback=false;showPersonal(true);
   if(typeof renderGear==='function')renderGear();
  }
  function members(){
   const group=typeof state!=='undefined'&&state.split?state.split:{};
   const ledger=Array.isArray(group.members)?group.members.map(clean).filter(Boolean):[];
   const chosen=clean(myName||window.motoTripRiderProfileName?.()||'Me');
-  const names=[chosen,...ledger.filter(n=>n.toLowerCase()!==chosen.toLowerCase())];
+  // Ledger names can contain the same person under a newer Profile name.
+  const aliases=new Set([chosen.toLowerCase(),clean(window.motoTripRiderProfileName?.()).toLowerCase()].filter(Boolean));
+  const names=[chosen,...ledger.filter(n=>!aliases.has(n.toLowerCase()))];
   return [...new Set(names)].slice(0,100);
  }
  function packingForName(name){
@@ -50,6 +58,20 @@
  }
  function render(){
   if(!ctx||root.hidden)return;
+  const fallback=Boolean(cloudError);
+  root.classList.toggle('mt77-sync-blocked',fallback);
+  if(fallback){
+   // The cloud is denied, not the rider's own local checklist. Keep it usable.
+   for(const id of ['gear-checklist','custom-gear','gear-more']){$(id).hidden=false;}
+   if(!lastFallback&&typeof renderGear==='function')renderGear();
+   lastFallback=true;
+   alertStatus(cloudError,true);
+   return;
+  }
+  if(lastFallback){
+   for(const id of ['gear-checklist','custom-gear','gear-more']){$(id).hidden=true;}
+   lastFallback=false;
+  }
   const names=members(),items=allItems(),mine=new Set(ownRecord().packed||[]);
   table.replaceChildren();
   const thead=create('thead'),head=create('tr');head.append(create('th','', 'Item'));

@@ -1179,3 +1179,17 @@ html[data-theme=dark] #gear .mt76-board-table th.mt76-me{background:#26615a;colo
 
 #gear #mt76-retry-sync{display:inline-block;width:auto!important;min-height:31px!important;margin:4px 0 8px!important;padding:5px 10px!important;font-size:11px!important}
 #gear #mt76-retry-sync[hidden]{display:none!important}
+
+
+/* MotoTrip V7.7 — clean sync-error fallback and mobile packing alignment */
+#gear .mt76-group-packing.mt77-sync-blocked{border-color:#eac8a8;background:var(--panel);padding:10px 12px;margin-bottom:8px}
+#gear .mt76-group-packing.mt77-sync-blocked .mt76-head{margin:0 0 5px}
+#gear .mt76-group-packing.mt77-sync-blocked .mt76-head small{display:none}
+#gear .mt76-group-packing.mt77-sync-blocked .mt76-board-scroll,
+#gear .mt76-group-packing.mt77-sync-blocked #mt76-add-gear,
+#gear .mt76-group-packing.mt77-sync-blocked .mt76-foot{display:none!important}
+#gear .mt76-group-packing.mt77-sync-blocked .mt76-board-status{font-size:12px;line-height:1.45;padding:5px 0;margin:0 0 4px;color:#a33c21}
+#gear .mt76-group-packing.mt77-sync-blocked #mt76-retry-sync{font-size:12px!important;min-height:34px!important;margin:5px 0 0!important}
+#gear .gear-checklist:not([hidden]){margin-top:8px}
+@media(max-width:440px){#gear .mt76-head strong{font-size:13px}#gear .mt76-head small{font-size:10px}#gear .mt76-board-table th,#gear .mt76-board-table td{font-size:11px}}
+html[data-theme=dark] #gear .mt76-group-packing.mt77-sync-blocked .mt76-board-status{color:#ffc5a4}
