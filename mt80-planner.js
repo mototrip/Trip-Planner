@@ -34,9 +34,9 @@
     if(rendering)return;
     rendering=true;
     try{
-      const d=read(), hasValid=originalForm.checkValidity();
-      const c=hasValid?calc(d):{km:0,total:0,fuel:0,stay:0,food:0,toll:0,other:0};
-      const km=hasValid&&Number.isFinite(c.km)?c.km:Math.max(0,Number(d.distance)||0)*(d.round?2:1);
+      const d=read(), c=calc(d);
+      // Hotel nights and food days are optional for the live estimate.
+      const km=c.km;
       if(document.activeElement!==quick.distance)quick.distance.value=formatNum(km);
       for(const name of ['mileage','price']) if(document.activeElement!==quick[name]) quick[name].value=field(name).value;
       el('mt80-route').textContent=(String(d.from||'Starting point').trim()||'Starting point')+' → '+(String(d.to||'Destination').trim()||'Destination');

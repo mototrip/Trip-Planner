@@ -55,21 +55,43 @@ function persist(){try{localStorage.setItem(key,JSON.stringify(state));return tr
 const money=n=>new Intl.NumberFormat('en-IN',{style:'currency',currency:'INR',maximumFractionDigits:0}).format(n);
 function read(){const d=Object.fromEntries([...new FormData(form)].map(([k,v])=>[k,v]));const roundField=form.elements.namedItem('round'),fuelField=form.elements.namedItem('includeFuel');d.round=roundField&&roundField.type==='hidden'?String(roundField.value)!=='false':!!roundField?.checked;d.includeFuel=fuelField&&fuelField.type==='hidden'?String(fuelField.value)!=='false':(fuelField?!!fuelField.checked:true);d.stops=Array.isArray(state.routeStops)?state.routeStops.map(s=>({name:String(s.name||'').slice(0,180),lat:Number.isFinite(Number(s.lat))&&s.lat!==null?Number(s.lat):null,lon:Number.isFinite(Number(s.lon))&&s.lon!==null?Number(s.lon):null})).filter(s=>s.name):[{name:d.to,lat:null,lon:null}];return d;}
 function fill(d){form.elements.nights.value=d?.nights??0;for(const k of ["departDate","departTime","endDate","endTime"])form.elements[k].value="";form.elements.toll.value="0";for(const k of ['from','to'])for(const suffix of ['Lat','Lon','District']){const e=form.elements[k+suffix];if(e)e.value="";}for(const [k,v] of Object.entries(d||{})){const el=form.elements.namedItem(k);if(el){if(el.type==='checkbox')el.checked=!!v;else el.value=v;}}if(form.elements.includeFuel&&form.elements.includeFuel.type==='hidden')form.elements.includeFuel.value=d?.includeFuel===false?'false':'true';if(form.elements.round&&form.elements.round.type==='hidden')form.elements.round.value=d?.round===false?'false':'true';if(window.restoreGeo)window.restoreGeo(d||{});const incoming=Array.isArray(d?.stops)?d.stops:[];state.routeStops=incoming.length?incoming.filter(s=>s&&typeof s.name==='string'&&s.name.trim()).map(s=>({name:s.name.trim().slice(0,180),lat:typeof s.lat==='number'&&Number.isFinite(s.lat)?s.lat:null,lon:typeof s.lon==='number'&&Number.isFinite(s.lon)?s.lon:null})).slice(0,40):[{name:form.elements.to.value.trim()||'Manali',lat:null,lon:null}];if(!state.routeStops.length)state.routeStops=[{name:form.elements.to.value.trim()||'Manali',lat:null,lon:null}];form.elements.to.value=state.routeStops[state.routeStops.length-1].name;if(window.refreshRoute)window.refreshRoute();}
-function calc(d){const km=Number(d.distance)*(d.round?2:1),litres=km/Number(d.mileage),includeFuel=d.includeFuel!==false&&d.includeFuel!=='false',fuel=includeFuel?litres*Number(d.price):0,stay=Number(d.nights??Math.max(0,Number(d.days)-1))*Number(d.hotel),food=Number(d.days)*Number(d.food),other=Number(d.extra),toll=Number(d.toll||0);return {km,litres,fuel,stay,food,other,toll,total:fuel+stay+food+other+toll,includeFuel};}
+// Show each estimate independently, even when another form field is incomplete.
+// Full validity checks are still performed by the form when saving a trip.
+function calc(d){
+ const amount=value=>{const n=Number(value);return Number.isFinite(n)&&n>0?n:0;};
+ const oneWay=amount(d.distance), mileage=amount(d.mileage), price=amount(d.price);
+ const km=oneWay*(d.round?2:1), litres=mileage>0?km/mileage:0;
+ const includeFuel=d.includeFuel!==false&&d.includeFuel!=='false';
+ const fuel=includeFuel?litres*price:0;
+ const nights=d.nights==null?Math.max(0,amount(d.days)-1):amount(d.nights);
+ const stay=nights*amount(d.hotel), food=amount(d.days)*amount(d.food);
+ const other=amount(d.extra),toll=amount(d.toll);
+ return {km,litres,fuel,stay,food,other,toll,total:fuel+stay+food+other+toll,includeFuel};
+}
 function node(tag,text,cls){const e=document.createElement(tag);e.textContent=text;if(cls)e.className=cls;return e;}
 function timing(d){if(!d.departDate||!d.departTime||!d.endDate||!d.endTime)return null;const a=new Date(d.departDate+"T"+d.departTime),b=new Date(d.endDate+"T"+d.endTime);return (b-a)/60000;}
 function timingLabel(d){const m=timing(d);return m===null?"":m<0?"End must be after departure":`${Math.floor(m/1440)} days ${Math.floor(m%1440/60)} hours ${Math.floor(m%60)} min`;}
-function update(save=true){const d=read();if(save){state.draft=d;persist();} $('map').href=window.motoGoogleDirections?window.motoGoogleDirections(0):'https://www.google.com/maps/dir/?api=1&origin='+encodeURIComponent(d.from)+'&destination='+encodeURIComponent(d.to)+'&travelmode=driving';$('stats').replaceChildren();$('breakdown').replaceChildren();if(!form.checkValidity()){
- $('total').textContent=money(0);$('tank-range').textContent='';
- for(const [label,value] of [['Distance','0 km'],['Fuel','0.0 L'],['Petrol',money(0)]]){
+function update(save=true){
+ const d=read();
+ if(save){state.draft=d;persist();}
+ $('map').href=window.motoGoogleDirections?window.motoGoogleDirections(0):'https://www.google.com/maps/dir/?api=1&origin='+encodeURIComponent(d.from)+'&destination='+encodeURIComponent(d.to)+'&travelmode=driving';
+ $('stats').replaceChildren();$('breakdown').replaceChildren();
+ // Estimate values are independent: missing hotel nights/food days must not hide fuel.
+ // Form validation is enforced when the user presses Save trip, not while previewing.
+ const c=calc(d);
+ const mileage=Number(d.mileage);
+ $('tank-range').textContent=Number.isFinite(mileage)&&mileage>0?'Estimated full-tank range: '+Math.round(profile().tank*mileage)+' km (theoretical, no reserve allowance)':'';
+ $('total').textContent=money(c.total);
+ for(const [label,value] of [['Distance',c.km+' km'],['Fuel',c.litres.toFixed(1)+' L'],['Petrol',money(c.fuel)]]){
   const el=node('div','','stat');el.append(node('strong',value),node('small',label));$('stats').append(el);
  }
- for(const label of ['Petrol','Hotel','Food','Toll','Other']){
-  const el=node('div','','line');el.append(node('span',label),node('strong',money(0)));$('breakdown').append(el);
+ for(const [label,value] of [['Petrol',c.fuel],['Hotel',c.stay],['Food',c.food],['Toll',c.toll],['Other',c.other]]){
+  const el=node('div','','line');el.append(node('span',label),node('strong',money(value)));$('breakdown').append(el);
  }
- const totalRow=node('div','','line breakdown-total');totalRow.append(node('strong','Total Estimated Budget'),node('strong',money(0)));$('breakdown').append(totalRow);
- return;
-}const c=calc(d);$('tank-range').textContent='Estimated full-tank range: '+Math.round(profile().tank*Number(d.mileage))+' km (theoretical, no reserve allowance)';$('total').textContent=money(c.total);for(const [label,value] of [['Distance',c.km+' km'],['Fuel',c.litres.toFixed(1)+' L'],['Petrol',money(c.fuel)]]){const el=node('div','','stat');el.append(node('strong',value),node('small',label));$('stats').append(el);}for(const [label,value] of [['Petrol',c.fuel],['Hotel',c.stay],['Food',c.food],['Toll',c.toll],['Other',c.other]]){const el=node('div','','line');el.append(node('span',label),node('strong',money(value)));$('breakdown').append(el);}const totalRow=node('div','','line breakdown-total');totalRow.append(node('strong','Total Estimated Budget'),node('strong',money(c.total)));$('breakdown').append(totalRow);}
+ const totalRow=node('div','','line breakdown-total');
+ totalRow.append(node('strong','Total Estimated Budget'),node('strong',money(c.total)));
+ $('breakdown').append(totalRow);
+}
 function tab(id){for(const s of document.querySelectorAll('section'))s.hidden=s.id!==id;for(const b of document.querySelectorAll('nav button'))b.classList.toggle('active',b.dataset.tab===id);if(id==='route'&&window.onRouteTabOpen)window.onRouteTabOpen();}
 function renderGear(){$('checklist').replaceChildren();for(const g of allGear()){const label=node('label','','check'),input=document.createElement('input');input.type='checkbox';input.checked=state.packed.includes(g);input.onchange=()=>{state.packed=input.checked?[...state.packed,g]:state.packed.filter(x=>x!==g);persist();renderGear();};label.append(input,document.createTextNode(g));if(!gear.includes(g)){const remove=node("button","Remove");remove.type="button";remove.onclick=e=>{e.preventDefault();state.customGear=allGear().filter(x=>!gear.includes(x)&&x!==g);state.packed=state.packed.filter(x=>x!==g);persist();renderGear();};label.append(remove);}$('checklist').append(label);}$('progress').max=allGear().length;$('progress').value=state.packed.length;$('count').textContent=state.packed.length+' / '+allGear().length+' packed';}
 $('custom-gear').onsubmit=e=>{e.preventDefault();const g=$('gear-name').value.trim();if(!g||allGear().some(x=>x.toLowerCase()===g.toLowerCase()))return;state.customGear=[...(state.customGear||[]),g];persist();$('gear-name').value='';renderGear();};
@@ -80,7 +102,6 @@ renderTheme();renderBike();fill(state.draft);update(false);renderGear();renderTr
 // V2.9: read-only budget comparison for the current planner and active expense group.
 function renderBudget(){
  const root=$('budget-actual'); if(!root)return; root.replaceChildren();
- if(!form.checkValidity()){root.append(node('p','Enter valid trip details to compare your budget.'));return;}
  const c=calc(read()), g=typeof group==='function'?group():null;
  const actual=[0,0,0,0,0], estimated=[c.stay,c.food,c.fuel,c.toll,c.other], names=['Hotel','Food','Fuel','Toll','Other'];
  if(g)for(const e of g.expenses){if(!Number.isSafeInteger(e.amount)||e.amount<=0||!g.members.includes(e.payer)||!Array.isArray(e.people)||!e.people.some(p=>g.members.includes(p)))continue;const n=String(e.name).toLowerCase();const i=/toll|fastag/.test(n)?3:/hotel|stay|room|hostel|homestay|lodg|accommodation/.test(n)?0:/food|meal|breakfast|lunch|dinner|snack|restaurant|cafe|tea|coffee/.test(n)?1:/fuel|petrol|diesel|gasoline/.test(n)?2:4;actual[i]+=e.amount/100;}

@@ -1,0 +1,10 @@
+MotoTrip V9.5 — Independent expense estimates
+
+FIX: Fuel estimate ab Hotel nights aur Food days se bilkul independent hai.
+- Petrol cost = Planned Distance / Bike Mileage x Petrol Price (Include petrol cost ON hone par).
+- Hotel nights empty/0 hone par bhi Fuel show hoga.
+- Food days empty/0 hone par bhi Fuel show hoga.
+- Stay, Food, Toll aur Others independently update honge.
+- Return journey selected hone par distance/fuel round-trip ke according calculate honge.
+- Save trip ki required-field validation unchanged hai.
+- Existing saved trips, layout, ad images, and Firebase code untouched.
