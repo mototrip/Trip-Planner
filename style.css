@@ -1435,3 +1435,47 @@ html[data-theme=dark] #route .mt86-note-card{background:linear-gradient(180deg,#
   #route .mt86-route-tools .route-map-options{flex-direction:column!important}
   #route .mt86-route-tools .route-map-options>*{flex:0 0 auto!important;width:100%!important}
 }
+
+
+/* MotoTrip V8.8 — attractive Rider Profile redesign (visual only) */
+#mt-account-overlay .mt-account-dialog{max-width:620px!important;padding:20px!important;border-radius:28px!important;border:1px solid rgba(144,190,235,.42)!important;background:
+  radial-gradient(circle at top right,rgba(118,242,204,.18),transparent 33%),
+  radial-gradient(circle at top left,rgba(98,181,255,.16),transparent 28%),
+  linear-gradient(180deg,#102047 0%,#132955 45%,#0e1c3a 100%)!important;box-shadow:0 30px 90px rgba(2,10,35,.72), inset 0 1px 0 rgba(255,255,255,.06)!important}
+#mt-account-overlay .mt-account-top{margin-bottom:14px!important;padding-bottom:12px!important;border-bottom:1px solid rgba(146,180,219,.18)}
+#mt-account-overlay .mt-account-symbol{display:grid;place-items:center;width:44px;height:44px;border-radius:14px;background:linear-gradient(145deg,#79e5ff,#8bffbd)!important;color:#15395f!important;border:0!important;box-shadow:0 10px 18px rgba(86,238,207,.14)}
+#mt-account-overlay .mt-account-kicker{font-size:11px!important;color:#bfe9ff!important;letter-spacing:.14em!important}
+#mt-account-overlay .mt-account-x{width:40px!important;height:40px!important;border-radius:12px!important;background:rgba(255,255,255,.06)!important;border:1px solid rgba(201,220,248,.28)!important;color:#fff!important}
+#mt-account-overlay .mt-account-dialog h2{font-size:clamp(28px,6vw,35px)!important;line-height:1.02!important;margin:6px 0 8px!important}
+#mt-account-overlay .mt-account-intro{font-size:14px!important;line-height:1.6!important;color:#d6e5ff!important;margin-bottom:16px!important}
+#mt-account-overlay .mt-account-benefits{gap:10px!important;margin-bottom:18px!important}
+#mt-account-overlay .mt-account-benefits span{padding:9px 12px!important;border-radius:999px!important;background:rgba(255,255,255,.08)!important;border:1px solid rgba(162,204,233,.22)!important;color:#f2f8ff!important;font-size:12px!important;font-weight:750!important}
+#mt-account-overlay .mt-account-panel{padding:14px!important;border-radius:22px!important;background:linear-gradient(180deg,rgba(255,255,255,.055),rgba(255,255,255,.03))!important;border:1px solid rgba(175,205,236,.18)!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.04)!important}
+#mt-account-overlay .mt-account-status{display:flex!important;align-items:center!important;gap:8px!important;padding:11px 14px!important;border-radius:14px!important;background:linear-gradient(90deg,rgba(25,89,101,.62),rgba(30,72,88,.42))!important;border:1px solid rgba(74,192,164,.35)!important;color:#adffe0!important;font-weight:700!important;margin-bottom:12px!important}
+#mt-account-overlay .mt-account-dialog label{font-size:11px!important;letter-spacing:.08em!important;text-transform:uppercase!important;color:#cae0ff!important;font-weight:800!important;margin:10px 0 0!important}
+#mt-account-overlay .mt-account-dialog input,
+#mt-account-overlay .mt-account-dialog select{min-height:52px!important;margin-top:7px!important;padding:13px 15px!important;border-radius:15px!important;border:1px solid #b8cceb66!important;background:linear-gradient(180deg,#f5fbff,#ebf6ff)!important;color:#17304d!important;font-size:16px!important;font-weight:700!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.9)}
+#mt-account-overlay .mt-account-dialog input::placeholder{color:#6f87a2!important;font-weight:600}
+#mt-account-overlay .mt-account-fields{gap:12px!important;margin-top:4px!important}
+#mt-account-overlay .mt-emergency-box{margin-top:14px!important;padding:14px!important;border-radius:20px!important;background:linear-gradient(180deg,rgba(33,104,118,.38),rgba(20,61,78,.24))!important;border:1px solid rgba(111,183,193,.30)!important;box-shadow:0 10px 20px rgba(6,17,38,.08)}
+#mt-account-overlay .mt-emergency-head{margin-bottom:8px!important;padding-bottom:8px!important;border-bottom:1px dashed rgba(171,224,234,.24)}
+#mt-account-overlay .mt-emergency-head strong{font-size:15px!important;color:#f8feff!important}
+#mt-account-overlay .mt-emergency-head span{font-size:10px!important;color:#bcffe7!important;font-weight:800!important;letter-spacing:.06em!important;text-transform:uppercase!important}
+#mt-account-overlay .mt-emergency-call{border-radius:14px!important;background:linear-gradient(135deg,#0f8e79,#1ca06e)!important;border:1px solid rgba(152,255,215,.28)!important;box-shadow:0 12px 18px rgba(18,150,116,.16)!important}
+#mt-account-overlay .mt-profile-gate-note{margin:12px 0 8px!important;border-radius:14px!important;background:rgba(167,252,220,.11)!important;border:1px solid rgba(138,234,196,.30)!important;color:#e6fff4!important}
+#mt-account-overlay .mt-account-dialog .mt-account-primary,
+#mt-account-overlay .mt-account-dialog .mt-account-secondary,
+#mt-account-overlay .mt-account-dialog .mt-account-danger{border-radius:14px!important;min-height:49px!important;font-size:14px!important;font-weight:850!important}
+#mt-account-overlay .mt-account-dialog .mt-account-primary{background:linear-gradient(135deg,#bafc6d,#72ecd8)!important;color:#102d31!important;border:1px solid #abef99!important;box-shadow:0 14px 22px rgba(117,241,194,.14)!important}
+#mt-account-overlay .mt-account-dialog .mt-account-secondary{background:linear-gradient(180deg,#325786,#26486d)!important;border:1px solid rgba(141,179,220,.32)!important;color:#f4f9ff!important}
+#mt-account-overlay .mt-account-dialog .mt-account-danger{background:linear-gradient(180deg,#6c2f4d,#53263b)!important;border:1px solid rgba(238,145,175,.30)!important;color:#ffe5ec!important}
+#mt-account-overlay .mt-account-dialog .mt-account-text-btn{font-size:12px!important;color:#b9efff!important;text-decoration:underline!important;text-underline-offset:3px!important}
+#mt-account-overlay .mt-account-actions{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px!important;margin-top:15px!important;padding-top:14px!important;border-top:1px solid rgba(132,159,201,.24)!important}
+#mt-account-overlay .mt-account-actions > .mt-account-secondary,
+#mt-account-overlay .mt-account-actions > .mt-account-danger{margin:0!important;width:100%!important}
+#mt-account-overlay .mt-account-actions > .mt-account-text-btn{grid-column:1/-1;justify-self:center;margin-top:2px!important}
+#mt-account-overlay .mt-account-message{margin-top:14px!important;padding:12px 13px!important;border-radius:14px!important;background:rgba(255,255,255,.05)!important;border:1px solid rgba(164,190,224,.18)!important;color:#b8f7dd!important;min-height:18px!important}
+#mt-account-overlay .mt-account-message[data-bad=true]{background:rgba(100,42,58,.38)!important;border-color:rgba(233,148,173,.25)!important;color:#ffd6dd!important}
+#mt-account-overlay .mt-account-links{margin-top:16px!important;padding-top:10px!important;border-top:1px solid rgba(134,160,197,.16)!important;color:#dceaf9!important}
+#mt-account-overlay .mt-account-links a{color:#d6f4ff!important}
+@media(max-width:640px){#mt-account-overlay .mt-account-dialog{max-width:100%!important;padding:16px!important;border-radius:22px!important}#mt-account-overlay .mt-account-fields,#mt-account-overlay .mt-account-actions{grid-template-columns:1fr!important}}

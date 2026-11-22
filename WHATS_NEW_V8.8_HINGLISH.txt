@@ -1,0 +1,4 @@
+MotoTrip V8.8
+- Rider Profile popup ko visually redesign kiya gaya.
+- Form fields, emergency card, buttons aur actions ko more attractive banaya gaya.
+- Koi profile logic ya storage behavior change nahi kiya gaya.
