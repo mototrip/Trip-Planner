@@ -1,0 +1,9 @@
+MotoTrip V9.15 — Four helper text lines removed.
+
+Removed:
+- Riding overnight? Count only nights spent in a hotel.
+- Estimated full-tank range: xxx km (theoretical, no reserve allowance).
+- Choose a city suggestion to avoid same-name mistakes. You can still type a place manually.
+- Start typing to see suggestions · Hotel, Food, Petrol, Toll…
+
+Not changed: nights/food/toll inputs, fuel and total calculations, route city autocomplete, expense name autocomplete, trip dates, Firebase, account, data storage, or UI layout. Route status remains available only for action feedback/errors.

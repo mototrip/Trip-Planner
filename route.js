@@ -18,7 +18,7 @@ function normalizeStops(){
  state.routeStops=state.routeStops.filter(s=>s&&typeof s.name==='string').map(s=>({name:s.name.trim().slice(0,180),lat:coord(s)?.lat??null,lon:coord(s)?.lon??null})).slice(0,40);
  if(!state.routeStops.length)state.routeStops=[{name:destination.value.trim()||'Manali',lat:null,lon:null}];
 }
-function setStatus(s){$('route-status').textContent=s;}
+function setStatus(s){const el=$('route-status');el.textContent=s;el.hidden=!s;}
 function commit(redraw=true){
  normalizeStops();const last=state.routeStops.at(-1);
  destination.value=last.name;

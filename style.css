@@ -1842,3 +1842,6 @@ html[data-theme=dark] #plan .mt913-compact-date-popover .mt913-date-x{background
 /* On first open, match the supplied screenshot: exactly two date fields.
    Clear / Done become visible only if a date has actually been chosen. */
 #plan .mt913-compact-date-popover:not(.mt913-has-dates) .mt913-date-tools{display:none!important;}
+
+/* V9.15: empty Route status occupies no space; show only actual feedback/errors. */
+#route #route-status[hidden]{display:none!important}
