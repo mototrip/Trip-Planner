@@ -1304,7 +1304,7 @@ html body #plan .mt80-trip-card .mt80-trip-budget small{color:#172c40!important;
 #plan .mt80-rider-stepper{display:flex;gap:7px;align-items:center;justify-content:space-between;width:128px;flex-shrink:0;color:#0e263d;}
 #plan .mt80-rider-stepper>button{border-radius:50%!important;width:33px!important;height:33px!important;min-height:33px!important;padding:0!important;background:#f6fafb!important;color:#17334c!important;border:1px solid #c7dce4!important;font-size:24px!important;line-height:1!important;box-shadow:none!important;}
 #plan .mt80-rider-stepper output{font-size:17px;color:#11213b;font-weight:780;min-width:22px;text-align:center;}
-#plan .mt80-costs{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:0;background:linear-gradient(105deg,#effaf3,#e1f9eb,#edfaf2);border-radius:13px;margin-top:9px;padding:9px 2px;min-width:0;}
+#plan .mt80-costs{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:0;background:linear-gradient(105deg,#effaf3,#e1f9eb,#edfaf2);border-radius:13px;margin-top:9px;padding:9px 2px;min-width:0;}
 #plan .mt80-costs>div{padding:2px 4px;border-right:1px solid #c5e4d5;min-width:0;text-align:center;}
 #plan .mt80-costs>div:last-child{border-right:none;}
 #plan .mt80-costs span{display:block;font-size:clamp(10px,2.75vw,13px);color:#10213a;font-weight:550;}
@@ -1318,3 +1318,26 @@ html body #plan .mt80-trip-card .mt80-trip-budget small{color:#172c40!important;
 .mt81-choice-row{display:flex;flex-wrap:wrap;gap:10px;margin:8px 0 12px}.mt81-choice-row .check{margin:0;padding:9px 12px!important;border:1px solid var(--edge);border-radius:12px;background:var(--sub)}
 .mt81-cost-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.mt81-cost-grid>label{min-width:0}
 @media (max-width:640px){.mt81-cost-grid{grid-template-columns:1fr}}
+
+
+/* MotoTrip V8.2 — top quick toggles + cleaner lower planner */
+.mt82-quick-toggles{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;margin:8px 0 0}.mt82-mini-check{margin:0!important;padding:4px 8px!important;border:1px solid var(--edge)!important;border-radius:999px!important;background:var(--panel)!important;font-size:11px!important;line-height:1.2}.mt82-mini-check input{transform:scale(.95)}
+#planner .mt82-journey-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}.mt82-journey-grid label{grid-column:auto!important}
+@media(max-width:520px){#plan .mt80-costs{grid-template-columns:repeat(5,minmax(0,1fr));}.mt82-mini-check{font-size:10px!important;padding:4px 7px!important}}
+
+
+/* V8.3: miniature right-aligned trip checkboxes, smaller planner section headings. */
+#plan .mt82-quick-toggles{display:flex!important;justify-content:flex-end!important;align-items:center!important;flex-wrap:nowrap!important;gap:6px!important;margin:5px 2px 0!important;padding:0!important;min-height:22px!important;}
+#plan .mt82-mini-check{display:inline-flex!important;align-items:center!important;justify-content:center!important;white-space:nowrap!important;gap:4px!important;flex:0 0 auto!important;min-height:21px!important;margin:0!important;padding:2px 6px!important;border-radius:6px!important;background:transparent!important;border:1px solid transparent!important;color:var(--muted)!important;font-size:clamp(9px,2.25vw,10px)!important;line-height:1.1!important;font-weight:600!important;box-shadow:none!important;}
+#plan .mt82-mini-check input[type=checkbox]{width:12px!important;height:12px!important;min-width:12px!important;min-height:12px!important;flex:0 0 12px!important;margin:0!important;padding:0!important;transform:none!important;accent-color:#049c82!important;}
+#plan .mt82-mini-check:focus-within{outline:1px solid #099f87;outline-offset:1px;}
+#plan #planner .mt61-plan-heading>h2,#plan #planner>h2{font-size:16px!important;line-height:1.17!important;letter-spacing:-.03em!important;font-weight:750!important;margin-top:5px!important;margin-bottom:4px!important;}
+#plan #planner .mt61-plan-heading{margin-bottom:2px!important;}
+#plan #planner .section-kicker{margin-top:10px!important;margin-bottom:4px!important;}
+#plan #planner .intro{margin-top:1px!important;margin-bottom:6px!important;}
+@media(max-width:360px){#plan .mt82-quick-toggles{gap:2px!important;margin-right:0!important}#plan .mt82-mini-check{gap:3px!important;padding:2px 3px!important;font-size:9px!important}#plan #planner .mt61-plan-heading>h2,#plan #planner>h2{font-size:15px!important}}
+
+/* Keep tiny tick labels legible on both themes. */
+#plan .mt82-mini-check{color:#cfe3f0!important;}
+html[data-theme=light] #plan .mt82-mini-check{color:#315269!important;}
+html[data-theme=dark] #plan .mt82-mini-check{color:#d9ebf5!important;}

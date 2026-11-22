@@ -1,0 +1,6 @@
+MotoTrip V8.3 — Compact planner heading and mini tick update
+
+- Return journey and Include petrol cost controls now ultra-small and right aligned under five cost boxes.
+- Plan your ride and Fuel & expenses headings are smaller.
+- Existing trip calculations, five expense totals and other screens retained.
+- HTML/CSS design only (no new storage keys or new permissions).
