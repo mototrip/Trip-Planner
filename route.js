@@ -3,7 +3,7 @@
 (()=>{
 'use strict';
 const $=id=>document.getElementById(id);
-const start=form.elements.from, destination=form.elements.to;
+const start=form.elements.from, destination=form.elements.to, tripName=form.elements.name;
 const mapEl=$('route-map'),tiles=$('map-tiles'),markers=$('map-markers'),overlay=$('route-map-overlay');
 let view={lat:22.9,lon:79.1,z:5},pending=null,mode='add',editIndex=-1,drag=null,geocodeAt=0,geoRequest=0;
 const PHOTON='https://photon.komoot.io';
@@ -93,7 +93,8 @@ function stopRow(i,compact=false){
  attachDrag(grip,row,i,compact?$('inline-stop-list'):$('route-stop-list'),compact);return row;
 }
 function syncRouteInputs(){
- const rStart=$('route-start-input'),rEnd=$('route-end-input');
+ const rStart=$('route-start-input'),rEnd=$('route-end-input'),rTrip=$('route-trip-name');
+ if(rTrip&&document.activeElement!==rTrip)rTrip.value=tripName.value;
  if(document.activeElement!==rStart)rStart.value=start.value;
  if(document.activeElement!==rEnd)rEnd.value=destination.value;
 }
@@ -306,6 +307,18 @@ async function useMyLocation(which){
   const label=err.code===1?'Location permission denied. Enable location in phone settings or type your city.':err.code===3?'GPS timed out. Try outdoors or search by city.':'Could not find GPS location. Search for a city instead.';
   setStatus(label);
  },{enableHighAccuracy:true,timeout:14000,maximumAge:30000});
+}
+
+const routeTrip=$('route-trip-name');
+if(routeTrip){
+ routeTrip.addEventListener('input',e=>{
+  tripName.value=e.target.value;
+  tripName.dispatchEvent(new Event('input',{bubbles:true}));
+  state.draft=read();persist();update(false);
+ });
+ tripName.addEventListener('input',()=>{
+  if(document.activeElement!==routeTrip)routeTrip.value=tripName.value;
+ });
 }
 setupPlaceSuggestions($('route-start-input'),'start');
 setupPlaceSuggestions($('route-end-input'),'end');

@@ -10,7 +10,7 @@ function notice(t){$('notice').textContent=t;}
 try{const raw=localStorage.getItem(key);if(raw)state={...state,...JSON.parse(raw)};}catch(e){notice('Storage could not be read.');}
 function bikeName(){return typeof state.bikeName==="string"&&state.bikeName.trim()?state.bikeName.trim().slice(0,80):"KTM Duke 250";}
 function profile(){const b=state.bikeProfile||{};return {cc:Number(b.cc)>0?Number(b.cc):250,tank:Number(b.tank)>0?Number(b.tank):13.5,mileage:Number(b.mileage)>0?Number(b.mileage):30};}
-function renderBike(){ $("bike-title").textContent=bikeName().toUpperCase()+" · TRIP ESTIMATE";const b=profile();$('bike-details').textContent=`${b.cc} cc · ${b.mileage} km/L · ${b.tank} L tank`;}
+function renderBike(){ $("bike-title").textContent="TRAVELING OBSESSION";const b=profile();$('bike-details').textContent=`${b.cc} cc · ${b.mileage} km/L · ${b.tank} L tank`;}
 function renderTheme(){const light=state.theme==='light';document.documentElement.dataset.theme=light?'light':'dark';const b=$('theme-toggle');const label=light?'Switch to dark mode':'Switch to light mode';b.textContent=light?'☾':'☀';b.setAttribute('aria-label',label);b.title=label;}
 $('theme-toggle').onclick=()=>{state.theme=state.theme==='light'?'dark':'light';persist();renderTheme();};
 function dashboard(){const totals=state.trips.reduce((a,t)=>{const c=calc(t.data);a.km+=c.km;a.total+=c.total;return a;},{km:0,total:0});$('dash-trips').textContent=state.trips.length;$('dash-km').textContent=totals.km.toLocaleString('en-IN')+' km';$('dash-budget').textContent=money(totals.total);}

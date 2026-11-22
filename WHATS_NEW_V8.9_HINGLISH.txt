@@ -1,0 +1,4 @@
+MotoTrip V8.9
+- Planner ka Plan your ride block ab Route tab me shift kar diya gaya.
+- Planner me route details ke badle compact note dikhai deti hai.
+- Route tab me naya Trip Basics card add kiya gaya hai with trip name sync.

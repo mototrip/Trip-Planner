@@ -2,11 +2,11 @@
  * Original application © 2026 Satish Kumar Gupta.
  * IMPORTANT: cache cleanup here does not delete trips/expenses in localStorage.
  */
-const CACHE_NAME = 'mototrip-v8.8';
+const CACHE_NAME = 'mototrip-v9.0';
 const PREVIOUS_CACHE_PREFIX = 'mototrip-';
 const APP_SHELL = [
-  './index.html','./app-update.js?v=80','./style.css?v=88',
-  './app.js?v=85','./account.js?v=80','./split.js?v=80','./route.js?v=80','./ui.js?v=80',
+  './index.html','./app-update.js?v=80','./style.css?v=90',
+  './app.js?v=90','./account.js?v=80','./split.js?v=80','./route.js?v=89','./ui.js?v=80',
   './exports.js?v=80','./firebase-config.js?v=80','./qr-code.js?v=80','./shared-ride.js?v=80','./group-gear.js?v=80','./safety.js?v=80','./qr-scanner.js?v=80',
   './report.html','./report.js?v=80','./privacy.html',
   './terms.html','./ownership.html','./manifest.json',

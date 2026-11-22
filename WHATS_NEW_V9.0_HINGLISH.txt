@@ -1,0 +1,8 @@
+MotoTrip V9.0 – Compact Route & Traveling Obsession
+
+- Route tab se no-stop empty message aur extra hint hata diya.
+- Quick tools row UI se hide kiya; core add-stop/route functionality preserve.
+- Search field aur Add stop button har phone width par ek hi row me fit.
+- Planner ki bike header branding: TRAVELING OBSESSION.
+- Mileage Check action aur branding same row me; no intentional layout changes elsewhere.
+- Saved bike details, fuel calculation, login, shared rides, bills and data keys unchanged.
