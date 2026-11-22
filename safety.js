@@ -1,4 +1,4 @@
-/* MotoTrip V7.1 Group Safety — emergency privacy sync + opt-in GPS, last-known location.
+/* MotoTrip V7.4 Group Safety — emergency privacy sync + opt-in GPS, last-known location.
  * © 2026 Satish Kumar Gupta. No location is shared before explicit rider consent.
  * Browser/OS may suspend GPS when PWA is hidden. No service-worker background GPS.
  */
@@ -28,11 +28,14 @@
  let context = null, unsubscribe = null, gpsTimer = null, gpsWatchId = null, gpsActive = false;
  let locationBusy = false, detailsBusy = false, mySafety = null;
  let locationPending = null, trackingEpoch = 0, lastPublishedAt = 0;
- let refreshTimer = null, generation = 0, lastCards = [];
+ let refreshTimer = null, generation = 0, lastCards = [], rosterReady = false;
  let nextEmergencyRetryAt = 0;
  const bloodTypes = new Set(['','A+','A-','B+','B-','AB+','AB-','O+','O-']);
  const clean = (x, max = 80) => String(x || '').trim().slice(0, max);
- const errorText = e => String(e?.message || e || 'Unknown error').slice(0, 200);
+ const errorText = e => {
+  if(e?.code==='permission-denied')return 'Firestore permission denied. Owner: publish full FIREBASE_RULES.txt in Firebase Console → Firestore → Rules. Verify you joined this ride with the same signed-in account.';
+  return String(e?.message || e || 'Unknown error').slice(0, 200);
+ };
  function say(s, bad = false) {status.textContent = s;status.style.color = bad ? '#b42640' : '';}
  function profile() {
   let scope = 'guest';
@@ -81,15 +84,33 @@
   if(needsEmergencyRemoval())Object.assign(patch,{
    emergencyShared:false,blood:'',emergencyName:'',emergencyPhone:''
   });
-  try {
-   await cloudTimeout(c.dbM.updateDoc(ref,patch),'Updating group safety');
-  } catch(e) {
-   // No safety document yet: there is nothing to revoke. A first opt-in creates
-   // the fully validated document without a preliminary network read.
-   if(e?.code!=='not-found')throw e;
+  const createFirstRecord = async () => {
    const fresh=locationFields(infoFields({...blank(c.uid),...patch}));
-   if(!fresh.emergencyShared && !fresh.locationShared){mySafety=null;return;}
-   await cloudTimeout(c.dbM.setDoc(ref,fresh),'Saving group safety');
+   // Opting out of a record that does not exist needs no cloud write.
+   if(!fresh.emergencyShared && !fresh.locationShared){mySafety=null;return false;}
+   await cloudTimeout(c.dbM.setDoc(ref,fresh),'Creating group safety');
+   return true;
+  };
+  if(rosterReady && !mySafety){
+   // First-time sharing is a CREATE, not UPDATE. An update to a missing doc
+   // can be rejected by Firestore even when authenticated create is allowed.
+   if(!(await createFirstRecord()))return;
+  }else{
+   try{
+    await cloudTimeout(c.dbM.updateDoc(ref,patch),'Updating group safety');
+   }catch(e){
+    if(e?.code==='not-found'){
+     if(!(await createFirstRecord()))return;
+    }else if(e?.code==='permission-denied' && !rosterReady){
+     // The list listener may still be starting. Verify existence once so that
+     // first-time sharing can take the create path; do NOT bypass Firebase rules.
+     let probe;
+     try{probe=await cloudTimeout(c.dbM.getDocFromServer(ref),'Checking safety membership');}
+     catch(_){throw e;}
+     if(probe.exists())throw e;
+     if(!(await createFirstRecord()))return;
+    }else{throw e;}
+   }
   }
   if(!validContext() || context!==c)return;
   mySafety={...(mySafety||blank(c.uid)),...patch};
@@ -177,17 +198,19 @@
  }
  function initRoster() {
   if (unsubscribe){unsubscribe();unsubscribe=null;}
+  rosterReady=false;
   const g=++generation;
   try {
    unsubscribe=context.dbM.onSnapshot(listRef(),snap=>{
     if(g!==generation)return;
     const items=snap.docs.map(doc=>doc.data());
+    rosterReady=true;
     lastCards=items;
     mySafety=items.find(d=>d.uid===context.uid)||null;
-    shareInfo.checked=!needsEmergencyRemoval() && Boolean(mySafety?.emergencyShared);
+    if(!detailsBusy)shareInfo.checked=!needsEmergencyRemoval() && Boolean(mySafety?.emergencyShared);
     render(items);
     if(needsEmergencyRemoval() && !detailsBusy && Date.now()>=nextEmergencyRetryAt)void syncPendingEmergencyRemoval();
-   },e=>{if(g!==generation)return;say('Safety cards unavailable: '+errorText(e)+'. Check updated Firestore Rules.',true);});
+   },e=>{if(g!==generation)return;rosterReady=false;say('Safety cards unavailable: '+errorText(e),true);});
   } catch(e){say('Safety setup failed: '+errorText(e),true);}
  }
  // A rider explicitly opts in for this specific account + ride until Stop or Leave.
@@ -376,7 +399,8 @@
   try{
    await writeSafety({name:fields.name,emergencyShared:true,
     blood:fields.blood,emergencyName:fields.emergencyName,emergencyPhone:fields.emergencyPhone});
-   say('✓ Your emergency info is now visible to joined riders.');
+   shareInfo.checked=true;
+   say('✓ Emergency details shared with joined riders.');
   }catch(e){shareInfo.checked=false;say('Could not share emergency info. Nothing was confirmed on Firebase: '+errorText(e),true);}
   finally{detailsBusy=false;shareInfo.disabled=false;}
  }
@@ -392,7 +416,7 @@
   ++generation;
   if(unsubscribe){unsubscribe();unsubscribe=null;}
   stopTimer();
-  context=null;mySafety=null;lastCards=[];
+  context=null;mySafety=null;lastCards=[];rosterReady=false;
   shareInfo.checked=false;
   if(retryEmergencyButton)retryEmergencyButton.hidden=true;
   roster.replaceChildren();

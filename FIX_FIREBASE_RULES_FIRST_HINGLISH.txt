@@ -1,0 +1,30 @@
+# MotoTrip V7.4 — FIX: Emergency checkbox + Group GPS permission
+
+Your screenshot says `Missing or insufficient permissions`: GPS can be working while FIRESTORE refuses writes.
+
+IMPORTANT: Two separate tasks are required:
+
+A. Firebase Console (required; GitHub upload does NOT do this):
+1. Open https://console.firebase.google.com/project/mototrip-13b38/firestore/rules
+2. Open the `FIREBASE_RULES.txt` file in this ZIP.
+3. Copy its ENTIRE contents, replace the full current Rules editor, then click **Publish**.
+4. Confirm the Rules contain `match /sharedRides/{rideId}` with nested `match /safety/{userId}`.
+5. DO NOT use `allow read, write: if true` (would expose private riders/location).
+6. If permission is still denied: in Firestore Data verify your signed-in Firebase Auth UID has a document at
+   `sharedRides/{rideId}/members/{yourAuthUid}`. After signing out, use the SAME account or rejoin by invitation.
+   Check authenticated UID in Firebase Authentication > Users; don't post this ID publicly.
+
+B. GitHub app update:
+1. From `MotoTrip_V7.4_Quick_Update.zip`, upload index.html, safety.js, sw.js into GitHub root (same as current app files).
+2. Commit changes, then in MotoTrip tap Update now. No uninstall needed.
+
+How to verify using TWO phones:
+1. Both accounts join the same Shared Ride.
+2. Phone A > My Profile: fill a blood group or emergency contact, Save.
+3. Phone A > Bill Split > Group Safety > tick `Share my emergency info`; confirm prompt.
+4. Phone B: safety card displays data (only after cloud confirms it).
+5. Phone A: untick checkbox; Phone B must stop showing emergency details.
+6. Phone A: separately enable Share My Location; check GPS permission and Phone B's timestamp.
+
+If the Rules change cannot be published or the user isn't actually a Firebase ride member, code alone CANNOT override the restriction.
+Privacy: use only per-member rules; do not open unrestricted database access.

@@ -1,0 +1,1 @@
+V7.4: First safety share creates a complete Firebase safety document; existing shares update. Permission-denied errors explain Firestore Rules and ride membership. Optional location remains opt-in. No app data migration.
