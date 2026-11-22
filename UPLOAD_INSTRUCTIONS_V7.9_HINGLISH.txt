@@ -1,0 +1,27 @@
+MotoTrip V7.9 — Screenshot Match Layout
+
+FULL ZIP:
+1. ZIP extract karo.
+2. GitHub repository > Add file > Upload files kholo.
+3. Extracted saari files aur assets folder upload karo. Same-name old files replace karo.
+4. Commit changes karo.
+5. Live site reload karo. Agar update prompt aaye, Update now tap karo.
+6. Existing account me sign in ya Continue as Guest karo. Home new screenshot layout me khulega.
+
+QUICK ZIP:
+Extract karke listed files and assets folder ko same existing repository me upload karo.
+Old app.js, split.js, account.js, route.js, safety.js, CSS, Firebase Rules etc as-is rahenge.
+
+DATA SAFETY:
+• GitHub update se local device storage normally delete nahi hota.
+• Site origin / URL same rakho; URL/domain badalne se local browser data automatically migrate nahi hota.
+• Backup > Download JSON backup before major update is recommended.
+• Group sync ke liye purana Firebase configuration and rules required hain.
+
+DESIGN:
+• Reference screenshot ke logo, navigation cards, trip image, sponsored banner
+  aur bottom navigation ke pixels screenshot se use kiye gaye hain.
+• Page UI responsive hai, device fonts/sizes ke kaaran 100% pixel-identical
+  reproduction hardware par guarantee nahi hai.
+• Sponsored RIDEMATE banner is an illustrative concept only, not a paid ad.
+• No existing bill split or group expense data was intentionally removed.

@@ -1,0 +1,99 @@
+/* MotoTrip V7.9: Screenshot-aligned Home UI. Other V7.8 functionality is preserved. */
+:root {--mt79-ink:#0b1d36;--mt79-border:#d7e4eb;--mt79-mint:#aaf6d4;--mt79-teal:#008d7d}
+html{scroll-padding-top:12px}
+body.app-v4{background:linear-gradient(180deg,#e8f5fc,#f7fcff 44%,#fff);color:var(--mt79-ink)}
+body.app-v4 main{max-width:540px!important;margin:auto;padding:0 12px 120px!important;background:#fafdff;min-height:100vh;box-shadow:0 0 36px #294e6e0c}
+html body .masthead.mt79-masthead{background:linear-gradient(115deg,#f6fcff 10%,#e1f3fa 73%,#ebf9ff)!important;border:0!important;box-shadow:none!important;border-radius:0!important;padding:13px 8px 4px!important;margin:0 -12px!important;overflow:visible!important;isolation:auto;color:var(--mt79-ink)!important}
+html body .masthead.mt79-masthead:after{display:none!important}
+.mt79-header-line{display:grid;grid-template-columns:46px minmax(0,1fr) 37px 48px;align-items:center;gap:6px;min-height:90px;padding:0 10px}
+html body .mt79-header-line button{margin:0;background:transparent!important;border:0!important;box-shadow:none!important;color:#0c2039!important;padding:0!important;min-height:40px;display:grid;place-items:center}
+.mt79-header-menu{font-size:30px!important;font-weight:300!important;line-height:1}
+.mt79-logo{width:100%;max-height:85px;object-fit:contain;mix-blend-mode:multiply}
+.mt79-bell{position:relative}.mt79-bell i{position:absolute;top:8px;right:6px;width:9px;height:9px;border-radius:50%;background:#f23535;border:1px solid white}
+html body .mt79-header-line .mt79-avatar-button{display:block;min-height:0!important;width:47px;height:47px;border-radius:50%!important;overflow:hidden;padding:0!important;background:#eaf9ff!important;box-shadow:none!important}
+.mt79-avatar-button img.mt-profile-avatar{display:block;width:100%;height:100%;border-radius:50%;object-fit:cover;border:0}
+.mt79-avatar-button .mt-profile-caption{display:none!important}
+.mt79-hidden-toolbar{position:absolute;top:77px;left:16px;z-index:50;min-width:220px;padding:12px;border-radius:17px;border:1px solid #d2e4e5;background:white;box-shadow:0 15px 40px #183c4e25;color:var(--mt79-ink)}
+.mt79-hidden-toolbar[hidden]{display:none!important}.mt79-hidden-toolbar button,.mt79-hidden-toolbar a{display:block;text-align:left!important;color:#13243e!important;width:100%;padding:10px!important;text-decoration:none;background:white!important;border:0!important;font-size:13px}.mt79-hidden-toolbar .version{display:block;font-size:11px;color:#4c6771!important}
+html body nav#main-nav.mt79-shortcuts{background:linear-gradient(120deg,#e8f7fe,#f6fcff)!important;border:0!important;margin:0 -12px 8px!important;padding:9px 12px 12px!important;display:grid!important;grid-template-columns:repeat(5,minmax(0,1fr))!important;gap:6px!important;box-shadow:none!important;border-radius:0!important}
+html body nav#main-nav.mt79-shortcuts button,html[data-theme=light] body nav#main-nav.mt79-shortcuts button:not(.active),html body nav#main-nav.mt79-shortcuts button.active{display:flex!important;align-items:center!important;justify-content:center!important;padding:0!important;min-width:0!important;min-height:0!important;height:auto!important;aspect-ratio:1.55!important;border:0!important;border-radius:17px!important;box-shadow:0 6px 12px #40678c0b!important;background-color:transparent!important;background-position:center!important;background-size:100% 100%!important;background-repeat:no-repeat!important;color:transparent!important;overflow:hidden}
+html body nav#main-nav.mt79-shortcuts button[data-tab=plan]{background-image:url('assets/shortcut-plan.png')!important}
+html body nav#main-nav.mt79-shortcuts button[data-tab=route]{background-image:url('assets/shortcut-route.png')!important}
+html body nav#main-nav.mt79-shortcuts button[data-tab=split]{background-image:url('assets/shortcut-split.png')!important}
+html body nav#main-nav.mt79-shortcuts button[data-tab=gear]{background-image:url('assets/shortcut-gear.png')!important}
+html body nav#main-nav.mt79-shortcuts button[data-tab=trips]{background-image:url('assets/shortcut-trips.png')!important}
+html body nav#main-nav.mt79-shortcuts button>span{opacity:0!important}
+html body nav#main-nav.mt79-shortcuts button:focus-visible{outline:3px solid #069b9c!important;outline-offset:3px}
+.mt79-home{padding:6px 0 10px;display:block}
+.mt79-home[hidden]{display:none!important}
+.mt79-current-trip{background:linear-gradient(115deg,#fff,#f7fdfd);border:1px solid var(--mt79-border);border-radius:17px;box-shadow:0 9px 19px #22474f10;display:grid;grid-template-columns:23% minmax(0,1fr) 31%;gap:9px;padding:8px;min-height:111px;cursor:pointer;color:var(--mt79-ink);align-items:stretch}
+.mt79-current-trip:focus-visible{outline:3px solid #00a58e;outline-offset:2px}
+.mt79-trip-pic{width:100%;height:100%;min-height:94px;max-height:120px;border-radius:12px;object-fit:cover}
+.mt79-trip-meta{display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:7px;min-width:0;white-space:nowrap;overflow:hidden}
+.mt79-trip-meta strong{font-size:clamp(15px,3.8vw,24px);letter-spacing:-.05em;color:#0d1d34;line-height:1.08;white-space:normal}
+.mt79-trip-meta span{font-size:clamp(10px,2.5vw,15px);white-space:nowrap}
+.mt79-trip-budget{border-left:1px solid #d7e4e8;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:5px;padding:4px 0 4px 10px;text-align:center}
+.mt79-trip-budget>span{font-size:clamp(9px,2.15vw,13px);white-space:normal;line-height:1.2}
+.mt79-trip-budget strong{color:#098758;font-size:clamp(21px,5.7vw,38px);letter-spacing:-.06em;white-space:nowrap;line-height:1}
+.mt79-trip-budget small{font-weight:750;font-size:clamp(9px,2.3vw,13px);border-radius:22px;background:linear-gradient(110deg,#d1f7e5,#d9fae9);padding:5px 7px;white-space:nowrap;color:#132a36}
+.mt79-ad-wrap{margin-top:13px;position:relative;overflow:hidden;border-radius:18px;box-shadow:0 8px 24px #22547a0b}
+.mt79-ad-wrap>img{display:block;width:100%;height:auto;aspect-ratio:806/283;object-fit:cover}
+.mt79-ad-sample{position:absolute;right:6px;bottom:5px;font-size:9px;color:#475c6c;background:#fff9;border-radius:10px;padding:2px 5px}
+.mt79-plan-head{display:flex;align-items:center;justify-content:space-between;margin:13px 4px 8px;font-size:clamp(21px,5.1vw,28px);color:#080d15;font-weight:800;letter-spacing:-.045em}
+html body .mt79-plan-head button{border:0!important;box-shadow:none!important;background:transparent!important;color:#007f7a!important;font-size:11px!important;font-weight:700!important;padding:5px 0!important;min-height:30px}
+.mt79-estimate-fields{border:1px solid #d6e3eb;border-radius:14px;padding:4px 8px;background:#fff;box-shadow:0 2px 9px #395a6910}
+.mt79-estimate-row{display:grid;grid-template-columns:33px minmax(0,1fr) 34%;align-items:center;gap:6px;min-height:47px;margin:0;padding:4px 0;border-bottom:1px solid #dce6eb;font-size:clamp(12px,3vw,16px);color:var(--mt79-ink)!important;font-weight:500!important}
+.mt79-estimate-row:last-child{border-bottom:0}
+.mt79-field-ico{font-size:23px;text-align:center;color:#0d243b;font-weight:700}.mt79-green-ico{color:#009d93}
+.mt79-input-wrap{display:flex;align-items:center;gap:3px;min-width:0;height:34px;background:linear-gradient(105deg,#e9f8eb,#f7fcfa);border:1px solid #b9e6c3;border-radius:11px;padding:0 8px;overflow:hidden}
+.mt79-input-wrap input[type=number]{height:28px!important;min-height:0!important;width:100%!important;min-width:0!important;flex:1;border:0!important;background:transparent!important;color:#141b24!important;text-align:left!important;font-size:clamp(14px,3.2vw,19px)!important;font-weight:700!important;box-shadow:none!important;margin:0!important;padding:0 0 0 1px!important;font-variant-numeric:tabular-nums;-moz-appearance:textfield}
+.mt79-input-wrap input::-webkit-outer-spin-button,.mt79-input-wrap input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+.mt79-input-wrap small{color:#12213a;font-size:clamp(11px,2.8vw,14px);white-space:nowrap;font-weight:500}
+.mt79-input-wrap b{font-size:15px;color:#142137}
+.mt79-stepper{display:flex;align-items:center;justify-content:space-between;min-width:0;font-size:16px;font-weight:750}
+.mt79-stepper output{font-size:16px;color:#0b1d36;font-weight:700}
+html body .mt79-stepper button{width:34px!important;height:34px!important;min-height:34px!important;padding:0!important;border-radius:50%!important;background:linear-gradient(#fff,#eaf0f2)!important;border:1px solid #c6d8dd!important;color:#132c45!important;box-shadow:0 1px 3px #28475a14!important;font-size:25px!important;display:grid;place-items:center;line-height:1}
+.mt79-costs{margin-top:10px;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));background:linear-gradient(110deg,#edfdf4,#e6faef);border-radius:14px;overflow:hidden;padding:8px 0;color:#0a1b30}
+.mt79-costs>div{display:flex;flex-direction:column;justify-content:center;gap:4px;align-items:center;min-width:0;padding:0 3px;border-right:1px solid #cee5db}
+.mt79-costs>div:last-child{border-right:0}
+.mt79-costs span{white-space:nowrap;font-size:clamp(11px,2.65vw,15px);color:#009d7e}
+.mt79-costs span b{color:#111e31;font-weight:500}
+.mt79-costs strong{font-size:clamp(12px,3vw,18px);letter-spacing:-.02em;white-space:nowrap}
+.mt79-estimate-help{font-size:10px;color:#748699;margin:7px 2px;text-align:center}
+.mt79-bottom{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:min(100%,540px);z-index:200;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));height:calc(70px + env(safe-area-inset-bottom));padding:6px 8px calc(7px + env(safe-area-inset-bottom));gap:4px;background:#ffffffef;border-top:1px solid #e0ebf0;box-shadow:0 -8px 25px #294f5912;backdrop-filter:blur(16px)}
+html body .mt79-bottom button{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:0!important;min-width:0!important;padding:4px 1px!important;background:transparent!important;border:0!important;border-radius:19px!important;box-shadow:none!important;color:#0d233b!important;font-weight:500!important}
+.mt79-bottom button span{font-size:29px;line-height:30px}.mt79-bottom button small{font-size:clamp(10px,2.8vw,13px);font-weight:500;line-height:1.2}
+html body .mt79-bottom button.mt79-bottom-active{background:linear-gradient(115deg,#dbfae9,#e1fff5)!important;color:#007f5d!important;font-weight:750!important}
+html body .mt79-bottom button.mt79-create{position:relative;z-index:2;margin-top:-12px!important}
+html body .mt79-bottom button.mt79-create span{display:grid;place-items:center;width:54px;height:54px;border-radius:50%;background:linear-gradient(125deg,#07a3aa,#007d6b);color:white;font-weight:300;box-shadow:0 4px 9px #006f6660;font-size:39px;line-height:54px}
+.mt79-bottom button.mt79-create small{font-size:0}
+body .mt79-ad-sample{pointer-events:none}
+#home:not([hidden])~section{display:none}
+@media(max-width:370px){html body .mt79-header-line{grid-template-columns:35px minmax(0,1fr) 30px 42px;gap:1px;padding:0 6px}.mt79-trip-budget{padding-left:6px}.mt79-current-trip{gap:5px}.mt79-estimate-row{grid-template-columns:26px minmax(0,1fr) 36%}.mt79-estimate-fields{padding:4px 6px}.mt79-trip-meta{gap:5px}}
+@media(min-width:541px){html body .mt79-home{padding-left:8px;padding-right:8px}.mt79-trip-meta strong{font-size:23px}.mt79-trip-budget strong{font-size:35px}}
+/* The original app used the five tabs as a mobile fixed footer. On the
+   reference Home they belong directly below the brand header instead. */
+html body nav#main-nav.mt79-shortcuts{
+ position:relative!important;top:auto!important;right:auto!important;bottom:auto!important;left:auto!important;
+ z-index:2!important;width:auto!important;max-width:none!important;
+ margin:0 -12px 8px!important;padding:9px 12px 12px!important;
+ box-shadow:none!important;border-radius:0!important;border:0!important;
+}
+body:has(#home:not([hidden])) main>footer,
+body:has(#home:not([hidden])) main>#notice{display:none!important}
+body:has(#home:not([hidden])) main{padding-bottom:calc(90px + env(safe-area-inset-bottom))!important}
+html body .mt79-avatar-button .mt-profile-avatar{display:grid;place-items:center;width:100%!important;height:100%!important;font-size:22px;object-fit:cover;border-radius:50%;background:linear-gradient(145deg,#aaf4f7,#a3f7c7);color:#0f374b}
+/* Match the exact reference navigation artwork on the Home screen. */
+body:has(#home:not([hidden])) .mt79-bottom button[data-mt79]{background-position:center!important;background-repeat:no-repeat!important;background-size:100% 100%!important;color:transparent!important}
+body:has(#home:not([hidden])) .mt79-bottom button[data-mt79]>*{opacity:0!important}
+body:has(#home:not([hidden])) .mt79-bottom button[data-mt79=home]{background-image:url('assets/bottom-home.png')!important;background-color:transparent!important}
+body:has(#home:not([hidden])) .mt79-bottom button[data-mt79=group]{background-image:url('assets/bottom-group.png')!important}
+body:has(#home:not([hidden])) .mt79-bottom button[data-mt79=new]{background-image:url('assets/bottom-add.png')!important;margin-top:0!important}
+body:has(#home:not([hidden])) .mt79-bottom button[data-mt79=safety]{background-image:url('assets/bottom-safety.png')!important}
+body:has(#home:not([hidden])) .mt79-bottom button[data-mt79=profile]{background-image:url('assets/bottom-profile.png')!important}
+body:has(#home:not([hidden])) .mt79-bottom button[data-mt79=new]>span{box-shadow:none!important}
+body:has(#home:not([hidden])) .mt79-plan-head #mt79-edit-all{display:none!important}
+body:has(#home:not([hidden])) .mt79-estimate-help{display:none!important}
+body:has(#home:not([hidden])) .mt79-ad-sample{display:none!important}
+/* Keep the round rider photograph from the provided reference on Home. */
+body:has(#home:not([hidden])) .mt79-avatar-button span.mt-profile-avatar{background:url('assets/mt79-avatar.jpg') center/cover no-repeat!important;color:transparent!important;font-size:0!important;box-shadow:none!important}

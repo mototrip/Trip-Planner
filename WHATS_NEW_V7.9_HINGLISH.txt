@@ -1,0 +1,9 @@
+MotoTrip V7.9 — Screenshot Reference Layout
+
+- Screenshot ke layout ke mutabik redesigned Home: MotoTrip branding, five shortcut cards, Delhi-Manali trip, ad preview, calculator, budget breakup, bottom navigation.
+- Banner aur trip photo reference image se hi extract kiye gaye hain, newly generated substitutes nahi.
+- Calculator mileage, distance, petrol price and riders interactive hain, core planner se sync karte hain.
+- Original V7.8 files, account, Firebase setup, group, shared packing, bill split, route, offline PWA, safety, backup retained.
+- Note: Screenshot RIDEMATE ad example hai, real sponsor partnership ka claim nahi.
+- Device ki size aur browser fonts ke difference se pixel-perfect 1:1 native responsive recreation guarantee nahi ki ja sakti.
+- Bina purane app ka storage clear kiye new files existing GitHub repo me replace / add karein.

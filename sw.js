@@ -2,13 +2,13 @@
  * Original application © 2026 Satish Kumar Gupta.
  * IMPORTANT: cache cleanup here does not delete trips/expenses in localStorage.
  */
-const CACHE_NAME = 'mototrip-v7.8';
+const CACHE_NAME = 'mototrip-v7.9';
 const PREVIOUS_CACHE_PREFIX = 'mototrip-';
 const APP_SHELL = [
-  './index.html','./app-update.js?v=78','./style.css?v=78',
-  './app.js?v=78','./account.js?v=78','./split.js?v=78','./route.js?v=78','./ui.js?v=78',
-  './exports.js?v=78','./firebase-config.js?v=78','./qr-code.js?v=78','./shared-ride.js?v=78','./group-gear.js?v=78','./safety.js?v=78','./qr-scanner.js?v=78',
-  './report.html','./report.js?v=78','./privacy.html',
+  './index.html','./app-update.js?v=79','./style.css?v=79','./mt79-layout.css?v=79','./mt79-layout.js?v=79','./assets/mt79-trip.jpg','./assets/mt79-sponsor.jpg','./assets/mt79-brand.png','./assets/mt79-avatar.jpg','./assets/shortcut-plan.png','./assets/shortcut-route.png','./assets/shortcut-split.png','./assets/shortcut-gear.png','./assets/shortcut-trips.png','./assets/bottom-home.png','./assets/bottom-group.png','./assets/bottom-add.png','./assets/bottom-safety.png','./assets/bottom-profile.png',
+  './app.js?v=79','./account.js?v=79','./split.js?v=79','./route.js?v=79','./ui.js?v=79',
+  './exports.js?v=79','./firebase-config.js?v=79','./qr-code.js?v=79','./shared-ride.js?v=79','./group-gear.js?v=79','./safety.js?v=79','./qr-scanner.js?v=79',
+  './report.html','./report.js?v=79','./privacy.html',
   './terms.html','./ownership.html','./manifest.json',
   './icon-192.png','./icon-512.png'
 ];
