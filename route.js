@@ -30,7 +30,7 @@ function renameStop(i,text){
  if(!state.routeStops[i])return;
  const name=String(text).trim().slice(0,180);
  if(!name)return;
- if(state.routeStops[i].name!==name){state.routeStops[i].name=name;state.routeStops[i].lat=null;state.routeStops[i].lon=null;}
+ if(state.routeStops[i].name!==name){state.routeStops[i].name=name;state.routeStops[i].lat=null;state.routeStops[i].lon=null;if(i===state.routeStops.length-1)state.gpsEndLabel='';}
  commit();
 }
 // Insert a waypoint BEFORE the final destination, which remains the final destination.
@@ -203,11 +203,13 @@ function setSelectedPlace(kind,place,index=-1){
  const name=place.label,lat=place.lat,lon=place.lon;
  if(kind==='start'||kind==='planner-start'){
   start.value=name;$('route-start-input').value=name;
+  state.gpsStartLabel=place.isGps===true?name:'';
   form.elements.fromLat.value=lat;form.elements.fromLon.value=lon;
   form.elements.fromState.value=place.state||'';form.elements.fromDistrict.value=place.county||'';
   state.draft=read();persist();update(false);renderGoogle();drawMap();
  }else if(kind==='end'||kind==='planner-end'){
   normalizeStops();state.routeStops[state.routeStops.length-1]={name,lat,lon};
+  state.gpsEndLabel=place.isGps===true?name:'';
   form.elements.toState.value=place.state||'';form.elements.toDistrict.value=place.county||'';commit();
  }else if(kind==='stop'){
   if(!state.routeStops[index])return;
@@ -268,19 +270,24 @@ function setupPlaceSuggestions(input,kind,index=-1){
 document.addEventListener('pointerdown',e=>{if(activePopup&&!activePopup.contains(e.target)&&!e.target.closest?.('input'))closePlacePopup();});
 window.addEventListener('resize',()=>closePlacePopup());
 function clearLocation(which){
+ geoRequest+=1; // Prevent a pending GPS lookup restoring a cleared place.
+ $('pick-start').disabled=false;$('pick-end').disabled=false;
  closePlacePopup();
  if(which==='start'){
   start.value='';$('route-start-input').value='';
+  state.gpsStartLabel='';
   form.elements.fromLat.value='';form.elements.fromLon.value='';
   form.elements.fromState.value='';form.elements.fromDistrict.value='';
   state.draft=read();persist();renderGoogle();drawMap();
  }else{
   normalizeStops();state.routeStops[state.routeStops.length-1]={name:'',lat:null,lon:null};
   destination.value='';$('route-end-input').value='';
+  state.gpsEndLabel='';
   form.elements.toLat.value='';form.elements.toLon.value='';
   form.elements.toState.value='';form.elements.toDistrict.value='';
   state.draft=read();persist();renderGoogle();drawMap();
  }
+ update(false); // Refresh Planner trip card immediately after Clear.
  if($('map-preview-details').open)requestAnimationFrame(fitStops);
  setStatus('Location cleared. Search again or tap My location.');
 }
@@ -289,20 +296,23 @@ async function useMyLocation(which){
  if(!navigator.geolocation){setStatus('Location not available in this browser. You can still search by city and state.');return;}
  if(!window.isSecureContext){setStatus('GPS needs HTTPS. Open the live MotoTrip website (not a downloaded file).');return;}
  const button=which==='start'?$('pick-start'):which==='end'?$('pick-end'):$('route-pin-mode');
- button.disabled=true;setStatus('Waiting for your phone’s location permission…');
+ button.disabled=true;const requestId=++geoRequest;setStatus('Waiting for your phone’s location permission…');
  navigator.geolocation.getCurrentPosition(async pos=>{
+  if(requestId!==geoRequest)return;
   button.disabled=false;
   const p={lat:pos.coords.latitude,lon:pos.coords.longitude};
   if(!validCoord(p.lat,p.lon)){setStatus('Location was invalid. Try searching for the place instead.');return;}
   const raw=p.lat.toFixed(6)+', '+p.lon.toFixed(6);
   const label=await reverseLookup(p)||'My location ('+raw+')';
-  const point={label,lat:p.lat,lon:p.lon,state:'',county:''};
+  if(requestId!==geoRequest)return; // User may have tapped Clear during reverse lookup.
+  const point={label,lat:p.lat,lon:p.lon,state:'',county:'',isGps:true};
   if(which==='add'){
    if(!addStop(label,p)){setStatus('Could not add location; maximum stops may be reached.');return;}
   }else setSelectedPlace(which,point);
   view={...p,z:11};if($('map-preview-details').open)fitStops();
   setStatus('✓ My location selected ('+Math.round(pos.coords.accuracy)+' m reported GPS accuracy). Tap ✕ Clear to remove it, or edit the field.');
  },err=>{
+  if(requestId!==geoRequest)return;
   button.disabled=false;
   const label=err.code===1?'Location permission denied. Enable location in phone settings or type your city.':err.code===3?'GPS timed out. Try outdoors or search by city.':'Could not find GPS location. Search for a city instead.';
   setStatus(label);
@@ -340,14 +350,14 @@ $('clear-route-start').onclick=()=>clearLocation('start');
 $('clear-route-end').onclick=()=>clearLocation('end');
 $('route-back-planner').onclick=()=>{tab('plan');document.querySelector('.dest-fieldset').scrollIntoView({block:'nearest',behavior:'smooth'});};
 $('route-zoom-in').onclick=()=>changeZoom(view.z+1);$('route-zoom-out').onclick=()=>changeZoom(view.z-1);$('route-fit').onclick=fitStops;
-$('route-start-input').addEventListener('input',e=>{start.value=e.target.value;form.elements.fromLat.value='';form.elements.fromLon.value='';state.draft=read();persist();renderGoogle();drawMap();});
+$('route-start-input').addEventListener('input',e=>{start.value=e.target.value;state.gpsStartLabel='';form.elements.fromLat.value='';form.elements.fromLon.value='';form.elements.fromState.value='';form.elements.fromDistrict.value='';state.draft=read();persist();update(false);renderGoogle();drawMap();});
 $('route-end-input').addEventListener('input',e=>{
- normalizeStops();const last=state.routeStops.at(-1);last.name=e.target.value;last.lat=null;last.lon=null;
- destination.value=e.target.value;form.elements.toLat.value='';form.elements.toLon.value='';state.draft=read();persist();renderGoogle();drawMap();
+ normalizeStops();const last=state.routeStops.at(-1);last.name=e.target.value;last.lat=null;last.lon=null;state.gpsEndLabel='';
+ destination.value=e.target.value;form.elements.toLat.value='';form.elements.toLon.value='';form.elements.toState.value='';form.elements.toDistrict.value='';state.draft=read();persist();update(false);renderGoogle();drawMap();
 });
 $('route-end-input').addEventListener('change',e=>{if(!e.target.value.trim()){e.target.value=destination.value;return;}state.routeStops.at(-1).name=e.target.value.trim();commit();});
-start.addEventListener('input',()=>{form.elements.fromLat.value='';form.elements.fromLon.value='';$('route-start-input').value=start.value;renderGoogle();drawMap();});
-destination.addEventListener('input',()=>{normalizeStops();const s=state.routeStops.at(-1);if(s.name!==destination.value){s.name=destination.value;s.lat=null;s.lon=null;form.elements.toLat.value='';form.elements.toLon.value='';}syncRouteInputs();renderLists();renderGoogle();drawMap();});
+start.addEventListener('input',()=>{state.gpsStartLabel='';form.elements.fromLat.value='';form.elements.fromLon.value='';$('route-start-input').value=start.value;renderGoogle();drawMap();});
+destination.addEventListener('input',()=>{state.gpsEndLabel='';normalizeStops();const s=state.routeStops.at(-1);if(s.name!==destination.value){s.name=destination.value;s.lat=null;s.lon=null;form.elements.toLat.value='';form.elements.toLon.value='';}syncRouteInputs();renderLists();renderGoogle();drawMap();});
 mapEl.addEventListener('pointerdown',e=>{if(e.button!==0&&e.pointerType==='mouse')return;drag={id:e.pointerId,x:e.clientX,y:e.clientY,lastX:e.clientX,lastY:e.clientY,moved:false};mapEl.setPointerCapture(e.pointerId);});
 mapEl.addEventListener('pointermove',e=>{if(!drag||drag.id!==e.pointerId)return;const dx=e.clientX-drag.lastX,dy=e.clientY-drag.lastY;if(Math.abs(e.clientX-drag.x)+Math.abs(e.clientY-drag.y)>8)drag.moved=true;if(drag.moved)panBy(dx,dy);drag.lastX=e.clientX;drag.lastY=e.clientY;});
 mapEl.addEventListener('pointerup',e=>{if(!drag||drag.id!==e.pointerId)return;drag=null;});

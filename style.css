@@ -1275,7 +1275,7 @@ html[data-theme=dark] #gear .mt76-group-packing.mt77-sync-blocked .mt76-board-st
 #plan .mt80-scene{align-self:stretch;min-height:90px;overflow:hidden;border-radius:13px;background:#d7edfa;}
 #plan .mt80-trip-art{display:block;width:100%;height:100%;min-height:90px;object-fit:cover;}
 #plan .mt80-trip-main{min-width:0;align-self:center;}
-#plan .mt80-trip-main>strong{display:block;font-size:clamp(12px,3.6vw,21px);letter-spacing:-.045em;white-space:nowrap;color:#0e2241;line-height:1.23;overflow-wrap:anywhere;margin:0 0 8px;}
+#plan .mt80-trip-main>strong{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;line-clamp:2;max-width:100%;font-size:clamp(12px,3.6vw,21px);letter-spacing:-.045em;white-space:normal;word-break:break-word;overflow:hidden;text-overflow:ellipsis;color:#0e2241;line-height:1.23;overflow-wrap:anywhere;margin:0 0 8px;}
 #plan .mt80-date-details{position:relative;font-size:11px;min-width:0;}
 #plan .mt80-date-details summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:5px;font-size:clamp(10px,2.7vw,12px);white-space:normal;line-height:1.3;color:#18314d;padding:2px 0;}
 #plan .mt80-date-details summary::-webkit-details-marker{display:none;}
@@ -1654,3 +1654,20 @@ html[data-theme=light] #bike-editor .mileage-lab-result small{color:#526786!impo
 html[data-theme=dark] #bike-editor .mileage-lab-result small{color:#c5dcf4!important;opacity:1!important}
 #bike-editor #apply-mileage:not(:disabled){background:linear-gradient(110deg,#aaf59c,#61e1be)!important;border:1px solid #65cda7!important;color:#13382e!important;box-shadow:0 5px 12px #138a6d17!important}
 #bike-editor .mileage-hint{margin-top:7px!important;font-size:11px!important;line-height:1.35!important}
+
+
+/* MotoTrip V9.9 — route information belongs only in the Route tab. */
+#route .mt99-date-box{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-top:12px;padding:12px 13px;border-radius:13px;background:rgba(230,243,251,.65);border:1px solid #d7e6f1;min-width:0;flex-wrap:wrap;}
+#route .mt99-date-label{font-size:12px;font-weight:800;letter-spacing:.025em;color:#4c6c87;}
+#route .mt80-date-details{position:relative;min-width:0;}
+#route .mt80-date-details summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:6px;font-size:13px;font-weight:750;color:#173a5a;padding:3px 0;max-width:100%;}
+#route .mt80-date-details summary::-webkit-details-marker{display:none;}
+#route .mt80-date-details summary>span:first-child{color:#008d77;font-size:16px;}
+#route .mt80-date-details[open] .mt80-date-fields{position:absolute;z-index:25;right:0;top:calc(100% + 8px);width:min(310px,78vw);display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;padding:12px;background:#fff;border:1px solid #c7ddea;box-shadow:0 12px 26px #0d2f4b2d;border-radius:13px;}
+#route .mt80-date-fields label{display:block;font-size:12px;font-weight:650;color:#29445a;min-width:0;margin:0;}
+#route .mt80-date-fields input{width:100%;min-width:0;box-sizing:border-box;min-height:39px;margin:5px 0 0;padding:7px 5px;font-size:13px!important;color:#152c46!important;background:#f7fafb!important;border-radius:9px;border:1px solid #cbdde8;}
+html[data-theme=dark] #route .mt99-date-box{background:#20324a;border-color:#3f5671;}
+html[data-theme=dark] #route .mt99-date-label,html[data-theme=dark] #route .mt80-date-details summary{color:#e3f0ff;}
+html[data-theme=dark] #route .mt80-date-details[open] .mt80-date-fields{background:#17273c;border-color:#3f5671;}
+html[data-theme=dark] #route .mt80-date-fields label{color:#ecf5ff;}
+@media(max-width:380px){#route .mt99-date-box{padding:10px;gap:7px}#route .mt80-date-details[open] .mt80-date-fields{right:-8px;width:min(290px,82vw);}}

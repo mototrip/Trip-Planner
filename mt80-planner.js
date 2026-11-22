@@ -39,9 +39,6 @@
       const km=c.km;
       if(document.activeElement!==quick.distance)quick.distance.value=formatNum(km);
       for(const name of ['mileage','price']) if(document.activeElement!==quick[name]) quick[name].value=field(name).value;
-      el('mt80-route').textContent=(String(d.from||'Starting point').trim()||'Starting point')+' → '+(String(d.to||'Destination').trim()||'Destination');
-      el('mt80-card-budget').textContent=pretty(c.total);
-      el('mt80-card-riders').textContent=riderCount()+' Rider'+(riderCount()===1?'':'s');
       el('mt80-riders').textContent=riderCount();
       el('mt80-per-person').textContent='≈ '+pretty(c.total/riderCount())+' / Rider';
       for(const [kind,name] of [['fuel','fuel'],['stay','stay'],['food','food'],['toll','toll'],['other','other']]) el('mt80-'+kind).textContent=pretty(c[name]);

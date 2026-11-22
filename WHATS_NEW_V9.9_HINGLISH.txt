@@ -1,0 +1,10 @@
+MotoTrip V9.9 — Route details only in Route tab
+
+1) Planner se duplicate route summary card (route address, photo, date, riders, budget) hata diya.
+2) Trip dates Route tab ke Trip Basics section mein shift ki. Existing saved dates retained.
+3) Planner mileage, budget dashboard, quick fuel/stay/food/toll estimate aur promo banner same.
+4) Previous V9.8 GPS Clear / stale location fixes retained.
+5) Service worker cache v9.9 kiya; existing localStorage/Firebase data ko touch nahi kiya.
+
+QUICK UPDATE: GitHub repo ke root mein included files upload/replace karein.
+FULL: Complete working app files.
