@@ -1,0 +1,13 @@
+MotoTrip V7.2 — Classic Compact Layout
+
+- Removed V7 Easy/Full toggle and additional quickstart buttons.
+- Original familiar five tabs and standard Planner layout restored.
+- Total Estimated Budget displayed prominently above amount.
+- Compact header, saved-trip dashboard, estimate, route fields, expenses and cards.
+- Kept start/end destination 50/50 in one row for phones.
+- Budget vs Actual restored as expanded; user can collapse it.
+- All V7.1 login gate, GPS Retry and real trip reports retained.
+- All existing Firebase, shared ride, safety and Bill Split code unchanged.
+- Storage format and original icon unchanged. Do not uninstall to update.
+
+QUICK UPDATE: Upload index.html, style.css, sw.js, WHATS_NEW_V7.2_HINGLISH.txt to repository root.
