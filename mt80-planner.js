@@ -1,4 +1,4 @@
-/* MotoTrip V9.11: restore original trip card without GPS street address overlap. */
+/* MotoTrip V9.12: original trip card + iPhone-safe trip-date editor. */
 (() => {
   'use strict';
   const el=id=>document.getElementById(id);
@@ -92,6 +92,37 @@
     persist();
     render();
   });
+  // iOS Safari can leave an open <details> popover visible after the system
+  // date wheel closes. An explicit, inline editor avoids native details state.
+  const dateToggle=el('mt80-date-toggle');
+  const dateEditor=el('mt80-date-fields');
+  const closeDates=()=>{
+    if(dateEditor.hidden)return;
+    dateEditor.hidden=true;
+    dateToggle.setAttribute('aria-expanded','false');
+  };
+  const openDates=()=>{
+    dateEditor.hidden=false;
+    dateToggle.setAttribute('aria-expanded','true');
+  };
+  dateToggle.addEventListener('click',()=>dateEditor.hidden?openDates():closeDates());
+  el('mt80-date-close').addEventListener('click',closeDates);
+  el('mt80-date-done').addEventListener('click',closeDates);
+  el('mt80-date-clear').addEventListener('click',()=>{
+    for(const [id,name] of [['mt80-start-date','departDate'],['mt80-end-date','endDate']]){
+      el(id).value='';
+      field(name).value='';
+    }
+    field('departDate').dispatchEvent(new Event('input',{bubbles:true}));
+    closeDates();
+  });
+  // Close on tapping elsewhere and when switching tabs; do not interfere with
+  // native iOS date selection or close the sheet prematurely on input events.
+  document.addEventListener('pointerdown',event=>{
+    if(!dateEditor.hidden && !dateEditor.contains(event.target) && !dateToggle.contains(event.target)) closeDates();
+  });
+  document.addEventListener('keydown',event=>{if(event.key==='Escape')closeDates();});
+  document.querySelectorAll('nav button[data-tab]').forEach(button=>button.addEventListener('click',closeDates));
   for(const [id,name] of [['mt80-start-date','departDate'],['mt80-end-date','endDate']]) el(id).addEventListener('change',()=>{
     field(name).value=el(id).value;
     field(name).dispatchEvent(new Event('input',{bubbles:true}));

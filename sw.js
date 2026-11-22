@@ -2,15 +2,15 @@
  * Original application © 2026 Satish Kumar Gupta.
  * IMPORTANT: cache cleanup here does not delete trips/expenses in localStorage.
  */
-const CACHE_NAME = 'mototrip-v9.11';
+const CACHE_NAME = 'mototrip-v9.12';
 const PREVIOUS_CACHE_PREFIX = 'mototrip-';
 const APP_SHELL = [
-  './index.html','./app-update.js?v=80','./style.css?v=911',
+  './index.html','./app-update.js?v=80','./style.css?v=912',
   './app.js?v=99','./account.js?v=80','./split.js?v=80','./route.js?v=99','./ui.js?v=80',
   './exports.js?v=80','./firebase-config.js?v=80','./qr-code.js?v=80','./shared-ride.js?v=80','./group-gear.js?v=80','./safety.js?v=80','./qr-scanner.js?v=80',
   './report.html','./report.js?v=80','./privacy.html',
   './terms.html','./ownership.html','./manifest.json',
-  './mt80-planner.js?v=911','./icon-192.png','./icon-512.png'
+  './mt80-planner.js?v=912','./icon-192.png','./icon-512.png'
 ];
 const OPTIONAL_IMAGE_ASSETS = ['./assets/trip-himalayas.webp','./assets/traveling-obsession-banner.svg'];
 const appIndex = new URL('./index.html', self.registration.scope).href;

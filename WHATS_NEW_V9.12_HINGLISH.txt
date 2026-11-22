@@ -1,0 +1,12 @@
+MotoTrip V9.12 — iPhone Trip Dates Popup Fix
+
+- Original mountain photo trip card, riders, budget, budget per rider retained.
+- Fixed iPhone Safari date popup remaining visible after native picker closes.
+- Date editor opens below the trip card (not over Trip Plan & Estimate).
+- Tap Add trip dates to open, tap Done / X / outside / Escape to close.
+- Clear dates removes selected dates; start and end dates sync with existing trip data.
+- Mobile inputs use native device date picker with 16px text to prevent Safari zoom.
+- No change to Firebase, group sharing, local saved trips, route, bill splitting or other app features.
+
+GitHub: extract the QUICK_UPDATE zip and replace those files in your repo root.
+For offline PWA users, open app online and accept the app update when prompted.
