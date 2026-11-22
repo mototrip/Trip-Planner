@@ -2,13 +2,13 @@
  * Original application © 2026 Satish Kumar Gupta.
  * IMPORTANT: cache cleanup here does not delete trips/expenses in localStorage.
  */
-const CACHE_NAME = 'mototrip-v6.9.1';
+const CACHE_NAME = 'mototrip-v7.0';
 const PREVIOUS_CACHE_PREFIX = 'mototrip-';
 const APP_SHELL = [
-  './index.html','./app-update.js?v=691','./style.css?v=691',
-  './app.js?v=691','./account.js?v=691','./split.js?v=691','./route.js?v=691','./ui.js?v=691',
-  './exports.js?v=691','./firebase-config.js?v=691','./qr-code.js?v=691','./shared-ride.js?v=691','./safety.js?v=691','./qr-scanner.js?v=691',
-  './report.html','./report.js?v=691','./privacy.html',
+  './index.html','./app-update.js?v=70','./style.css?v=70',
+  './app.js?v=70','./account.js?v=70','./split.js?v=70','./route.js?v=70','./ui.js?v=70',
+  './exports.js?v=70','./firebase-config.js?v=70','./qr-code.js?v=70','./shared-ride.js?v=70','./safety.js?v=70','./qr-scanner.js?v=70',
+  './easy-ui.js?v=70','./report.html','./report.js?v=70','./privacy.html',
   './terms.html','./ownership.html','./manifest.json',
   './icon-192.png','./icon-512.png'
 ];

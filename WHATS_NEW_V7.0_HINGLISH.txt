@@ -1,0 +1,15 @@
+MotoTrip V7.0 — Easy View (default)
+
+1. Short header, small trip estimate, no duplicate dashboard summary.
+2. Three one-tap shortcuts: Plan trip, Add stops, Split bills.
+3. Shorter names, compact fields and cleaner mobile sections.
+4. Full View button gives back the detailed layout without deleting anything.
+5. Budget vs Actual collapsed in Easy View; expand to view it.
+6. All key actions remain: Toll, Other, rider selection, expense and payment history,
+   live location, group sharing, reports, backup/restore, Firebase and login.
+7. Existing trips/profile/Firebase data format unchanged.
+
+To update existing GitHub Pages app: extract QUICK UPDATE ZIP, upload the
+5 files (index.html, style.css, sw.js, easy-ui.js, WHATS_NEW_V7.0_HINGLISH.txt)
+into the repository root and commit. Existing installations get the optional
+Update now/Later prompt through the service worker. Do not uninstall.
