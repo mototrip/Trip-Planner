@@ -1,0 +1,10 @@
+MotoTrip V9.11 — Old Himalayan Trip Card Restored and Fixed
+
+1. Planner mein reference wala original mountain-photo card wapas: trip name, Add trip dates, riders count, Total Estimated Budget, aur ₹ / Rider.
+2. GPS ka long street address sirf Route tab mein rahega. Planner card Route starting point / destination ki jagah editable Trip Name show karta hai. App ki location tracking/clear functionality unchanged.
+3. iPhone 320–430 px par title/date/budget ke overlap aur overflow ko CSS se fix kiya.
+4. Budget aur per-rider amounts independent calculator total se live sync hote hain; +/− riders bhi refresh karte hain.
+5. Duplicate V9.10 budget strip removed; dates back in old photo card.
+6. Firebase, Group, Safety, saved trips, data and PWA offline app unaffected. Service worker cache bumped.
+
+GitHub: Quick ZIP extract karke uski files repo ROOT mein replace karen. Complete ZIP original root structure ke saath hai.

@@ -1,4 +1,4 @@
-/* MotoTrip V9.10: compact Planner, live budget and per-rider summary. */
+/* MotoTrip V9.11: restore original trip card without GPS street address overlap. */
 (() => {
   'use strict';
   const el=id=>document.getElementById(id);
@@ -39,8 +39,20 @@
       const km=c.km;
       if(document.activeElement!==quick.distance)quick.distance.value=formatNum(km);
       for(const name of ['mileage','price']) if(document.activeElement!==quick[name]) quick[name].value=field(name).value;
+      // The route's exact start/destination stay in Route tab.  A trip NAME, not
+      // a geocoded GPS street address, is shown in this old-style Planner card.
+      const tripName=String(d.name||'').trim().replace(/\s+/g,' ').slice(0,100);
+      const tripTitle=el('mt80-route');
+      tripTitle.textContent=tripName||'My Trip';
+      tripTitle.title=tripName||'My Trip';
+      const budgetEl=el('mt80-card-budget');
+      const budgetText=pretty(c.total);
+      budgetEl.textContent=budgetText;
+      budgetEl.title=budgetText;
+      // Keep even six/seven-figure amounts fully visible on narrow phones.
+      budgetEl.style.fontSize=budgetText.length>=13?'12px':budgetText.length>=10?'clamp(12px,3.6vw,16px)':budgetText.length>=7?'clamp(15px,4.4vw,20px)':'';
+      el('mt80-card-riders').textContent=riderCount()+' Rider'+(riderCount()===1?'':'s');
       el('mt80-riders').textContent=riderCount();
-      el('mt910-budget').textContent=pretty(c.total);
       el('mt80-per-person').textContent='≈ '+pretty(c.total/riderCount())+' / Rider';
       for(const [kind,name] of [['fuel','fuel'],['stay','stay'],['food','food'],['toll','toll'],['other','other']]) el('mt80-'+kind).textContent=pretty(c[name]);
       el('mt80-cost-note').textContent=Number(c.other)>0?'Other expenses ('+pretty(c.other)+') are included in the total.':'Estimate cards stay in sync.';
