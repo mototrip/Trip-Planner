@@ -1,4 +1,4 @@
-/* MotoTrip V6.9 Group Safety — emergency privacy sync + opt-in GPS, last-known location.
+/* MotoTrip V7.1 Group Safety — emergency privacy sync + opt-in GPS, last-known location.
  * © 2026 Satish Kumar Gupta. No location is shared before explicit rider consent.
  * Browser/OS may suspend GPS when PWA is hidden. No service-worker background GPS.
  */
@@ -15,6 +15,8 @@
  const joinLiveBtn = $('mt66-live-start');
  const joinLivePanel = $('mt66-live-join');
  const retryEmergencyButton = $('mt-safety-retry-removal');
+ const gpsRetry = $('mt71-gps-retry');
+ let startupProbe = null, queuedPosition = null;
  const everyMs = 30000;
  const cloudTimeout = (promise, label) => {
   let timer;
@@ -229,6 +231,9 @@
  function markPendingStop(on){try{if(on)localStorage.setItem(pendingStopKey(),'yes');else localStorage.removeItem(pendingStopKey());}catch(_){/* storage unavailable */}}
  function needsStop(){try{return !!pendingStopKey() && localStorage.getItem(pendingStopKey())==='yes';}catch(_){return false;}}
  function stopTimer(){
+  if(startupProbe!==null){clearTimeout(startupProbe);startupProbe=null;}
+  queuedPosition=null;
+  if(gpsRetry)gpsRetry.hidden=true;
   trackingEpoch++;
   if(gpsTimer!==null){clearInterval(gpsTimer);gpsTimer=null;}
   if(gpsWatchId!==null){try{navigator.geolocation.clearWatch(gpsWatchId);}catch(_){}gpsWatchId=null;}
@@ -254,58 +259,92 @@
  }
  function gpsError(e){
   if(!gpsActive)return;
-  if(e?.code===1){void stopLocation(false);say('GPS permission denied. Sharing is OFF; cloud removal will be retried if necessary.',true);return;}
-  say('GPS is temporarily unavailable. Last location remains with its time; updates resume when GPS is available.',true);
+  if(e?.code===1){
+   if(gpsRetry)gpsRetry.hidden=true;
+   void stopLocation(false);
+   say('Location permission denied. In phone Settings allow Location for MotoTrip / browser, then tap Share My Location again.',true);
+   return;
+  }
+  if(gpsRetry)gpsRetry.hidden=false;
+  if(!navigator.onLine){say('Phone is offline. Last shared location (if any) remains visible; connect to internet and Retry GPS.',true);return;}
+  if(e?.code===3) say('GPS timed out. Check phone Location Services, move outdoors if needed and tap Retry GPS. Last shared location stays visible.',true);
+  else say('GPS signal unavailable or paused by the phone. Check Location Services and tap Retry GPS. Last shared location stays visible.',true);
  }
  async function postPosition(position = null, force = false){
-  if(!gpsActive || locationBusy || !validContext())return;
+  if(!gpsActive || !validContext())return;
+  // If a coarse GPS request is pending, retain the latest watcher fix instead of dropping it.
+  if(locationBusy){if(position)queuedPosition=position;return;}
   if(!force && lastPublishedAt && Date.now()-lastPublishedAt<18000)return;
   const epoch=trackingEpoch;
   locationBusy=true;
+  let stage='gps';
   try{
    const pos=position||await new Promise((resolve,reject)=>navigator.geolocation.getCurrentPosition(resolve,reject,
-    {enableHighAccuracy:true,timeout:17000,maximumAge:8000}));
+    {enableHighAccuracy:false,timeout:12000,maximumAge:15000}));
    if(!gpsActive || epoch!==trackingEpoch || !validContext())return;
    const lat=Number(pos.coords.latitude),lon=Number(pos.coords.longitude),acc=Number(pos.coords.accuracy);
    if(!Number.isFinite(lat)||!Number.isFinite(lon)||Math.abs(lat)>90||Math.abs(lon)>180)throw Error('Invalid GPS coordinates.');
    const gpsTime=Number(pos.timestamp)||Date.now();
-   // Never make cached/stale GPS appear fresh by replacing its actual fix time with now.
-   if(gpsTime>Date.now()+60000||Date.now()-gpsTime>90000)throw Error('GPS fix is old; keeping the previous timestamp.');
+   if(gpsTime>Date.now()+60000||Date.now()-gpsTime>90000)throw Error('GPS fix is old.');
+   stage='cloud';
    locationPending=writeSafety({name:riderName(),locationShared:true,latitude:lat,longitude:lon,
     accuracy:Number.isFinite(acc)?Math.max(0,Math.min(100000,acc)):0,
     locationUpdatedAt:new Date(gpsTime).toISOString()},epoch);
    await locationPending;
    if(!gpsActive||epoch!==trackingEpoch||!validContext())return;
    lastPublishedAt=Date.now();
-   say('✓ Live sharing ON · latest GPS '+localClock(new Date(gpsTime).toISOString())+'. Background updates depend on phone/browser permissions.');
+   if(gpsRetry)gpsRetry.hidden=true;
+   say('✓ Location updated '+localClock(new Date(gpsTime).toISOString())+'. Sharing stays ON while your phone permits GPS.');
   }catch(e){
-   gpsError(e);
-  }finally{locationPending=null;locationBusy=false;}
+   if(stage==='cloud'){
+    if(gpsRetry)gpsRetry.hidden=false;
+    say('GPS found, but group sync failed. Check internet / Firebase access and tap Retry GPS: '+errorText(e),true);
+   } else gpsError(e);
+  }finally{
+   locationPending=null;locationBusy=false;
+   if(queuedPosition && gpsActive && epoch===trackingEpoch){
+    const next=queuedPosition;queuedPosition=null;
+    // Don't spam Firebase: send one queued position once any request completes.
+    Promise.resolve().then(()=>postPosition(next));
+   }
+  }
  }
  function armWatcher(){
   if(!gpsActive || gpsWatchId!==null || !validContext())return;
-  // watchPosition is best-effort in a background browser, NOT a native background service.
   try{
-   gpsWatchId=navigator.geolocation.watchPosition(pos=>{void postPosition(pos);},gpsError,
-    {enableHighAccuracy:true,timeout:25000,maximumAge:8000});
-  }catch(e){say('GPS watcher unavailable: '+errorText(e),true);}
+   gpsWatchId=navigator.geolocation.watchPosition(pos=>{
+     if(startupProbe!==null){clearTimeout(startupProbe);startupProbe=null;}
+     void postPosition(pos);
+   },gpsError,{enableHighAccuracy:true,timeout:25000,maximumAge:12000});
+  }catch(e){gpsError(e);}
+ }
+ function retryGps(){
+   if(!gpsActive){void startLocation();return;}
+   if(gpsRetry)gpsRetry.hidden=true;
+   say('Checking GPS and group connection…');
+   // A coarse fix is usually quicker inside cities. The high-accuracy watcher remains enabled.
+   void postPosition(null,true);
  }
  async function startLocation(resume = false){
   if(gpsActive){if(!resume)await stopLocation();return;}
   if(!validContext()){say('Join Shared Ride before sharing location.',true);return;}
-  if(!navigator.geolocation){say('Location access is unavailable in this browser.',true);return;}
+  if(!navigator.geolocation){say('GPS is not available in this browser. Try Safari or Chrome with Location Services enabled.',true);return;}
   if(!window.isSecureContext){say('Location sharing requires HTTPS.',true);return;}
   if(needsStop()){await syncPendingStop();if(needsStop())return;}
-  if(!resume && !confirm('Start sharing your GPS with current and future members of this Shared Ride? MotoTrip will try to update while running (including in background when supported). Phone browsers may pause location when hidden or closed; others will see your LAST location and time. Sharing resumes when you reopen until you tap Stop or leave. Continue?'))return;
-  // Save the explicit, ride-scoped choice before requesting permission so accidental
-  // app suspension does not reset it. Permission denied will revoke this preference.
+  if(!resume && !confirm('Share your location with joined ride members? MotoTrip updates while the browser allows GPS; background updates can pause on iPhone. Last known location and time stay visible. Stop Sharing removes the group location. Continue?'))return;
   setOptIn(true);
   trackingEpoch++;
   gpsActive=true;lastPublishedAt=0;setLocationButton();
-  say(resume?'Resuming your previously approved GPS sharing…':'Requesting GPS permission…');
+  say(resume?'Resuming approved GPS sharing…':'Requesting location access…');
   armWatcher();
-  await postPosition(null,true);
-  if(gpsActive && gpsTimer===null)gpsTimer=setInterval(()=>{void postPosition(null,true);},everyMs);
+  // A watcher can take time on iOS. Try a coarse fix only if it hasn't supplied GPS yet.
+  startupProbe=setTimeout(()=>{
+   startupProbe=null;
+   if(gpsActive&&!lastPublishedAt&&!locationBusy)void postPosition(null,true);
+  },6000);
+  if(gpsTimer===null)gpsTimer=setInterval(()=>{
+   if(gpsActive && !locationBusy)void postPosition(null,true);
+  },everyMs);
  }
  async function toggleEmergency(){
   if(detailsBusy)return;
@@ -396,6 +435,7 @@
  });
  shareInfo.addEventListener('change',toggleEmergency);
  retryEmergencyButton?.addEventListener('click',()=>{void syncPendingEmergencyRemoval();});
+ gpsRetry?.addEventListener('click',retryGps);
  btnLocation.addEventListener('click',()=>{void startLocation();});
  joinLiveBtn?.addEventListener('click',()=>{
   box.open=true;

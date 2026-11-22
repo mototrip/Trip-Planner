@@ -1,4 +1,4 @@
-/* MotoTrip V4.8 — local-only Excel/CSV exports and restore.
+/* MotoTrip V7.1 — selected saved-trip Excel/CSV/PDF exports and restore.
    All data stays on the device, and no external package or service is required. */
 (()=>{'use strict';
 const encoder=new TextEncoder(),decoder=new TextDecoder();
@@ -10,7 +10,7 @@ function download(content,name,type){const b=content instanceof Blob?content:new
 function summaryData(state){
  const g=state.split||{},trips=Array.isArray(state.trips)?state.trips:[],expenses=Array.isArray(g.expenses)?g.expenses:[],payments=Array.isArray(g.transfers)?g.transfers:[],riders=Array.isArray(g.members)?g.members:[];
  const c=d=>{const km=safeNum(d.distance)*(d.round?2:1),fuel=safeNum(d.mileage)>0?km/safeNum(d.mileage)*safeNum(d.price):0;return {km,fuel,total:fuel+safeNum(d.nights)*safeNum(d.hotel)+safeNum(d.days)*safeNum(d.food)+safeNum(d.extra)+safeNum(d.toll)};};
- const tripRows=[['Trip name','Start','Destination','Distance (km)','Fuel cost (INR)','Estimated budget (INR)','Travel type','Bike / Vehicle'],...trips.map(t=>{const d=t.data||{},v=c(d);return [d.name||'',d.from||'',d.to||'',v.km,Math.round(v.fuel*100)/100,Math.round(v.total*100)/100,d.round?'Return':'One way',t.bikeName||''];})];
+ const tripRows=[['Trip name','Start','Destination','Distance (km)','Fuel cost (INR)','Estimated budget (INR)','Travel type','Bike / Vehicle','Mileage (km/L)','Fuel price (INR/L)','Hotel nights','Hotel cost (INR)','Food days','Food cost (INR)','Toll (INR)','Other costs (INR)','Departure date','Departure time','End date','End time'],...trips.map(t=>{const d=t.data||{},v=c(d);return [d.name||'',d.from||'',d.to||'',v.km,Math.round(v.fuel*100)/100,Math.round(v.total*100)/100,d.round?'Return':'One way',t.bikeName||'',safeNum(d.mileage),safeNum(d.price),safeNum(d.nights??Math.max(0,safeNum(d.days)-1)),safeNum(d.nights??Math.max(0,safeNum(d.days)-1))*safeNum(d.hotel),safeNum(d.days),safeNum(d.days)*safeNum(d.food),safeNum(d.toll),safeNum(d.extra),d.departDate||'',d.departTime||'',d.endDate||'',d.endTime||''];})];
  const expRows=[['Expense name','Paid by','Amount (INR)','Shared by','Date','Group / Trip'],...expenses.map(e=>[e.name||'',e.payer||'',safeNum(e.amount)/100,Array.isArray(e.people)?e.people.join(', '):'',e.date||'',g.name||''])];
  const payRows=[['From rider','To rider','Amount (INR)','Status','Date','Group / Trip'],...payments.map(e=>[e.from||'',e.to||'',safeNum(e.amount)/100,e.status==='unpaid'?'Unpaid':'Paid',e.date||'',g.name||''])];
  const rideRows=[['Rider name','Group / Trip'],...riders.map(n=>[n,g.name||''])];
@@ -21,13 +21,22 @@ function summaryData(state){
 function csvVal(v){let s=String(v??''); if(/^[\s]*[=+\-@\t\r]/.test(s))s="'"+s;return /[",\r\n]/.test(s)?'"'+s.replace(/"/g,'""')+'"':s;}
 window.motoTripExportCsv=state=>{
  const d=summaryData(state);const head=['Record type','Trip / Group','Name / From','To / Paid by','Amount (INR)','Other details','Date / Status'];const rows=[head];
- for(const t of d.tripRows.slice(1))rows.push(['Trip',t[0],t[1],t[2],t[5],`${t[3]} km, ${t[6]}, ${t[7]}`,'']);
+ for(const t of d.tripRows.slice(1))rows.push(['Trip',t[0],t[1],t[2],t[5],`${t[3]} km, ${t[6]}, ${t[7]}, mileage ${t[8]} km/L, petrol ₹${t[9]}/L, fuel ₹${t[4]}, hotel ₹${t[11]}, food ₹${t[13]}, toll ₹${t[14]}, other ₹${t[15]}, departure ${t[16]} ${t[17]}, end ${t[18]} ${t[19]}`,'']);
  for(const e of d.expRows.slice(1))rows.push(['Expense',e[5],e[0],e[1],e[2],e[3],e[4]]);
  for(const p of d.payRows.slice(1))rows.push(['Payment',p[5],p[0],p[1],p[2],p[3],p[4]]);
  for(const r of d.rideRows.slice(1))rows.push(['Rider',r[1],r[0],'','','','']);
  download('\uFEFF'+rows.map(r=>r.map(csvVal).join(',')).join('\r\n'),baseName()+'_Report.csv','text/csv;charset=utf-8');
 };
-window.motoTripExportPdf=()=>{window.open('./report.html','_blank','noopener');};
+window.motoTripExportPdf=state=>{
+ if(!Array.isArray(state?.trips)||!state.trips.length)throw Error('No saved trips to export.');
+ // Print page is a separate tab. Store only a 15-minute local snapshot under the
+ // same origin, so it can read the selected signed-in account data safely.
+ let scope='guest';try{scope=localStorage.getItem('mototrip-account-scope')||'guest';}catch(_){}
+ localStorage.setItem('mototrip-report-preview-v71',JSON.stringify({createdAt:Date.now(),scope,state}));
+ const win=window.open('./report.html?v=71','_blank');
+ if(!win)throw Error('Pop-up blocked. Allow MotoTrip pop-ups to open the PDF preview.');
+ try{win.opener=null;}catch(_){}
+};
 // Self-contained XLSX writer: ZIP stored entries; Excel/Numbers/Sheets-compatible OOXML.
 const crcTable=(()=>{const t=new Uint32Array(256);for(let i=0;i<256;i++){let c=i;for(let j=0;j<8;j++)c=(c&1)?0xedb88320^(c>>>1):c>>>1;t[i]=c>>>0;}return t;})();
 function crc32(bytes){let c=0xffffffff;for(const b of bytes)c=crcTable[(c^b)&255]^(c>>>8);return(c^0xffffffff)>>>0;}
@@ -40,7 +49,7 @@ function col(n){let s='';for(n++;n;n=Math.floor((n-1)/26))s=String.fromCharCode(
 function sheetXML(rows,widths=[],moneyCols=[]){const widthXML=widths.map((w,i)=>`<col min="${i+1}" max="${i+1}" width="${w}" customWidth="1"/>`).join('');const body=rows.map((row,i)=>{const cells=row.map((v,j)=>{const ref=col(j)+(i+1),sty=i===0?1:(moneyCols.includes(j)?2:0);if(typeof v==='number'&&Number.isFinite(v))return `<c r="${ref}" s="${sty}"><v>${v}</v></c>`;return `<c r="${ref}" s="${sty}" t="inlineStr"><is><t xml:space="preserve">${xmlesc(v)}</t></is></c>`;}).join('');return `<row r="${i+1}">${cells}</row>`;}).join('');return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><sheetViews><sheetView workbookViewId="0"><pane ySplit="1" topLeftCell="A2" activePane="bottomLeft" state="frozen"/></sheetView></sheetViews><cols>${widthXML}</cols><sheetData>${body}</sheetData></worksheet>`;}
 function backupLines(state){const bytes=encoder.encode(JSON.stringify(state));let b64='';for(let i=0;i<bytes.length;i+=12000){b64+=btoa(String.fromCharCode(...bytes.slice(i,i+12000)));}const lines=[];for(let i=0;i<b64.length;i+=20000)lines.push(b64.slice(i,i+20000));return [['MotoTrip Backup V1'],...lines.map(x=>[x])];}
 window.motoTripExportXlsx=state=>{
- const d=summaryData(state),sheets=[['Overview',d.overview,[39,67],[]],['Trips',d.tripRows,[32,29,29,23,25,27,20,28],[4,5]],['Expenses',d.expRows,[34,24,25,52,28,32],[2]],['Payments',d.payRows,[25,25,25,18,28,34],[2]],['Riders',d.rideRows,[30,36],[]],['MotoTrip Backup',backupLines(state),[100],[]]];
+ const d=summaryData(state),sheets=[['Overview',d.overview,[39,67],[]],['Trips',d.tripRows,[32,29,29,23,25,27,20,28,20,20,18,24,16,24,22,22,20,18,20,18],[4,5,9,11,13,14,15]],['Expenses',d.expRows,[34,24,25,52,28,32],[2]],['Payments',d.payRows,[25,25,25,18,28,34],[2]],['Riders',d.rideRows,[30,36],[]],...(state.__reportAll===false?[]:[['MotoTrip Backup',backupLines(state),[100],[]]])];
  const sheetItems=sheets.map((s,i)=>`<sheet name="${xmlesc(s[0])}" sheetId="${i+1}" r:id="rId${i+1}"/>`).join('');
  const book=`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><sheets>${sheetItems}</sheets></workbook>`;
  const styles=`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><numFmts count="1"><numFmt numFmtId="164" formatCode="&quot;₹&quot;#,##0.00"/></numFmts><fonts count="2"><font><sz val="11"/><name val="Calibri"/></font><font><b/><sz val="11"/><color rgb="FFFFFFFF"/><name val="Calibri"/></font></fonts><fills count="2"><fill><patternFill patternType="none"/></fill><fill><patternFill patternType="solid"><fgColor rgb="FF253D75"/><bgColor indexed="64"/></patternFill></fill></fills><borders count="1"><border><left/><right/><top/><bottom/><diagonal/></border></borders><cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs><cellXfs count="3"><xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/><xf numFmtId="0" fontId="1" fillId="1" borderId="0" xfId="0" applyFill="1" applyFont="1"/><xf numFmtId="164" fontId="0" fillId="0" borderId="0" xfId="0" applyNumberFormat="1"/></cellXfs></styleSheet>`;

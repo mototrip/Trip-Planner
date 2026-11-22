@@ -1,4 +1,4 @@
-/* MotoTrip V4.3 | Original app © 2026 Satish Kumar Gupta; third-party map data retains its own rights. */
+/* MotoTrip V7.1 | Original app © 2026 Satish Kumar Gupta; third-party map data retains its own rights. */
 const $=id=>document.getElementById(id), form=$('planner');
 const gear=['Helmet','Riding jacket','Gloves','Riding boots','Raincoat','First aid kit','Driving licence','RC & insurance','Puncture kit','Power bank','Chain lubricant','Tool kit'];
 const places = {
@@ -77,5 +77,42 @@ function renderBudget(){
 }
 const originalUpdate=update;update=function(...args){originalUpdate(...args);renderBudget();};
 
+// V7.1: choose which SAVED trip's real details to export.
+// The active planner draft is not a saved trip and is never silently substituted.
+const reportSelect=$('report-trip-select');
+function refreshReportPicker(){
+ if(!reportSelect)return;
+ const previous=reportSelect.value;
+ reportSelect.replaceChildren();
+ const all=document.createElement('option');all.value='__all__';all.textContent='All saved trips ('+state.trips.length+')';reportSelect.append(all);
+ for(const [i,t] of state.trips.entries()){
+   const option=document.createElement('option');option.value=t.id;
+   const d=t.data||{};
+   option.textContent=(i+1)+'. '+String(d.name||'Unnamed trip')+' · '+String(d.from||'?')+' → '+String(d.to||'?');
+   reportSelect.append(option);
+ }
+ if([...reportSelect.options].some(o=>o.value===previous))reportSelect.value=previous;
+ const hint=$('mt71-report-hint');
+ if(hint) hint.textContent=state.trips.length
+   ? state.trips.length+' saved trip'+(state.trips.length===1?'':'s')+' on this device. Select one or all to download.'
+   : 'No saved trips in this account/device yet. Save a trip in Planner first.';
+ for(const id of ['export-xlsx','export-csv','export-pdf']){
+   const button=$(id);if(button)button.disabled=!state.trips.length;
+ }
+}
+function reportData(){
+ const id=reportSelect?.value||'__all__';
+ if(id==='__all__')return {...state,__reportAll:true};
+ const trip=state.trips.find(t=>t.id===id);
+ if(!trip)throw Error('Selected saved trip not found. Choose it again.');
+ // A shared expense group's records belong only when its title matches that trip.
+ // Otherwise prevent unrelated group spending from appearing in a selected trip report.
+ const matched=String(state.split?.name||'').trim().toLowerCase()===String(trip.data?.name||'').trim().toLowerCase();
+ return {...state,trips:[trip],split:matched?state.split:{name:'',members:[],expenses:[],transfers:[]},__reportAll:false};
+}
+const oldRenderTrips=renderTrips;
+renderTrips=function(...args){const value=oldRenderTrips(...args);refreshReportPicker();return value;};
+refreshReportPicker();
+
 // V4.8: on-device report exports (no data sent to a server).
-for(const [id,fn] of [["export-xlsx","motoTripExportXlsx"],["export-csv","motoTripExportCsv"],["export-pdf","motoTripExportPdf"]]){const el=$(id);if(el)el.addEventListener("click",()=>{try{const task=window[fn](state);if(task&&task.catch)task.catch(e=>{console.error(e);notice("Export failed: "+e.message);});}catch(e){console.error(e);notice("Export failed: "+e.message);}});}
+for(const [id,fn] of [["export-xlsx","motoTripExportXlsx"],["export-csv","motoTripExportCsv"],["export-pdf","motoTripExportPdf"]]){const el=$(id);if(el)el.addEventListener("click",()=>{try{if(!state.trips.length){notice("Save a trip first, then download the report.");return;}const task=window[fn](reportData());if(task&&task.catch)task.catch(e=>{console.error(e);notice("Export failed: "+e.message);});}catch(e){console.error(e);notice("Export failed: "+e.message);}});}

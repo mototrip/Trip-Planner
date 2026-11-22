@@ -1116,3 +1116,17 @@ html.mt-full #mt70-quickstart{display:none!important}
  html body .mt70-quick-links>.mt70-quick-link{padding:8px 3px!important;gap:3px;font-size:10px!important}
  html:not(.mt-full) #plan .hero #stats>.stat{padding:6px!important}
 }
+
+
+/* MotoTrip V7.1 — entry choice, GPS help, real saved-trip reports */
+html.mt-entry-locked body > main { filter:blur(4px);pointer-events:none;user-select:none; }
+html.mt-entry-locked #mt-account-overlay .mt-account-scrim {cursor:default}
+html.mt-entry-locked #mt-account-x {display:none!important}
+#mt-account-overlay:focus-within {outline:0}
+.mt71-report-label{display:flex;flex-direction:column;gap:7px;font-size:12px;font-weight:800;color:var(--ink);margin:12px 0 5px}
+#trips .mt-reports-card #report-trip-select{width:100%;max-width:100%;min-width:0;min-height:42px!important;margin:0;padding:10px 32px 10px 11px;font-size:13px!important;font-weight:700;line-height:1.35;border:1px solid var(--edge);border-radius:10px;background:var(--sub);color:var(--ink);box-sizing:border-box}
+#mt71-report-hint{margin:4px 0 11px!important;font-size:11px!important;line-height:1.4;color:var(--muted);overflow-wrap:anywhere}
+.mt71-gps-retry{width:auto!important;min-height:35px!important;margin:9px 0 0!important;padding:7px 12px!important;border:1px solid #d3a359!important;border-radius:10px!important;background:#fff4df!important;color:#785018!important;font-size:12px!important;font-weight:800!important;cursor:pointer}
+.mt71-gps-retry[hidden]{display:none!important}
+html[data-theme=dark] .mt71-gps-retry{background:#4b3b22!important;color:#ffe2ad!important;border-color:#9b7641!important}
+#trips .mt-reports-card .export-grid button:disabled{opacity:.45!important;cursor:not-allowed!important}

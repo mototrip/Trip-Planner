@@ -1,4 +1,4 @@
-/* MotoTrip V6.5 | Optional Firebase email login + PRIVATE device-only rider profile with optional opt-in Group Safety sharing.
+/* MotoTrip V7.1 | Required entry choice (Login / Sign up / Guest) + Firebase email login + PRIVATE device-only rider profile with optional opt-in Group Safety sharing.
    © 2026 Satish Kumar Gupta. Profile details go to Firestore only after separate Group Safety consent. */
 (() => {
  'use strict';
@@ -16,6 +16,13 @@
  const savedProfileKey = () => profilePrefix + scope;
  const accountProfileKey = uid => profilePrefix + 'uid-' + uid;
  const afterLoginKey = 'mototrip-show-profile-after-login-v65';
+ const entryKey = 'mototrip-entry-choice-v71';
+ let entryRequired = true;
+ const main = document.querySelector('main');
+ if (main) main.inert = true;
+ function entryChoice(){try{return sessionStorage.getItem(entryKey)||'';}catch(_){return '';}}
+ function chooseEntry(choice){try{sessionStorage.setItem(entryKey,choice);}catch(_){}entryRequired=false;document.documentElement.classList.remove('mt-entry-locked');if(main)main.inert=false;closeDialog();}
+ function resetEntry(){try{sessionStorage.removeItem(entryKey);}catch(_){}entryRequired=true;document.documentElement.classList.add('mt-entry-locked');if(main)main.inert=true;}
  const declinedRestoreKey = uid => 'mototrip-declined-profile-restore-v65-' + uid;
  const privateTripKey = uid => 'mototrip-v1-uid-' + uid;
  const groupIsActive = () => Boolean(window.motoTripSharedRide?.active);
@@ -71,6 +78,7 @@
    $('mt-account-x').focus({preventScroll: true});
  }
  function closeDialog() {
+   if (entryRequired) return;
    el.hidden = true;
    document.documentElement.classList.remove('mt-account-open');
    setMessage();
@@ -78,6 +86,7 @@
  }
  function show(which) {
    if (!panels.includes(which)) which = 'welcome';
+   if (entryRequired && which === 'profile') which = 'welcome';
    for (const p of panels) $('mt-' + p + '-panel').hidden = p !== which;
    const titles = { welcome: 'Welcome to MotoTrip', signup: 'Create your account', login: 'Welcome back', profile: 'My Rider Profile' };
    $('mt-account-title').textContent = titles[which];
@@ -155,7 +164,7 @@
    markSeen();
    // An existing account should re-open the profile too, not land in Planner
    // with its private fields hidden and appearing to have vanished.
-   try { sessionStorage.setItem(afterLoginKey, 'yes'); } catch (_) {}
+   try { sessionStorage.setItem(afterLoginKey, 'yes'); sessionStorage.setItem(entryKey, 'uid-'+uid); } catch (_) {}
    location.reload();
  }
  async function signup(event) {
@@ -249,6 +258,7 @@
      if (auth.currentUser) await modules.signOut(auth);
      setScope(null);
      markSeen();
+     resetEntry();
      location.reload();
    });
  }
@@ -264,6 +274,7 @@
      try { localStorage.removeItem(savedProfileKey()); localStorage.removeItem(privateTripKey(u.uid)); } catch (_) {}
      setScope(null);
      markSeen();
+     resetEntry();
      location.reload();
    });
  }
@@ -308,7 +319,10 @@
  document.addEventListener('keydown', e => { if (e.key === 'Escape' && !el.hidden) closeDialog(); });
  $('mt-welcome-signup').addEventListener('click', () => show('signup'));
  $('mt-welcome-login').addEventListener('click', () => show('login'));
- $('mt-welcome-guest').addEventListener('click', () => { markSeen(); closeDialog(); });
+ $('mt-welcome-guest').addEventListener('click', () => {
+   if (scope !== 'guest') {setMessage('This account is signed in. Please sign out from My Profile first.',true);return;}
+   markSeen();chooseEntry('guest');
+ });
  for (const b of el.querySelectorAll('[data-mt-go]')) b.addEventListener('click', () => show(b.dataset.mtGo));
  $('mt-signup-panel').addEventListener('submit', signup);
  $('mt-login-panel').addEventListener('submit', login);
@@ -322,16 +336,44 @@
  $('mt-reset-password').addEventListener('click', resetPassword);
  $('mt-emergency-phone').addEventListener('input', e => updateEmergencyCall(e.target.value));
  fillLabel();
- let welcomed = false;
- try { welcomed = Boolean(localStorage.getItem(welcomeKey)); } catch (_) {}
  let finishProfile = false;
  try {
    finishProfile = sessionStorage.getItem(afterLoginKey) === 'yes' || sessionStorage.getItem('mototrip-finish-rider-profile') === 'yes';
    sessionStorage.removeItem(afterLoginKey);
    sessionStorage.removeItem('mototrip-finish-rider-profile');
  } catch (_) {}
- if (finishProfile) {
+ const showPostLoginProfile=()=>{
+   if(!finishProfile)return;
    openDialog('profile');
    setMessage(readProfile().name ? '✓ Your saved Rider Profile is ready.' : 'Add your name to finish your private Rider Profile.');
- } else if (!welcomed) openDialog('welcome');
+ };
+ // The welcome overlay is a real entry gate. No close/backdrop/Escape bypass.
+ // Guest is an explicit per-session choice; restored email accounts use Firebase auth.
+ const initialChoice=entryChoice();
+ if(initialChoice==='guest' && scope==='guest'){
+   chooseEntry('guest');
+ } else {
+   openDialog('welcome');
+   setMessage('Choose Create account, Log in, or Continue as Guest to enter MotoTrip.');
+   void loadAuth().then(()=>{
+     if(!entryRequired)return;
+     const signed=auth?.currentUser;
+     if(signed && !signed.isAnonymous){
+       const verified='uid-'+signed.uid;
+       if(scope!==verified){
+         setScope(signed.uid);
+         try{sessionStorage.setItem(entryKey, verified);}catch(_){}
+         location.reload();return;
+       }
+       chooseEntry(verified);
+       showPostLoginProfile();
+     } else {
+       // Never retain a previous account's local data in a guest/anonymous session.
+       if(scope.startsWith('uid-')){setScope(null);location.reload();return;}
+       setMessage('Choose how to continue: Create account, Log in, or Guest.');
+     }
+   }).catch(()=>{
+     if(entryRequired)setMessage('Could not verify a saved login. You can try Log in again, or choose Guest.',true);
+   });
+ }
 })();

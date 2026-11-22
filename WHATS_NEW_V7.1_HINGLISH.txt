@@ -1,0 +1,10 @@
+MotoTrip V7.1 — Entry, GPS Status, Real Trip Reports (Hinglish)
+
+1. App open karne par Login, Create account ya Continue as Guest mein se ek choose karna zaroori hai. Welcome ko X/backdrop se bypass nahi kar sakte. Already signed-in account Firebase se verify hoga.
+2. GPS: Permission denied = phone Location Settings check karo. Timeout/no GPS = Retry GPS dabao. Firebase network issue aur GPS error alag messages hain. Live location background mein browser/OS suspend kar sakta hai; app close hone par last-known location + timestamp rehta hai (jab tak sharing explicitly off na ki jaye).
+3. Trips tab -> Download reports -> Select 'All saved trips' ya kisi specific saved trip -> Excel, CSV, PDF. Download actual saved trip details se banta hai, blank template se nahi.
+4. PDF opens print preview; 'Print / Save as PDF' use karo. Safari/Chrome pop-up blocked ho toh site pop-ups allow karo.
+5. Single-trip report mein Bill Split records tab hi aayenge jab expense group ka name us trip se match kare. All trips report mein active expense group include hota hai; saved trips alag-alag device/account mein sync nahi hote.
+6. JSON/Excel BACKUP & RESTORE option alag hai. All-trips Excel mein restore backup sheet included hai; single-trip Excel report mein full backup sheet nahi hai.
+7. Data keys/Firestore schema unchanged; uninstall mat karo. Existing V7.0 se V7.1 update ke liye User > Update now.
+8. Firebase / GPS ke real-phone verification abhi required hai.
