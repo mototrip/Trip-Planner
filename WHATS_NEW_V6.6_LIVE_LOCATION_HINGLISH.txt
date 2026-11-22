@@ -1,0 +1,12 @@
+MotoTrip V6.6 — Live Group Location (best effort web/PWA)
+
+1. Create/Join Shared Ride ke baad "Start Live Location" visible. User permission zaroori hai.
+2. Geolocation watchPosition + 30-second refresh: GPS while app can execute; no automatic disable when hidden.
+3. App hidden, background, closed, offline ya phone OFF par latest saved position + original timestamp rehta hai. 2 min se purani position last-known marked; stale position Maps par khol sakte hain.
+4. App dobara kholne aur same account/ride connect hone par, previously approved sharing can resume unless Stop pressed.
+5. Stop Sharing removes GPS cloud fields; offline stop queued for retry on reconnect. Leave Shared Ride removes full safety record.
+6. IMPORTANT: iOS/Android web apps do NOT have guaranteed background GPS. Browser may suspend watchPosition, network, JS or the whole PWA. For true continuous screen-off/background tracking, create a native iOS/Android application with user-approved background location permissions.
+7. Location is NEVER enabled merely by joining a ride. Opt-in is mandatory.
+8. Your V6.5 bills, profile, reports and Firebase rules format are unchanged.
+
+Quick upload: index.html, safety.js, style.css, sw.js to GitHub repo root, then Commit. Uninstall not required.

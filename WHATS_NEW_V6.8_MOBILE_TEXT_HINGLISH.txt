@@ -1,0 +1,12 @@
+MotoTrip V6.8 — Mobile Text & Layout Fit Fix
+
+1. Profile ke andar extra form padding remove; Name, Vehicle, Gender aur Emergency card ko zyada width milegi.
+2. Emergency Blood Group note ab short, readable aur automatically wrap hota hai.
+3. Shared Ride, Group Safety, rider names, invite buttons, payment status, Route notes aur dashboard ke long labels fit/wrap karenge.
+4. Narrow iPhone par nav labels aur Safety buttons screen ke andar rahenge.
+5. JavaScript, Firebase, app login, existing trips/expenses/profile storage, update-choice flow untouched.
+
+GitHub par Quick ZIP ki 3 app files upload karo: index.html, style.css, sw.js.
+All 3 should be uploaded together, then Commit Changes. App reopen karke Update now choose karo.
+
+Note: Existing PWA cache / iOS font-size settings may briefly show the older layout until the new Service Worker activates.

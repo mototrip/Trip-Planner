@@ -22,8 +22,8 @@
  const config = window.MOTOTRIP_FIREBASE_CONFIG || {};
  const configured = ['apiKey','authDomain','projectId','appId'].every(k =>
   typeof config[k] === 'string' && !!config[k].trim() && !/YOUR_|<|>/.test(config[k]));
- let auth=null, db=null, sdk=null, me=null, current=null, lastRemote=null, lastLocal=null;
- let subscription=null, busy=0, queue=Promise.resolve(), leaving=false;
+ let auth=null, db=null, sdk=null, sdkLoading=null, me=null, current=null, lastRemote=null, lastLocal=null;
+ let subscription=null, busy=0, queue=Promise.resolve(), leaving=false, joinInProgress=false;
  let lastError='';
  const clone = o => JSON.parse(JSON.stringify(o));
  const uuid = () => crypto.randomUUID();
@@ -81,16 +81,21 @@
   if(active){ $('shared-current').textContent='Shared: '+(current?.name||'Group Ride')+' · Your friends can view and add expenses'; }
  }
  async function loadSDK(){
-  if(sdk)return;
+  if(sdk)return sdk;
+  if(sdkLoading)return sdkLoading;
   if(!configured)throw Error('Owner setup required: Add your Firebase web config to firebase-config.js and publish FIREBASE_RULES.txt in Firestore. Offline Bill Split is still available.');
-  const version='13.4.0';
-  const [appM,authM,dbM]=await Promise.all([
-   import(`https://www.gstatic.com/firebasejs/${version}/firebase-app.js`),
-   import(`https://www.gstatic.com/firebasejs/${version}/firebase-auth.js`),
-   import(`https://www.gstatic.com/firebasejs/${version}/firebase-firestore.js`)]);
-  const app=appM.getApps().length ? appM.getApp() : appM.initializeApp(config);
-  auth=authM.getAuth(app);db=dbM.getFirestore(app);
-  sdk={authM,dbM};
+  // Restore and Join can start together. Load Firebase modules only once per page.
+  sdkLoading=(async()=>{
+   const version='13.4.0';
+   const [appM,authM,dbM]=await Promise.all([
+    import(`https://www.gstatic.com/firebasejs/${version}/firebase-app.js`),
+    import(`https://www.gstatic.com/firebasejs/${version}/firebase-auth.js`),
+    import(`https://www.gstatic.com/firebasejs/${version}/firebase-firestore.js`)]);
+   const app=appM.getApps().length ? appM.getApp() : appM.initializeApp(config);
+   auth=authM.getAuth(app);db=dbM.getFirestore(app);
+   sdk={authM,dbM};return sdk;
+  })().catch(e=>{sdkLoading=null;throw e;});
+  return sdkLoading;
  }
  async function signIn(){
   await loadSDK();
@@ -120,18 +125,27 @@
   subscription=sdk.dbM.onSnapshot(rideRef(rid),snap=>{
    if(!current||current.rideId!==rid)return;
    if(!snap.exists()) {message('This ride is no longer available.',true);return;}
-   if(snap.metadata.fromCache){badge('Reconnecting');message('Waiting for latest group history from Firebase…');return;}
+   if(snap.metadata.fromCache){
+    // The join transaction already returned verified history. Never hide it behind
+    // a stale cached snapshot or tell the rider that nothing has loaded.
+    if(!lastRemote){badge('Reconnecting');message('Waiting for latest group history from Firebase…');}
+    return;
+   }
    lastRemote=snap.data();
    // Avoid replacing freshly loaded complete server history with a stale offline cache.
    if(!snap.metadata.fromCache && !busy)display(lastRemote);
    if(!lastError)message('✓ Connected. Changes appear on all joined phones.');
   },e=>{badge('Disconnected');message('Cloud sync error: '+e.message+'. Check Firebase settings and permissions.',true);});
  }
- async function activate(rideId,inviteId){
-  // Server-first: never replace past bills with empty local state while connecting.
-  const snap=await withTimeout(sdk.dbM.getDocFromServer(rideRef(rideId)), 'Loading past expenses',15000);
-  if(!snap.exists())throw Error('Shared Ride could not be found.');
-  const remote=snap.data();
+ async function activate(rideId,inviteId,serverHistory=null){
+  // Join transactions already read an authoritative server snapshot. Reuse it
+  // instead of downloading the entire expense ledger a SECOND time.
+  let remote=serverHistory;
+  if(!remote){
+   const snap=await withTimeout(sdk.dbM.getDocFromServer(rideRef(rideId)), 'Loading past expenses',15000);
+   if(!snap.exists())throw Error('Shared Ride could not be found.');
+   remote=snap.data();
+  }
   if(!Array.isArray(remote.members)||!Array.isArray(remote.expenses)||!Array.isArray(remote.transfers))
    throw Error('Ride history is incomplete. Ask the organizer to check the group.');
   leaving=false;
@@ -183,46 +197,61 @@
   finally{$('shared-create').disabled=false;}
  }
  async function joinRide(){
-  if(enabled())return;
+  if(enabled()||joinInProgress)return;
   const name=inputName(),code=joinToken($('shared-code').value);
   if(!name){message('First add your Rider Name in Profile. It will be picked automatically.',true);$('mt-account-open')?.click();return;}
   if(!code){message('Paste a valid Shared Ride invitation link or code.',true);return;}
   if(!configured){message('Owner needs to set up Firebase first. See setup guide in ZIP.',true);return;}
+  joinInProgress=true;
+  const button=$('shared-join');button.disabled=true;button.setAttribute('aria-busy','true');
   try{
-   $('shared-join').disabled=true;message('Joining your friends…');
-   const user=await signIn();
-   const inviteSnap=await sdk.dbM.getDoc(inviteRef(code));
+   if(!navigator.onLine)throw Error('You are offline. Connect to the internet and try again.');
+   message('Connecting securely…');
+   const user=await withTimeout(signIn(),'Firebase sign-in',15000);
+   message('Checking invitation…');
+   const inviteSnap=await withTimeout(sdk.dbM.getDocFromServer(inviteRef(code)),'Checking invitation',12000);
    if(!inviteSnap.exists())throw Error('Invalid or expired invite. Ask your friend for a fresh link.');
    const rideId=inviteSnap.data().rideId;
    if(typeof rideId!=='string'||!/^[a-f0-9]{32}$/.test(rideId))throw Error('Invalid shared ride.');
-   const myRef=memberRef(rideId,user.uid),memberSnap=await sdk.dbM.getDoc(myRef);
-   // Returning riders keep their original ledger name, so historical payer/share references survive.
+   const myRef=memberRef(rideId,user.uid);
+   message('Finding your rider membership…');
+   const memberSnap=await withTimeout(sdk.dbM.getDocFromServer(myRef),'Checking rider membership',12000);
+   // Returning riders keep their original ledger name, so payment references survive.
    const wasMember=memberSnap.exists();
    const ledgerName=wasMember?memberSnap.data().name:name;
-   if(!wasMember)await sdk.dbM.setDoc(myRef,{name,inviteId:code,joinedAt:new Date().toISOString()});
+   if(!wasMember){
+    message('Adding you to the ride…');
+    await withTimeout(sdk.dbM.setDoc(myRef,{name,inviteId:code,joinedAt:new Date().toISOString()}),'Adding you as a rider',15000);
+   }
+   let verifiedHistory;
    try{
+    message('Loading group expenses and payments…');
+    // Firestore transaction provides complete server-backed history. Return it
+    // with updated member list, so activate() needs NO redundant getDocFromServer.
     const r=rideRef(rideId);
-    await sdk.dbM.runTransaction(db,async tx=>{
+    verifiedHistory=await withTimeout(sdk.dbM.runTransaction(db,async tx=>{
      const snap=await tx.get(r);
      if(!snap.exists())throw Error('Shared ride has been removed.');
      const old=snap.data();const members=old.members||[];
      const collision=members.some(x=>x.toLocaleLowerCase()===ledgerName.toLocaleLowerCase());
      if(collision&&!wasMember)throw Error('A rider with this name is already in the group. Use a distinguishable name in Profile.');
-     if(!collision){
-      if(members.length>=100)throw Error('Ride has reached rider limit.');
-      tx.update(r,{members:[...members,ledgerName],updatedAt:new Date().toISOString()});
-     }
-    });
+     if(collision)return old;
+     if(members.length>=100)throw Error('Ride has reached rider limit.');
+     const updatedAt=new Date().toISOString();
+     const updatedMembers=[...members,ledgerName];
+     tx.update(r,{members:updatedMembers,updatedAt});
+     return {...old,members:updatedMembers,updatedAt};
+    }), 'Loading group history',18000);
    }catch(e){
-    // Membership was created only for this attempt: revoke partial joins on failure.
-    if(!wasMember)try{await sdk.dbM.deleteDoc(myRef);}catch(_){/* warn on next try */}
+    // Clean up a new failed membership. Never remove existing members on failure.
+    if(!wasMember&&!/timed out/i.test(String(e?.message||'')))try{await withTimeout(sdk.dbM.deleteDoc(myRef),'Cleaning up failed join',8000);}catch(_){/* next attempt will reconcile membership */}
     throw e;
    }
-   preserveLocal();await activate(rideId,code);
-   // Hide invitation after successful join so users won't accidentally share it on screenshots.
+   preserveLocal();await activate(rideId,code,verifiedHistory);
+   // Hide invitation after successful join to avoid leaking it in screenshots.
    if(location.hash.includes('join='))history.replaceState(null,'',location.pathname+location.search);
-  }catch(e){message('Join failed: '+e.message,true);}
-  finally{$('shared-join').disabled=false;}
+  }catch(e){message('Join failed: '+String(e?.message||'Connection error')+'. Check your connection and try again.',true);}
+  finally{joinInProgress=false;button.disabled=false;button.removeAttribute('aria-busy');}
  }
  function patch(before,after){
   const b=normalizeGroup(before),a=normalizeGroup(after);
@@ -372,7 +401,7 @@
   if(location.hash.includes('join='))history.replaceState(null,'',location.pathname+location.search);
  }
  async function restore(){
-  if(!configured)return;
+  if(!configured||joinToken(location.hash))return; // explicit invite takes priority
   try{
    // IMPORTANT: restore an existing identity, never sign in anonymously on page load.
    await loadSDK();
@@ -387,9 +416,11 @@
     try{const legacy=JSON.parse(localStorage.getItem(sessionKey)||'null');if(!legacy?.uid||legacy.uid===user.uid)session=legacy;}catch(_){}
    }
    if(!session?.rideId||!session?.inviteId||!(/^[a-f0-9]{32}$/i.test(session.rideId)))return;
+   if(joinInProgress||enabled())return;
    message('Reconnecting to your Shared Ride…');
    const member=await withTimeout(sdk.dbM.getDocFromServer(memberRef(session.rideId,user.uid)), 'Checking ride membership');
    if(!member.exists())throw Error('This account is not a member. Use your invite link to join.');
+   if(joinInProgress||enabled())return;
    await activate(session.rideId,session.inviteId);
   }catch(e){message('Reconnect failed: '+e.message+'. Sign in with the SAME account or use your invite link.',true);}
  }

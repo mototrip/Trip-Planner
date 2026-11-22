@@ -1,5 +1,6 @@
-/* MotoTrip V5.8 Group Safety (consent-based, foreground GPS only)
- * © 2026 Satish Kumar Gupta. Emergency & GPS data are never shared by default.
+/* MotoTrip V6.6 Group Safety — opt-in GPS watch, best-effort background, last-known location.
+ * © 2026 Satish Kumar Gupta. No location is shared before explicit rider consent.
+ * Browser/OS may suspend GPS when PWA is hidden. No service-worker background GPS.
  */
 (() => {
  'use strict';
@@ -11,7 +12,9 @@
  const status = $('mt-safety-status');
  const roster = $('mt-safety-riders');
  const count = $('mt-safety-count');
- const everyMs = 45000;
+ const joinLiveBtn = $('mt66-live-start');
+ const joinLivePanel = $('mt66-live-join');
+ const everyMs = 30000;
  const cloudTimeout = (promise, label) => {
   let timer;
   return Promise.race([promise,new Promise((_, reject) => {
@@ -19,8 +22,9 @@
   })]).finally(()=>clearTimeout(timer));
  };
  const staleAfterMs = 120000;
- let context = null, unsubscribe = null, gpsTimer = null, gpsActive = false;
+ let context = null, unsubscribe = null, gpsTimer = null, gpsWatchId = null, gpsActive = false;
  let locationBusy = false, detailsBusy = false, mySafety = null;
+ let locationPending = null, trackingEpoch = 0, lastPublishedAt = 0;
  let refreshTimer = null, generation = 0, lastCards = [];
  const bloodTypes = new Set(['','A+','A-','B+','B-','AB+','AB-','O+','O-']);
  const clean = (x, max = 80) => String(x || '').trim().slice(0, max);
@@ -61,10 +65,11 @@
   if (!d.locationShared) return {...d,latitude:null,longitude:null,accuracy:null,locationUpdatedAt:''};
   return d;
  }
- async function writeSafety(next) {
+ async function writeSafety(next, epoch = null) {
   if (!validContext()) throw Error('Join a Shared Ride first.');
   const ref=currentRef();
   const old=await cloudTimeout(context.dbM.getDoc(ref),'Reading safety settings');
+  if(!validContext() || (epoch !== null && (epoch !== trackingEpoch || !gpsActive)))return;
   const merged={...(old.exists()?old.data():blank(context.uid)),...next,
    uid:context.uid,updatedAt:new Date().toISOString()};
   const safe=locationFields(infoFields(merged));
@@ -80,6 +85,14 @@
   btnLocation.textContent = gpsActive ? '✕ Stop Sharing Location' : '📍 Share My Location';
   btnLocation.classList.toggle('is-live', gpsActive);
   btnLocation.setAttribute('aria-pressed', String(gpsActive));
+  if(joinLivePanel){
+   joinLivePanel.hidden=!context;
+   joinLivePanel.classList.toggle('is-live',gpsActive);
+  }
+  if(joinLiveBtn){
+   joinLiveBtn.textContent=gpsActive?'✓ Sharing ON · Manage':'📍 Start Live Location';
+   joinLiveBtn.setAttribute('aria-pressed',String(gpsActive));
+  }
  }
  function localClock(timestamp){
   const d=new Date(timestamp);
@@ -115,7 +128,7 @@
    if(d.locationShared){
     const valid = Number.isFinite(d.latitude)&&Number.isFinite(d.longitude)&&Math.abs(d.latitude)<=90&&Math.abs(d.longitude)<=180;
     const fresh=freshTime(d.locationUpdatedAt);
-    tag(badges, valid ? (fresh ? '📍 Location shared · '+localClock(d.locationUpdatedAt) : '⚠ Old location · '+localClock(d.locationUpdatedAt)):'Location unavailable');
+    tag(badges, valid ? (fresh ? '🟢 Latest GPS · '+localClock(d.locationUpdatedAt) : '🕘 Last location · '+localClock(d.locationUpdatedAt)):'Location unavailable');
     if(valid && Number.isFinite(d.accuracy)) tag(badges,'GPS accuracy ≈ '+Math.round(d.accuracy)+' m');
    }
    card.append(badges);
@@ -128,15 +141,18 @@
      links.append(call);
     }
    }
-   if(d.locationShared && freshTime(d.locationUpdatedAt) && Number.isFinite(d.latitude)&&Number.isFinite(d.longitude)
+   if(d.locationShared && Number.isFinite(d.latitude)&&Number.isFinite(d.longitude)
       && Math.abs(d.latitude)<=90&&Math.abs(d.longitude)<=180){
     const coords=d.latitude.toFixed(6)+','+d.longitude.toFixed(6);
-    const map=el('a','','🧭 Navigate to rider');
-    map.href='https://www.google.com/maps/dir/?api=1&destination='+encodeURIComponent(coords)+'&travelmode=driving';
+    const isFresh=freshTime(d.locationUpdatedAt);
+    const map=el('a','',isFresh?'🧭 Navigate to rider':'🗺️ View last location');
+    map.href=isFresh
+     ? 'https://www.google.com/maps/dir/?api=1&destination='+encodeURIComponent(coords)+'&travelmode=driving'
+     : 'https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(coords);
     map.target='_blank';map.rel='noopener noreferrer';links.append(map);
    }
    if(links.childNodes.length)card.append(links);
-   if(d.locationShared && !freshTime(d.locationUpdatedAt))card.append(el('p','mt-safety-stale','Last location is outdated; ask rider to re-share. It is not a live position.'));
+   if(d.locationShared && !freshTime(d.locationUpdatedAt))card.append(el('p','mt-safety-stale','Last known location only — updates may be paused because the app is backgrounded, closed, offline or the phone is off. Not live.'));
    roster.append(card);
   }
  }
@@ -154,46 +170,92 @@
    },e=>{if(g!==generation)return;say('Safety cards unavailable: '+errorText(e)+'. Check updated Firestore Rules.',true);});
   } catch(e){say('Safety setup failed: '+errorText(e),true);}
  }
- function stopTimer() {
+ // A rider explicitly opts in for this specific account + ride until Stop or Leave.
+ // No blanket location sharing for newly joined members.
+ function preferenceKey(){return context?'mototrip-live-location-v66-'+context.uid+'-'+context.rideId:'';}
+ function pendingStopKey(){return context?'mototrip-location-stop-v66-'+context.uid+'-'+context.rideId:'';}
+ function optedIn(){try{return !!preferenceKey() && localStorage.getItem(preferenceKey())==='yes';}catch(_){return false;}}
+ function setOptIn(on){try{if(on)localStorage.setItem(preferenceKey(),'yes');else localStorage.removeItem(preferenceKey());}catch(_){/* storage unavailable */}}
+ function markPendingStop(on){try{if(on)localStorage.setItem(pendingStopKey(),'yes');else localStorage.removeItem(pendingStopKey());}catch(_){/* storage unavailable */}}
+ function needsStop(){try{return !!pendingStopKey() && localStorage.getItem(pendingStopKey())==='yes';}catch(_){return false;}}
+ function stopTimer(){
+  trackingEpoch++;
   if(gpsTimer!==null){clearInterval(gpsTimer);gpsTimer=null;}
+  if(gpsWatchId!==null){try{navigator.geolocation.clearWatch(gpsWatchId);}catch(_){}gpsWatchId=null;}
   gpsActive=false;setLocationButton();
  }
- async function stopLocation(notify = true) {
-  stopTimer();
-  if (!validContext())return;
-  try {
+ async function syncPendingStop(){
+  if(!validContext() || !needsStop())return;
+  try{
    await writeSafety({locationShared:false,latitude:null,longitude:null,accuracy:null,locationUpdatedAt:''});
-   if(notify)say('✓ Your location is no longer shared with this ride.');
-  } catch(e){
-   if(notify)say('Could not clear cloud location. Connect to the internet and tap Stop again: '+errorText(e),true);
-  }
+   markPendingStop(false);
+   say('✓ Location sharing stopped and cloud coordinates removed.');
+  }catch(e){say('Sharing is OFF on this phone. Cloud removal pending: connect to the internet. '+errorText(e),true);}
  }
- async function postPosition() {
-  if (!gpsActive || locationBusy || document.hidden || !validContext())return;
+ async function stopLocation(notify = true){
+  setOptIn(false);
+  markPendingStop(true);
+  stopTimer();
+  if(!validContext())return;
+  // Let an in-flight GPS write settle before clearing it, so a late write does not re-share.
+  if(locationPending)try{await Promise.race([locationPending.catch(()=>{}),new Promise(r=>setTimeout(r,14000))]);}catch(_){}
+  await syncPendingStop();
+  if(notify&&!needsStop())say('✓ Location sharing is OFF. Your last GPS location was removed from the group.');
+ }
+ function gpsError(e){
+  if(!gpsActive)return;
+  if(e?.code===1){void stopLocation(false);say('GPS permission denied. Sharing is OFF; cloud removal will be retried if necessary.',true);return;}
+  say('GPS is temporarily unavailable. Last location remains with its time; updates resume when GPS is available.',true);
+ }
+ async function postPosition(position = null, force = false){
+  if(!gpsActive || locationBusy || !validContext())return;
+  if(!force && lastPublishedAt && Date.now()-lastPublishedAt<18000)return;
+  const epoch=trackingEpoch;
   locationBusy=true;
-  try {
-   const pos=await new Promise((resolve,reject)=>navigator.geolocation.getCurrentPosition(resolve,reject,
-    {enableHighAccuracy:true,timeout:12000,maximumAge:15000}));
-   if (!gpsActive || document.hidden || !validContext())return;
+  try{
+   const pos=position||await new Promise((resolve,reject)=>navigator.geolocation.getCurrentPosition(resolve,reject,
+    {enableHighAccuracy:true,timeout:17000,maximumAge:8000}));
+   if(!gpsActive || epoch!==trackingEpoch || !validContext())return;
    const lat=Number(pos.coords.latitude),lon=Number(pos.coords.longitude),acc=Number(pos.coords.accuracy);
-   if(!Number.isFinite(lat)||!Number.isFinite(lon)||Math.abs(lat)>90||Math.abs(lon)>180)throw Error('Invalid GPS position.');
-   await writeSafety({name:riderName(),locationShared:true,latitude:lat,longitude:lon,
-    accuracy:Number.isFinite(acc)?Math.max(0,Math.min(100000,acc)):0,locationUpdatedAt:new Date().toISOString()});
-   say('✓ Location shared with ride members · '+new Date().toLocaleTimeString()+'. Keep MotoTrip open for updates.');
+   if(!Number.isFinite(lat)||!Number.isFinite(lon)||Math.abs(lat)>90||Math.abs(lon)>180)throw Error('Invalid GPS coordinates.');
+   const gpsTime=Number(pos.timestamp)||Date.now();
+   // Never make cached/stale GPS appear fresh by replacing its actual fix time with now.
+   if(gpsTime>Date.now()+60000||Date.now()-gpsTime>90000)throw Error('GPS fix is old; keeping the previous timestamp.');
+   locationPending=writeSafety({name:riderName(),locationShared:true,latitude:lat,longitude:lon,
+    accuracy:Number.isFinite(acc)?Math.max(0,Math.min(100000,acc)):0,
+    locationUpdatedAt:new Date(gpsTime).toISOString()},epoch);
+   await locationPending;
+   if(!gpsActive||epoch!==trackingEpoch||!validContext())return;
+   lastPublishedAt=Date.now();
+   say('✓ Live sharing ON · latest GPS '+localClock(new Date(gpsTime).toISOString())+'. Background updates depend on phone/browser permissions.');
   }catch(e){
-   say('Could not update location: '+errorText(e)+'. You can stop sharing any time.',true);
-   if(e?.code===1){await stopLocation(false);say('GPS permission denied. Location sharing is OFF.',true);}
-  }finally{locationBusy=false;}
+   gpsError(e);
+  }finally{locationPending=null;locationBusy=false;}
  }
- async function startLocation(){
-  if(gpsActive){await stopLocation();return;}
-  if(!validContext()) {say('Join Shared Ride before sharing location.',true);return;}
-  if (!navigator.geolocation){say('Location access is not available in this browser.',true);return;}
+ function armWatcher(){
+  if(!gpsActive || gpsWatchId!==null || !validContext())return;
+  // watchPosition is best-effort in a background browser, NOT a native background service.
+  try{
+   gpsWatchId=navigator.geolocation.watchPosition(pos=>{void postPosition(pos);},gpsError,
+    {enableHighAccuracy:true,timeout:25000,maximumAge:8000});
+  }catch(e){say('GPS watcher unavailable: '+errorText(e),true);}
+ }
+ async function startLocation(resume = false){
+  if(gpsActive){if(!resume)await stopLocation();return;}
+  if(!validContext()){say('Join Shared Ride before sharing location.',true);return;}
+  if(!navigator.geolocation){say('Location access is unavailable in this browser.',true);return;}
   if(!window.isSecureContext){say('Location sharing requires HTTPS.',true);return;}
-  if(!confirm('Share your current GPS coordinates with everyone who joined this Shared Ride? They can open them on Maps. Updates happen only while MotoTrip stays open and visible.'))return;
-  gpsActive=true;setLocationButton();say('Requesting GPS permission…');
-  await postPosition();
-  if(gpsActive && gpsTimer===null)gpsTimer=setInterval(postPosition,everyMs);
+  if(needsStop()){await syncPendingStop();if(needsStop())return;}
+  if(!resume && !confirm('Start sharing your GPS with current and future members of this Shared Ride? MotoTrip will try to update while running (including in background when supported). Phone browsers may pause location when hidden or closed; others will see your LAST location and time. Sharing resumes when you reopen until you tap Stop or leave. Continue?'))return;
+  // Save the explicit, ride-scoped choice before requesting permission so accidental
+  // app suspension does not reset it. Permission denied will revoke this preference.
+  setOptIn(true);
+  trackingEpoch++;
+  gpsActive=true;lastPublishedAt=0;setLocationButton();
+  say(resume?'Resuming your previously approved GPS sharing…':'Requesting GPS permission…');
+  armWatcher();
+  await postPosition(null,true);
+  if(gpsActive && gpsTimer===null)gpsTimer=setInterval(()=>{void postPosition(null,true);},everyMs);
  }
  async function toggleEmergency(){
   if(detailsBusy)return;
@@ -218,7 +280,7 @@
   finally{detailsBusy=false;shareInfo.disabled=false;}
  }
  async function removeMySafety(){
-  stopTimer();
+  setOptIn(false);markPendingStop(false);stopTimer();
   if(!validContext())return;
   const ref=currentRef();
   const record=await cloudTimeout(context.dbM.getDoc(ref),'Checking shared safety data');
@@ -236,18 +298,40 @@
   const next=window.motoTripSharedRide?.safetyContext?.();
   if(next && context?.uid===next.uid && context?.rideId===next.rideId)return;
   clearLocal();
-  if(next){context=next;initRoster();say('Sharing is OFF by default. Choose what to share with joined riders.');}
- }
- // Browser background/locked mode must NOT be represented as continuous live tracking.
- document.addEventListener('visibilitychange',()=>{
-  if(document.hidden && gpsActive) {
-   // Best effort removal. If offline, other users see a stale-location warning after two minutes.
-   void stopLocation(false);
+  if(next){
+   context=next;initRoster();setLocationButton();
+   if(needsStop())void syncPendingStop();
+   else if(optedIn())void startLocation(true);
+   else say('New ride: live location is OFF. Tap Start Live Location to share your GPS.');
   }
+ }
+ // Never clear a location just because the app goes into the background.
+ // iOS and other browsers can suspend JS/GPS regardless of our preferences.
+ document.addEventListener('visibilitychange',()=>{
+  if(!gpsActive)return;
+  if(document.hidden){say('Location sharing is ON. Background GPS may pause on this device; group members can view your last timestamped location.');}
+  else {armWatcher();void postPosition(null,true);}
  });
- window.addEventListener('pagehide',()=>{if(gpsActive)void stopLocation(false);});
+ window.addEventListener('pageshow',()=>{
+  if(!gpsActive && validContext() && optedIn())void startLocation(true);
+  else if(gpsActive)void postPosition(null,true);
+ });
+ window.addEventListener('pagehide',()=>{
+  // Discard only this page's watcher. Do NOT revoke the cloud safety record.
+  // Last position remains visible with a stale label until sharing resumes.
+  stopTimer();
+ });
+ window.addEventListener('online',()=>{
+  if(needsStop())void syncPendingStop();
+  else if(gpsActive)void postPosition(null,true);
+ });
  shareInfo.addEventListener('change',toggleEmergency);
- btnLocation.addEventListener('click',startLocation);
+ btnLocation.addEventListener('click',()=>{void startLocation();});
+ joinLiveBtn?.addEventListener('click',()=>{
+  box.open=true;
+  if(gpsActive){box.scrollIntoView({behavior:'smooth',block:'nearest'});return;}
+  void startLocation();
+ });
  window.addEventListener('mototrip-ride-change',onRideChange);
  window.addEventListener('mototrip-profile-updated',async()=>{
   if(!validContext() || !mySafety?.emergencyShared)return;

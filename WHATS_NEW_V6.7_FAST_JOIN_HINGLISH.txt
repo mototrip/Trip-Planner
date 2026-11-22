@@ -1,0 +1,10 @@
+MotoTrip V6.7 — Faster Shared Ride Join
+=====================================
+1. Join flow now reuses Firestore transaction server history rather than downloading the entire group history twice.
+2. Clear step-by-step joining progress. No silent wait; per-step timeouts.
+3. Prevents double taps and parallel Firebase module initializations.
+4. Opening an invite link prioritizes that invitation over old group auto-restore.
+5. All prior expenses, payment history and riders remain loaded from the server.
+6. No change to Firebase rules, user data format, or existing groups.
+
+Note: Actual speed still depends on connection/Firebase response time. Use the same signed-in account to rejoin existing groups. No app uninstall needed. Use Update Now when offered.

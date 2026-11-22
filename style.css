@@ -853,3 +853,131 @@ html[data-theme=dark] body .mt-update-message small{color:#bbd6df}
 html[data-theme=dark] body .mt-update-icon{background:#255957}
 html[data-theme=dark] body .mt-update-actions .mt-update-later{background:#334d60;color:#f0fcff;border-color:#6c8a9c}
 @media(max-width:420px){.mt-update-actions{width:100%;display:grid;grid-template-columns:1fr 1fr}.mt-update-actions button{width:100%}}
+
+
+/* MotoTrip V6.6 — visible opt-in after creating/joining a ride */
+#shared-ride-active .mt66-live-join:not([hidden]){display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap;padding:12px;margin:9px 0 8px;background:linear-gradient(115deg,#e0fff2,#e3f5ff);border:1px solid #81cec7;border-radius:14px;color:#173e50}
+#shared-ride-active .mt66-live-join.is-live{background:linear-gradient(115deg,#d2f9df,#e2f8f2);border-color:#65c79c}
+#shared-ride-active .mt66-live-join .mt66-live-copy{display:grid;gap:4px;flex:1 1 160px;min-width:0}
+#shared-ride-active .mt66-live-join strong{font-size:13px;font-weight:800}
+#shared-ride-active .mt66-live-join small{font-size:11px;line-height:1.35;color:#3b6471}
+html body #shared-ride-active #mt66-live-start{flex:0 0 auto;width:auto!important;min-height:38px!important;margin:0!important;padding:8px 12px!important;border-radius:10px!important;background:#0b7b75!important;color:white!important;border:1px solid #126d70!important;font-size:12px!important;font-weight:800!important}
+html body #shared-ride-active .mt66-live-join.is-live #mt66-live-start{background:#14664d!important;border-color:#14664d!important}
+#shared-ride-active .mt66-live-join[hidden]{display:none!important}
+html[data-theme=dark] #shared-ride-active .mt66-live-join{background:linear-gradient(115deg,#1b4646,#244258);border-color:#468f91;color:#efffff}
+html[data-theme=dark] #shared-ride-active .mt66-live-join small{color:#b4d9e6}
+@media(max-width:410px){#shared-ride-active .mt66-live-join{align-items:stretch}html body #shared-ride-active #mt66-live-start{flex:1 1 100%;width:100%!important}}
+
+
+/* MotoTrip V6.8 — responsive text-fit patch (mobile + desktop)
+   Fixes narrow profile form, note clipping, flexible card titles and long labels.
+   No app logic, storage keys or privacy settings changed. */
+
+/* Account profile form was receiving the global form padding *inside* the
+   dialog, reducing room for blood group / emergency text on iPhone. */
+html body #mt-account-overlay #mt-profile-form {
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  padding: 0 !important;
+  margin: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+#mt-account-overlay .mt-account-dialog,
+#mt-account-overlay .mt-account-panel,
+#mt-account-overlay .mt-emergency-box,
+#mt-account-overlay .mt-account-fields,
+#mt-account-overlay .mt-account-fields label {
+  box-sizing: border-box;
+  min-width: 0;
+  max-width: 100%;
+}
+#mt-account-overlay .mt-emergency-box { margin-inline: 0; }
+#mt-account-overlay .mt-account-fine,
+#mt-account-overlay .mt-account-intro,
+#mt-account-overlay .mt-account-status,
+#mt-account-overlay .mt-account-message,
+#mt-account-overlay .mt-account-small,
+#mt-account-overlay .mt-account-links,
+#mt-account-overlay label,
+#mt-account-overlay .mt-account-benefits span {
+  white-space: normal !important;
+  overflow-wrap: anywhere !important;
+  word-break: normal !important;
+  max-width: 100%;
+}
+#mt-account-overlay .mt-account-fine { font-size: 12px !important; line-height: 1.55 !important; }
+#mt-account-overlay .mt-emergency-head { min-width:0; flex-wrap:wrap; align-items:baseline; column-gap:8px; row-gap:3px; }
+#mt-account-overlay .mt-emergency-head strong { min-width:0; flex:1 1 150px; overflow-wrap:anywhere; }
+#mt-account-overlay .mt-emergency-head span { flex:0 1 auto; white-space:normal; overflow-wrap:anywhere; }
+#mt-account-overlay .mt-account-dialog :is(input,select,textarea,button) { box-sizing:border-box; max-width:100%; }
+#mt-account-overlay .mt-account-dialog :is(button.mt-account-primary,button.mt-account-secondary,button.mt-account-danger) {
+  height:auto;
+  white-space:normal!important;
+  overflow-wrap:anywhere;
+  line-height:1.35;
+}
+
+/* The ordinary app cards also must survive long rider names, codes,
+   expense descriptions, and future translations without horizontal clipping. */
+#plan :is(.intro,.muted,.ride-tip,.trip-sync-hint,.stop-summary,.mileage-hint),
+#route :is(.route-status,.route-head-simple p,.map-card-head,.route-list-title),
+#split :is(.shared-current,.shared-tip,.shared-ride-head,.shared-ride-head strong,.shared-ride-head p,.shared-mode,.shared-join-hint,.qr-scan-copy,.payment-correction-info,.payment-correction-hint,.split-stat,.split-stat small,.split-stat strong,.mt-safety-status,.mt-safety-intro,.mt-safety-note,.mt-safety-tag,.mt-safety-mini,.mt-safety-rider-head strong,.mt-safety-riders-header,.mt-safety-consent small),
+#trips :is(.trip,.trip p,.export-help,.mt-compact-help),
+#gear :is(.gear-scroll-list,.check) {
+  min-width: 0;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  word-break: normal;
+}
+#split .shared-ride-head { flex-wrap:wrap; }
+#split .shared-ride-head > :first-child { flex:1 1 145px; min-width:0; }
+#split .shared-mode { white-space:normal; flex:0 1 auto; }
+#split .mt-safety>summary { min-width:0; flex-wrap:wrap; }
+#split .mt-safety-mini { white-space:normal; }
+#split .mt-safety-rider-head { min-width:0; }
+#split .mt-safety-rider-head strong { flex:1 1 0; min-width:0; }
+#split .mt-safety-rider-head span { flex:0 1 auto; max-width:42%; text-align:center; white-space:normal; overflow-wrap:anywhere; }
+#split .mt-safety-riders-header { flex-wrap:wrap; }
+#split .mt-safety-tag { max-width:100%; white-space:normal; overflow-wrap:anywhere; }
+#split .mt-safety-links a { max-width:100%; min-width:0; white-space:normal; overflow-wrap:anywhere; text-align:center; }
+#split .payment-correction-info { flex:1 1 0; min-width:0; }
+#split .invite-share-head > :last-child,
+#split .invite-sheet-head > :first-child,
+#split .invite-choice { min-width:0; }
+#split .invite-sheet-head :is(strong,p),
+#split .invite-choice,
+#split .invite-sheet-safety,
+#split .shared-qr-notice,
+#split .shared-qr-label { overflow-wrap:anywhere; white-space:normal; }
+#split .shared-actions,
+#split .invite-quick-actions,
+#split .invite-sheet-options,
+#split .invite-utility-actions,
+#trips .export-grid,
+#plan .dashboard { min-width:0; }
+#split .shared-actions > *,
+#split .invite-quick-actions > *,
+#split .invite-sheet-options > *,
+#split .invite-utility-actions > *,
+#trips .export-grid > *,
+#plan .dashboard > * { min-width:0; max-width:100%; }
+.mt-update-message { min-width:0; }
+.mt-update-message > :last-child { flex:1; min-width:0; overflow-wrap:anywhere; }
+
+/* Avoid hard one-line nav labels if the user's iPhone uses larger text. */
+@media(max-width:390px) {
+  #mt-account-overlay .mt-account-dialog { padding:14px; }
+  #mt-account-overlay .mt-emergency-box { padding:11px; }
+  nav#main-nav button .nav-name { white-space:normal; overflow-wrap:anywhere; text-align:center; }
+  #split .mt-safety-links a { flex:1 1 160px; justify-content:center; }
+}
+@media(max-width:340px) {
+  #mt-account-overlay .mt-account-dialog { padding:12px; }
+  #mt-account-overlay .mt-emergency-head strong { flex-basis:100%; }
+  #mt-account-overlay .mt-emergency-head span { flex-basis:100%; }
+}

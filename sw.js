@@ -1,14 +1,14 @@
-/* MotoTrip V6.5 — online-first updates, offline-safe fallback.
+/* MotoTrip V6.8 — online-first updates, offline-safe fallback.
  * Original application © 2026 Satish Kumar Gupta.
  * IMPORTANT: cache cleanup here does not delete trips/expenses in localStorage.
  */
-const CACHE_NAME = 'mototrip-v6.5';
+const CACHE_NAME = 'mototrip-v6.8';
 const PREVIOUS_CACHE_PREFIX = 'mototrip-';
 const APP_SHELL = [
-  './index.html','./app-update.js?v=65','./style.css?v=65',
-  './app.js?v=65','./account.js?v=65','./split.js?v=65','./route.js?v=65','./ui.js?v=65',
-  './exports.js?v=65','./firebase-config.js?v=65','./qr-code.js?v=65','./shared-ride.js?v=65','./safety.js?v=65','./qr-scanner.js?v=65',
-  './report.html','./report.js?v=65','./privacy.html',
+  './index.html','./app-update.js?v=68','./style.css?v=68',
+  './app.js?v=68','./account.js?v=68','./split.js?v=68','./route.js?v=68','./ui.js?v=68',
+  './exports.js?v=68','./firebase-config.js?v=68','./qr-code.js?v=68','./shared-ride.js?v=68','./safety.js?v=68','./qr-scanner.js?v=68',
+  './report.html','./report.js?v=68','./privacy.html',
   './terms.html','./ownership.html','./manifest.json',
   './icon-192.png','./icon-512.png'
 ];
