@@ -1,3 +1,38 @@
-plugins {
-    id 'com.android.application' version '8.9.2' apply false
+plugins { id 'com.android.application' }
+
+android {
+    namespace 'com.mototrip.app'
+    compileSdk 35
+
+    defaultConfig {
+        applicationId 'com.mototrip.app'
+        minSdk 24
+        targetSdk 34
+        versionCode 915
+        versionName '9.15'
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+
+    signingConfigs {
+        if (System.getenv('MOTOTRIP_RELEASE_KEYSTORE') && System.getenv('MOTOTRIP_RELEASE_PASSWORD')) {
+            create('mototripRelease') {
+                storeFile file(System.getenv('MOTOTRIP_RELEASE_KEYSTORE'))
+                storePassword System.getenv('MOTOTRIP_RELEASE_PASSWORD')
+                keyAlias 'mototrip'
+                keyPassword System.getenv('MOTOTRIP_RELEASE_PASSWORD')
+            }
+        }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            if (signingConfigs.findByName('mototripRelease')) {
+                signingConfig signingConfigs.getByName('mototripRelease')
+            }
+        }
+    }
 }

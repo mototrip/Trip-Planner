@@ -1,0 +1,10 @@
+MotoTrip ko install kaise karein:
+
+iPhone: https://mototrip.github.io/Trip-Planner/
+Safari > Share > Add to Home Screen > Add
+
+Android: MotoTrip-Android.apk file directly WhatsApp/Drive se bhejo.
+Download file > Open > Install (Allow from this source if asked).
+
+Public signed APK release ka URL (release publish hone KE BAAD hi chalega):
+https://github.com/mototrip/Trip-Planner/releases/download/mototrip-android/MotoTrip-Android.apk
