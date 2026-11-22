@@ -1,0 +1,4 @@
+MotoTrip V9.2
+- Planner se Route details moved wala notice poori tarah hata diya.
+- V9.1 ke local assets (trip-himalayas.webp aur traveling-obsession-banner.svg) preserved.
+- Service worker cache v9.2 update.

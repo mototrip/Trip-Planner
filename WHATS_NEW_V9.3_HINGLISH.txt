@@ -1,0 +1,4 @@
+MotoTrip V9.3
+- Traveling Obsession channel ad banner ko Food days aur Hotel nights inputs ke bilkul upar move kiya.
+- Old location se banner removed, ek hi banner display hoga.
+- Calculations, images aur other functionality unchanged.
