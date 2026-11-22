@@ -1131,3 +1131,12 @@ html body #planner{margin:8px 0!important;padding:12px!important;border-radius:1
   #planner .simple-place .mt61-place-label{font-size:10px!important}
   #plan .hero #stats .stat{padding:6px!important}
 }
+
+
+/* MotoTrip V7.3 — Mandatory two-step entry without layout redesign */
+html.mt-entry-locked body > main{visibility:hidden!important;filter:none!important;pointer-events:none;user-select:none}
+html.mt-entry-locked #mt-account-x{display:none!important}
+#mt-account-overlay [hidden]{display:none!important}
+#mt-account-overlay .mt-profile-gate-note{margin:10px 0 6px;padding:10px 12px;background:#b4f5e315;border:1px solid #91ecc184;border-radius:11px;color:#d8ffef;font-size:12px;line-height:1.45;font-weight:650}
+#mt-account-overlay #mt-profile-exit-guest{background:#315477!important}
+#mt-account-overlay .mt-onboarding-actions > :not(#mt-profile-logout):not(#mt-profile-exit-guest){display:none!important}

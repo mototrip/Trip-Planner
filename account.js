@@ -1,4 +1,4 @@
-/* MotoTrip V7.1 | Required entry choice (Login / Sign up / Guest) + Firebase email login + PRIVATE device-only rider profile with optional opt-in Group Safety sharing.
+/* MotoTrip V7.3 | Two-step mandatory entry + protected sign-out; required entry choice (Login / Sign up / Guest) + Firebase email login + PRIVATE device-only rider profile with optional opt-in Group Safety sharing.
    © 2026 Satish Kumar Gupta. Profile details go to Firestore only after separate Group Safety consent. */
 (() => {
  'use strict';
@@ -17,12 +17,58 @@
  const accountProfileKey = uid => profilePrefix + 'uid-' + uid;
  const afterLoginKey = 'mototrip-show-profile-after-login-v65';
  const entryKey = 'mototrip-entry-choice-v71';
- let entryRequired = true;
+ // Two-stage access: a conscious Login/Sign up/Guest choice, THEN explicit
+ // saving of the Rider Profile. Existing, valid profiles are prefilled but the
+ // rider must confirm Save & Continue for each new entry session.
+ const profileApprovedKey = 'mototrip-profile-approved-v73';
+ let entryRequired = true, gateStep = 'welcome', acceptedChoice = '';
  const main = document.querySelector('main');
  if (main) main.inert = true;
+ document.documentElement.classList.add('mt-entry-locked');
  function entryChoice(){try{return sessionStorage.getItem(entryKey)||'';}catch(_){return '';}}
- function chooseEntry(choice){try{sessionStorage.setItem(entryKey,choice);}catch(_){}entryRequired=false;document.documentElement.classList.remove('mt-entry-locked');if(main)main.inert=false;closeDialog();}
- function resetEntry(){try{sessionStorage.removeItem(entryKey);}catch(_){}entryRequired=true;document.documentElement.classList.add('mt-entry-locked');if(main)main.inert=true;}
+ function approvedChoice(){try{return sessionStorage.getItem(profileApprovedKey)||'';}catch(_){return '';}}
+ function storedProfileIsValid(){return Boolean(readProfile().name?.trim());}
+ function updateEntryUI(){
+   const locked = entryRequired;
+   const profileGate = locked && gateStep === 'profile';
+   $('mt-account-x').hidden = locked;
+   $('mt-profile-back').hidden = profileGate;
+   $('mt-profile-gate-note').hidden = !profileGate;
+   $('mt-profile-exit-guest').hidden = scope !== 'guest';
+   const actions = $('mt-profile-actions');
+   if (actions) actions.classList.toggle('mt-onboarding-actions', profileGate);
+   const saveBtn = $('mt-profile-save');
+   if (saveBtn) saveBtn.textContent = profileGate ? 'Save & Continue' : 'Save my profile';
+ }
+ function lockApp(step='welcome'){
+   entryRequired = true; gateStep = step;
+   document.documentElement.classList.add('mt-entry-locked');
+   if(main)main.inert = true;
+   updateEntryUI();
+ }
+ function openProfileGate(choice){
+   if (!['guest'].includes(choice) && !/^uid-[a-zA-Z0-9_-]+$/.test(choice)) return;
+   acceptedChoice=choice;
+   try { sessionStorage.setItem(entryKey,choice); sessionStorage.removeItem(profileApprovedKey); } catch(_) {}
+   lockApp('profile');
+   openDialog('profile');
+   setMessage('Review your Rider Profile and tap Save & Continue to enter MotoTrip.');
+ }
+ function finishEntry(choice){
+   if (!choice || !storedProfileIsValid()) return false;
+   acceptedChoice=choice;
+   try { sessionStorage.setItem(entryKey,choice); sessionStorage.setItem(profileApprovedKey,choice); } catch(_) {}
+   entryRequired=false; gateStep='';
+   document.documentElement.classList.remove('mt-entry-locked');
+   if(main)main.inert=false;
+   updateEntryUI();
+   closeDialog();
+   return true;
+ }
+ function resetEntry(){
+   try { sessionStorage.removeItem(entryKey); sessionStorage.removeItem(profileApprovedKey); } catch(_) {}
+   acceptedChoice='';lockApp('welcome');
+ }
  const declinedRestoreKey = uid => 'mototrip-declined-profile-restore-v65-' + uid;
  const privateTripKey = uid => 'mototrip-v1-uid-' + uid;
  const groupIsActive = () => Boolean(window.motoTripSharedRide?.active);
@@ -86,13 +132,14 @@
  }
  function show(which) {
    if (!panels.includes(which)) which = 'welcome';
-   if (entryRequired && which === 'profile') which = 'welcome';
+   if (entryRequired && which === 'profile' && gateStep !== 'profile') which = 'welcome';
    for (const p of panels) $('mt-' + p + '-panel').hidden = p !== which;
    const titles = { welcome: 'Welcome to MotoTrip', signup: 'Create your account', login: 'Welcome back', profile: 'My Rider Profile' };
    $('mt-account-title').textContent = titles[which];
    $('mt-account-intro').textContent = which === 'profile' ? 'Your ride essentials, all in one private place.' : 'Plan together. Ride further. Split smarter.';
    setMessage();
    if (which === 'profile') renderProfile();
+   updateEntryUI();
  }
  function setScope(uid) {
    const next = uid ? 'uid-' + uid : 'guest';
@@ -164,7 +211,7 @@
    markSeen();
    // An existing account should re-open the profile too, not land in Planner
    // with its private fields hidden and appearing to have vanished.
-   try { sessionStorage.setItem(afterLoginKey, 'yes'); sessionStorage.setItem(entryKey, 'uid-'+uid); } catch (_) {}
+   try { sessionStorage.setItem(afterLoginKey, 'yes'); sessionStorage.setItem(entryKey, 'uid-'+uid); sessionStorage.removeItem(profileApprovedKey); } catch (_) {}
    location.reload();
  }
  async function signup(event) {
@@ -205,6 +252,7 @@
    const restoreButton = $('mt-profile-restore');
    if (restoreButton) restoreButton.hidden = !registered || !!p.name || !restoreCandidate(scope.slice(4));
    updateEmergencyCall(p.icePhone || '');
+   updateEntryUI();
  }
  function updateEmergencyCall(raw) {
    const phone = String(raw || '').replace(/[^+0-9]/g, '');
@@ -243,8 +291,13 @@
    updateEmergencyCall(p.icePhone);
    window.dispatchEvent(new Event('mototrip-profile-updated'));
    markSeen();
+   if (entryRequired && gateStep === 'profile') {
+     // Save is the ONLY route from mandatory onboarding to the main app.
+     if (!finishEntry(acceptedChoice)) setMessage('Could not finish setup. Please try saving your profile again.',true);
+     return;
+   }
    setMessage('✓ Profile saved privately on this device.');
-   window.setTimeout(closeDialog, 450);
+   window.setTimeout(closeDialog, 400);
  }
  function fillLabel() {
    const p = readProfile();
@@ -296,7 +349,11 @@
    renderProfile();
    fillLabel();
    window.dispatchEvent(new Event('mototrip-profile-updated'));
-   setMessage('✓ Local rider profile deleted.');
+   // Never leave the full application accessible with a missing required name.
+   const chosen = entryChoice();
+   if (chosen === 'guest' || chosen === scope) openProfileGate(chosen);
+   else { resetEntry(); openDialog('welcome'); }
+   setMessage('Profile deleted from this device. Save a new name before continuing.',true);
  }
  async function resetPassword() {
    const email = $('mt-login-email').value.trim();
@@ -320,60 +377,70 @@
  $('mt-welcome-signup').addEventListener('click', () => show('signup'));
  $('mt-welcome-login').addEventListener('click', () => show('login'));
  $('mt-welcome-guest').addEventListener('click', () => {
-   if (scope !== 'guest') {setMessage('This account is signed in. Please sign out from My Profile first.',true);return;}
-   markSeen();chooseEntry('guest');
+   void guarded(async () => {
+     // A real Guest should never inherit someone else's saved signed-in Firebase
+     // session (and therefore their protected Shared Ride membership).
+     if(readyConfig){
+       await loadAuth();
+       if(auth.currentUser && !auth.currentUser.isAnonymous) await modules.signOut(auth);
+     }
+     markSeen();
+     if(scope !== 'guest'){
+       setScope(null);
+       try{sessionStorage.setItem(entryKey,'guest');sessionStorage.removeItem(profileApprovedKey);}catch(_){}
+       location.reload();return; // rebuild account-scoped trips with guest storage
+     }
+     openProfileGate('guest');
+   });
  });
  for (const b of el.querySelectorAll('[data-mt-go]')) b.addEventListener('click', () => show(b.dataset.mtGo));
  $('mt-signup-panel').addEventListener('submit', signup);
  $('mt-login-panel').addEventListener('submit', login);
  $('mt-profile-form').addEventListener('submit', saveProfile);
- $('mt-profile-back').addEventListener('click', closeDialog);
+ $('mt-profile-back').addEventListener('click', () => { if (entryRequired) {setMessage('Save your profile before entering MotoTrip.',true);return;} closeDialog(); });
  $('mt-profile-login').addEventListener('click', () => show('signup'));
  $('mt-profile-logout').addEventListener('click', logout);
+ $('mt-profile-exit-guest').addEventListener('click', () => {
+   if(scope !== 'guest')return;
+   resetEntry();
+   location.reload(); // return to Welcome; do not erase Guest trips/profile
+ });
  $('mt-profile-delete-account').addEventListener('click', deleteAccount);
  $('mt-profile-clear').addEventListener('click', clearProfile);
  $('mt-profile-restore')?.addEventListener('click', restoreProfileFromDevice);
  $('mt-reset-password').addEventListener('click', resetPassword);
  $('mt-emergency-phone').addEventListener('input', e => updateEmergencyCall(e.target.value));
  fillLabel();
- let finishProfile = false;
- try {
-   finishProfile = sessionStorage.getItem(afterLoginKey) === 'yes' || sessionStorage.getItem('mototrip-finish-rider-profile') === 'yes';
-   sessionStorage.removeItem(afterLoginKey);
-   sessionStorage.removeItem('mototrip-finish-rider-profile');
- } catch (_) {}
- const showPostLoginProfile=()=>{
-   if(!finishProfile)return;
-   openDialog('profile');
-   setMessage(readProfile().name ? '✓ Your saved Rider Profile is ready.' : 'Add your name to finish your private Rider Profile.');
- };
- // The welcome overlay is a real entry gate. No close/backdrop/Escape bypass.
- // Guest is an explicit per-session choice; restored email accounts use Firebase auth.
+ // A session may reload for a PWA update. Reuse the *already approved* step
+ // only when the original identity and its saved profile still match.
  const initialChoice=entryChoice();
+ const isApproved = choice => approvedChoice()===choice && storedProfileIsValid();
  if(initialChoice==='guest' && scope==='guest'){
-   chooseEntry('guest');
- } else {
+   if(isApproved('guest'))finishEntry('guest');
+   else openProfileGate('guest');
+ } else if(initialChoice.startsWith('uid-')){
    openDialog('welcome');
-   setMessage('Choose Create account, Log in, or Continue as Guest to enter MotoTrip.');
+   setMessage('Checking your saved login…');
    void loadAuth().then(()=>{
-     if(!entryRequired)return;
-     const signed=auth?.currentUser;
-     if(signed && !signed.isAnonymous){
-       const verified='uid-'+signed.uid;
-       if(scope!==verified){
-         setScope(signed.uid);
-         try{sessionStorage.setItem(entryKey, verified);}catch(_){}
-         location.reload();return;
-       }
-       chooseEntry(verified);
-       showPostLoginProfile();
-     } else {
-       // Never retain a previous account's local data in a guest/anonymous session.
+     const user=auth?.currentUser;
+     if(!user || user.isAnonymous || ('uid-'+user.uid)!==initialChoice){
+       resetEntry();
        if(scope.startsWith('uid-')){setScope(null);location.reload();return;}
-       setMessage('Choose how to continue: Create account, Log in, or Guest.');
+       show('welcome');setMessage('Log in or choose Guest to continue.');return;
      }
+     if(scope!==initialChoice){setScope(user.uid);location.reload();return;}
+     if(isApproved(initialChoice))finishEntry(initialChoice);
+     else openProfileGate(initialChoice);
    }).catch(()=>{
-     if(entryRequired)setMessage('Could not verify a saved login. You can try Log in again, or choose Guest.',true);
+     resetEntry();show('welcome');
+     setMessage('Could not verify your account. Check the internet and log in again, or choose Guest.',true);
    });
+ } else {
+   // Even if Firebase silently restores an email account, *do not* enter the
+   // app without choosing Log in / Sign up / Guest in this session.
+   resetEntry();
+   openDialog('welcome');
+   setMessage('Choose Create account, Log in, or Guest to continue.');
  }
+
 })();

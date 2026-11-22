@@ -1,0 +1,10 @@
+MotoTrip V7.3 — Mandatory Entry & Profile
+
+1. App start: Login / Create Account / Continue as Guest choose karo.
+2. Agla step: Rider Profile khulega; apna name bhar kar Save & Continue dabana compulsory. Existing profile prefilled rahegi. Emergency info optional.
+3. Profile save se pehle Back/Close, backdrop, Escape app gate ko bypass nahi kar sakte.
+4. Log out / account deletion success: welcome screen par return. Guest ke liye Exit Guest Mode.
+5. Delete local profile se app dobara profile save maangti hai.
+6. Profile, trips aur Firebase group storage format unchanged.
+
+Note: Account deletion group membership hone par pehle Leave Shared Ride required ho sakta hai. Firebase email account deletion recent sign-in bhi require kar sakta hai.
