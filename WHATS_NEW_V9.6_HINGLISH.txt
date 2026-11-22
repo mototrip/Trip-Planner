@@ -1,0 +1,5 @@
+MotoTrip V9.6
+- Route top section ko cleaner aur more attractive banaya.
+- Extra/faltu text remove kiya.
+- Maps action ko chhota corner icon bana diya.
+- Trip Basics card ko compact premium style diya.

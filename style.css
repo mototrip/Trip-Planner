@@ -1580,3 +1580,21 @@ html[data-theme=dark] #route .mt89-trip-label input{background:#13243a;border-co
 /* V9.3: ad relocated immediately above Food days / Hotel nights; no duplicate banner. */
 #plan #planner>.mt91-channel-promo{margin:8px 0 11px!important;width:100%;box-sizing:border-box;}
 #plan #planner>.mt91-channel-promo + .mt82-journey-grid{margin-top:0!important;}
+
+
+/* MotoTrip V9.6 — cleaner and more attractive Route top block */
+#route .mt96-route-head{padding:2px 0 8px!important;display:flex;align-items:center;justify-content:flex-start;gap:8px;flex-wrap:wrap}
+#route .mt96-route-head h2{margin:0!important;font-size:28px!important;line-height:1.05!important;letter-spacing:-.03em}
+#route .mt96-route-head p{display:none!important}
+#route .mt96-head-badge{padding:7px 12px!important;font-size:11px!important;line-height:1!important;border-radius:999px!important}
+#route .mt96-trip-card{padding:14px!important;border-radius:18px!important;background:linear-gradient(180deg,#ffffff,#f7fbff)!important;border:1px solid #d6e5f4!important;box-shadow:0 10px 22px rgba(14,39,71,.05)!important}
+html[data-theme=dark] #route .mt96-trip-card{background:linear-gradient(180deg,#15253a,#122033)!important;border-color:#33506f!important;box-shadow:none!important}
+#route .mt96-trip-head{display:flex;align-items:flex-start;justify-content:space-between;gap:8px!important;margin-bottom:10px!important}
+#route .mt96-mini-label{margin-bottom:6px!important;padding:4px 8px!important;font-size:10px!important}
+#route .mt96-trip-head h3{margin:0!important;font-size:24px!important;line-height:1.08!important}
+#route .mt96-map-action{display:inline-grid!important;place-items:center!important;flex:0 0 34px!important;width:34px!important;height:34px!important;min-height:34px!important;padding:0!important;border-radius:10px!important;background:#eef8ff!important;border:1px solid #c6dff7!important;box-shadow:0 4px 10px rgba(28,56,110,.10)!important;color:#174268!important;font-size:15px!important;line-height:1!important}
+html[data-theme=dark] #route .mt96-map-action{background:#234668!important;border-color:#5884ac!important;color:#ecf8ff!important}
+#route .mt96-trip-label{margin:0!important;font-size:10.5px!important;letter-spacing:.08em!important}
+#route .mt96-trip-label input{margin-top:7px!important;min-height:48px!important;padding:12px 14px!important;border-radius:14px!important;font-size:17px!important;font-weight:800!important}
+#route .mt89-trip-sync{display:none!important}
+@media(max-width:520px){#route .mt96-route-head h2{font-size:24px!important}#route .mt96-trip-head h3{font-size:22px!important}}
