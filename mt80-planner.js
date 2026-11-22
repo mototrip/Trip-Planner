@@ -1,4 +1,4 @@
-/* MotoTrip V8.2: compact Planner overview with top quick toggles. */
+/* MotoTrip V9.10: compact Planner, live budget and per-rider summary. */
 (() => {
   'use strict';
   const el=id=>document.getElementById(id);
@@ -40,6 +40,7 @@
       if(document.activeElement!==quick.distance)quick.distance.value=formatNum(km);
       for(const name of ['mileage','price']) if(document.activeElement!==quick[name]) quick[name].value=field(name).value;
       el('mt80-riders').textContent=riderCount();
+      el('mt910-budget').textContent=pretty(c.total);
       el('mt80-per-person').textContent='≈ '+pretty(c.total/riderCount())+' / Rider';
       for(const [kind,name] of [['fuel','fuel'],['stay','stay'],['food','food'],['toll','toll'],['other','other']]) el('mt80-'+kind).textContent=pretty(c[name]);
       el('mt80-cost-note').textContent=Number(c.other)>0?'Other expenses ('+pretty(c.other)+') are included in the total.':'Estimate cards stay in sync.';

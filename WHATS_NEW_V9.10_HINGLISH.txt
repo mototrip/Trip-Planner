@@ -1,0 +1,9 @@
+MotoTrip V9.10 — Planner Budget + Per Rider Restored
+
+1. Planner mein compact ESTIMATED TRIP BUDGET + ≈ ₹ / Rider line wapas aa gayi (no route/address card).
+2. Amount live update hota hai: Distance, Mileage, Petrol Price, Nights, Food, Toll, Other aur No. of Riders ke saath.
+3. Trip Dates ka unnecessary standalone box Route se hata diya; existing date selector Planner summary ke right mein compact link ke through available hai.
+4. Fix: V9.9 mein missing mt80-per-person element ke karan quick estimate render fail ho sakta tha. Restored.
+5. My Location clearing, Route, Firebase, saved trips aur PWA offline caching unchanged. Existing stored data unaffected.
+
+QUICK UPDATE: ZIP ki saari files repo root mein replace karo. FULL: all app files.

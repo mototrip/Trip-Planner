@@ -1671,3 +1671,40 @@ html[data-theme=dark] #route .mt99-date-label,html[data-theme=dark] #route .mt80
 html[data-theme=dark] #route .mt80-date-details[open] .mt80-date-fields{background:#17273c;border-color:#3f5671;}
 html[data-theme=dark] #route .mt80-date-fields label{color:#ecf5ff;}
 @media(max-width:380px){#route .mt99-date-box{padding:10px;gap:7px}#route .mt80-date-details[open] .mt80-date-fields{right:-8px;width:min(290px,82vw);}}
+
+
+/* MotoTrip V9.10 — compact live estimate restored; no Route address card in Planner. */
+#plan .mt910-budget-strip{
+  position:relative;z-index:2;isolation:isolate;
+  display:flex;align-items:center;justify-content:space-between;gap:12px;
+  min-width:0;padding:11px 15px;margin:8px 0 12px;
+  border:1px solid #cde6dd;border-radius:16px;
+  background:linear-gradient(106deg,#ffffff 0%,#f5fffa 64%,#e9faf3 100%);
+  box-shadow:0 5px 15px rgba(22,59,52,.07);
+  overflow:visible;
+}
+#plan .mt910-budget-main{min-width:0;display:flex;flex-direction:column;gap:3px;}
+#plan .mt910-budget-main small{font-size:clamp(9px,2.3vw,11px)!important;font-weight:800!important;line-height:1.15!important;letter-spacing:.075em!important;color:#546f68!important;}
+#plan .mt910-budget-main strong{font-size:clamp(25px,6.2vw,32px);font-weight:900;color:#078765;line-height:1.1;letter-spacing:-.04em;overflow-wrap:anywhere;}
+#plan .mt910-budget-side{display:flex;flex-direction:column;align-items:flex-end;justify-content:center;gap:5px;min-width:0;text-align:right;}
+#plan .mt910-per-rider{background:#d9f7e9;color:#145f47;border-radius:999px;padding:6px 10px;font-size:clamp(11px,2.7vw,13px);font-weight:850;line-height:1.2;white-space:nowrap;}
+#plan .mt910-budget-side .mt80-date-details{max-width:100%;z-index:30;}
+#plan .mt910-budget-side .mt80-date-details summary{font-size:clamp(10px,2.6vw,12px);color:#315c60;font-weight:650;justify-content:flex-end;white-space:normal;}
+#plan .mt910-budget-side .mt80-date-details[open] .mt80-date-fields{
+  z-index:70;right:0;left:auto;top:calc(100% + 8px);
+  width:min(300px,calc(100vw - 55px));box-sizing:border-box;
+  box-shadow:0 14px 35px rgba(8,35,54,.2);
+}
+#plan .mt80-panel{position:relative;z-index:1;}
+html[data-theme=dark] #plan .mt910-budget-strip{background:linear-gradient(105deg,#19283c,#163d39);border-color:#38685f;box-shadow:0 6px 18px #020b1630;}
+html[data-theme=dark] #plan .mt910-budget-main small{color:#b9d3d0!important;}
+html[data-theme=dark] #plan .mt910-budget-main strong{color:#8bf2cb;}
+html[data-theme=dark] #plan .mt910-per-rider{background:#255949;color:#e1ffed;}
+html[data-theme=dark] #plan .mt910-budget-side .mt80-date-details summary{color:#d5f5ec;}
+html[data-theme=dark] #plan .mt910-budget-side .mt80-date-details[open] .mt80-date-fields{background:#17273c;border-color:#40625c;}
+html[data-theme=dark] #plan .mt910-budget-side .mt80-date-fields label{color:#dff7f2!important;}
+@media(max-width:360px){
+  #plan .mt910-budget-strip{padding:9px 10px;gap:6px;}
+  #plan .mt910-per-rider{padding:5px 7px;font-size:10px;}
+  #plan .mt910-budget-main strong{font-size:24px;}
+}
