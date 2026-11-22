@@ -1,0 +1,12 @@
+MotoTrip V6.9 — Emergency Sharing Privacy Fix
+
+- Untick 'Share my emergency info' = remove blood group, emergency name and phone from Firestore, independent of GPS sharing.
+- Removes slow getDoc/read-before-write for safety changes.
+- While cloud removal is pending, checkbox stays OFF locally and Retry removal is shown. No false success claim; other devices may still see old data until Firebase commits.
+- Automatically retry on internet reconnect, app reopen and ride reconnection.
+- Group members' cards update automatically after the Firestore change succeeds.
+- Existing GPS/location consent, shared expenses, profile and local saved data are preserved.
+- Firestore rules in FIREBASE_RULES.txt remain unchanged; ensure they were published for your project.
+- Never uninstall for an update if local data is not backed up.
+
+GitHub Quick Upload: index.html, safety.js, style.css, sw.js.

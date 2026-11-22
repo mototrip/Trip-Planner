@@ -1,0 +1,14 @@
+MotoTrip V6.9.1 | Equal-height mileage fields — quick upload
+
+Only 3 files changed: index.html, style.css, sw.js.
+
+Changes:
+- Mileage Distance and Fuel Cost remain 50/50 side by side on all phone sizes.
+- On phones labels become short: Distance (km), Fuel cost (₹).
+- Both text labels and input boxes align with equal heights.
+- Original long labels remain on larger screens, full names kept as accessible labels.
+- All Firebase, Shared Ride, Group Safety, trip data and login logic unchanged.
+
+GitHub: upload three files to the repository root (not a nested folder),
+commit, then select Update now in the installed MotoTrip app.
+If the old UI persists, close and reopen the PWA. Avoid uninstalling the app.

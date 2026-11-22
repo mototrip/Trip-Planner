@@ -1,4 +1,4 @@
-/* MotoTrip V6.6 Group Safety — opt-in GPS watch, best-effort background, last-known location.
+/* MotoTrip V6.9 Group Safety — emergency privacy sync + opt-in GPS, last-known location.
  * © 2026 Satish Kumar Gupta. No location is shared before explicit rider consent.
  * Browser/OS may suspend GPS when PWA is hidden. No service-worker background GPS.
  */
@@ -14,6 +14,7 @@
  const count = $('mt-safety-count');
  const joinLiveBtn = $('mt66-live-start');
  const joinLivePanel = $('mt66-live-join');
+ const retryEmergencyButton = $('mt-safety-retry-removal');
  const everyMs = 30000;
  const cloudTimeout = (promise, label) => {
   let timer;
@@ -26,6 +27,7 @@
  let locationBusy = false, detailsBusy = false, mySafety = null;
  let locationPending = null, trackingEpoch = 0, lastPublishedAt = 0;
  let refreshTimer = null, generation = 0, lastCards = [];
+ let nextEmergencyRetryAt = 0;
  const bloodTypes = new Set(['','A+','A-','B+','B-','AB+','AB-','O+','O-']);
  const clean = (x, max = 80) => String(x || '').trim().slice(0, max);
  const errorText = e => String(e?.message || e || 'Unknown error').slice(0, 200);
@@ -65,21 +67,30 @@
   if (!d.locationShared) return {...d,latitude:null,longitude:null,accuracy:null,locationUpdatedAt:''};
   return d;
  }
+ // Updating a known safety document does NOT need getDoc(). The old read-before-write
+ // could hang on weak mobile connections, leaving emergency info visible after opt-out.
+ // A partial update also preserves the independent GPS sharing setting.
  async function writeSafety(next, epoch = null) {
   if (!validContext()) throw Error('Join a Shared Ride first.');
-  const ref=currentRef();
-  const old=await cloudTimeout(context.dbM.getDoc(ref),'Reading safety settings');
-  if(!validContext() || (epoch !== null && (epoch !== trackingEpoch || !gpsActive)))return;
-  const merged={...(old.exists()?old.data():blank(context.uid)),...next,
-   uid:context.uid,updatedAt:new Date().toISOString()};
-  const safe=locationFields(infoFields(merged));
-  if (!safe.emergencyShared && !safe.locationShared) {
-   if (old.exists())await cloudTimeout(context.dbM.deleteDoc(ref),'Clearing shared safety data');
-   mySafety=null;
-   return;
+  if(epoch !== null && (epoch !== trackingEpoch || !gpsActive)) return;
+  const c=context, ref=currentRef();
+  const patch={...next,uid:c.uid,updatedAt:new Date().toISOString()};
+  // A pending opt-out always wins over any GPS or profile write in this page.
+  if(needsEmergencyRemoval())Object.assign(patch,{
+   emergencyShared:false,blood:'',emergencyName:'',emergencyPhone:''
+  });
+  try {
+   await cloudTimeout(c.dbM.updateDoc(ref,patch),'Updating group safety');
+  } catch(e) {
+   // No safety document yet: there is nothing to revoke. A first opt-in creates
+   // the fully validated document without a preliminary network read.
+   if(e?.code!=='not-found')throw e;
+   const fresh=locationFields(infoFields({...blank(c.uid),...patch}));
+   if(!fresh.emergencyShared && !fresh.locationShared){mySafety=null;return;}
+   await cloudTimeout(c.dbM.setDoc(ref,fresh),'Saving group safety');
   }
-  await cloudTimeout(context.dbM.setDoc(ref,safe),'Saving shared safety data');
-  mySafety=safe;
+  if(!validContext() || context!==c)return;
+  mySafety={...(mySafety||blank(c.uid)),...patch};
  }
  function setLocationButton() {
   btnLocation.textContent = gpsActive ? '✕ Stop Sharing Location' : '📍 Share My Location';
@@ -109,9 +120,15 @@
   return n;
  }
  function tag(parent, text){parent.append(el('span','mt-safety-tag',text));}
+ function visibleCards(list) {
+  if(!needsEmergencyRemoval())return list;
+  // Optimistic privacy on THIS device only; the status warns that other devices
+  // may still see the previously synced record until Firebase confirms removal.
+  return list.map(d=>d?.uid===context?.uid ? {...d,emergencyShared:false,blood:'',emergencyName:'',emergencyPhone:''}:d);
+ }
  function render(list) {
   roster.replaceChildren();
-  const entries=list.filter(d=>d && (d.emergencyShared === true || d.locationShared === true));
+  const entries=visibleCards(list).filter(d=>d && (d.emergencyShared === true || d.locationShared === true));
   count.textContent=entries.length+' sharing';
   if (!entries.length){roster.append(el('p','mt-safety-empty','No rider has enabled safety sharing yet.'));return;}
   for(const d of entries){
@@ -165,13 +182,46 @@
     const items=snap.docs.map(doc=>doc.data());
     lastCards=items;
     mySafety=items.find(d=>d.uid===context.uid)||null;
-    shareInfo.checked=Boolean(mySafety?.emergencyShared);
+    shareInfo.checked=!needsEmergencyRemoval() && Boolean(mySafety?.emergencyShared);
     render(items);
+    if(needsEmergencyRemoval() && !detailsBusy && Date.now()>=nextEmergencyRetryAt)void syncPendingEmergencyRemoval();
    },e=>{if(g!==generation)return;say('Safety cards unavailable: '+errorText(e)+'. Check updated Firestore Rules.',true);});
   } catch(e){say('Safety setup failed: '+errorText(e),true);}
  }
  // A rider explicitly opts in for this specific account + ride until Stop or Leave.
  // No blanket location sharing for newly joined members.
+ // Privacy revocation survives app reloads and is retried on reconnect.
+ // It never declares success until Firestore acknowledges the write.
+ function emergencyRemovalKey(){return context?'mototrip-emergency-remove-v69-'+context.uid+'-'+context.rideId:'';}
+ function needsEmergencyRemoval(){try{return !!emergencyRemovalKey() && localStorage.getItem(emergencyRemovalKey())==='yes';}catch(_){return false;}}
+ function markEmergencyRemoval(on){
+  try{if(on)localStorage.setItem(emergencyRemovalKey(),'yes');else localStorage.removeItem(emergencyRemovalKey());}catch(_){}
+  if(retryEmergencyButton)retryEmergencyButton.hidden=!on;
+ }
+ async function syncPendingEmergencyRemoval(){
+  if(!validContext() || !needsEmergencyRemoval() || detailsBusy)return false;
+  detailsBusy=true;
+  shareInfo.checked=false;shareInfo.disabled=true;
+  if(retryEmergencyButton)retryEmergencyButton.disabled=true;
+  nextEmergencyRetryAt=Date.now()+20000;
+  say('Removing emergency details from Shared Ride…');
+  try{
+   await writeSafety({emergencyShared:false,blood:'',emergencyName:'',emergencyPhone:''});
+   if(!validContext())return false;
+   markEmergencyRemoval(false);
+   nextEmergencyRetryAt=0;
+   shareInfo.checked=false;
+   say('✓ Emergency info removed from the group. Other riders will no longer see your blood group or emergency contact.');
+   render(lastCards);
+   return true;
+  }catch(e){
+   say('NOT removed from the group yet. Other riders may still see your old emergency info. Check internet / Firestore rules and tap Retry removal. '+errorText(e),true);
+   return false;
+  }finally{
+   detailsBusy=false;shareInfo.disabled=false;
+   if(retryEmergencyButton)retryEmergencyButton.disabled=false;
+  }
+ }
  function preferenceKey(){return context?'mototrip-live-location-v66-'+context.uid+'-'+context.rideId:'';}
  function pendingStopKey(){return context?'mototrip-location-stop-v66-'+context.uid+'-'+context.rideId:'';}
  function optedIn(){try{return !!preferenceKey() && localStorage.getItem(preferenceKey())==='yes';}catch(_){return false;}}
@@ -261,37 +311,52 @@
   if(detailsBusy)return;
   if(!validContext()){shareInfo.checked=false;say('Join a Shared Ride first.',true);return;}
   const checked=shareInfo.checked;
+  if(!checked){
+   // Never flip the switch back ON when a network write fails. Store a durable
+   // revocation intention and retry on reconnect/reopen.
+   markEmergencyRemoval(true);
+   render(lastCards);
+   await syncPendingEmergencyRemoval();
+   return;
+  }
+  if(needsEmergencyRemoval()){
+   shareInfo.checked=false;
+   say('Finish removing the old emergency info before sharing again. Tap Retry removal.',true);
+   return;
+  }
   const fields=sanitizedProfile(profile());
-  if(checked && !fields.blood && !fields.emergencyPhone){
+  if(!fields.blood && !fields.emergencyPhone){
    shareInfo.checked=false;
    say('First fill your emergency number and/or blood group in My Profile.',true);
    $('mt-account-open')?.click();return;
   }
-  if(checked && !confirm('Share your blood group and emergency contact with all current Shared Ride members? This information is sensitive. You can turn it off later.')){
+  if(!confirm('Share your blood group and emergency contact with all current Shared Ride members? This information is sensitive. You can turn it off later.')){
    shareInfo.checked=false;return;
   }
   detailsBusy=true;shareInfo.disabled=true;
-  try {
-   await writeSafety({name:fields.name,emergencyShared:checked,
-    blood:checked?fields.blood:'',emergencyName:checked?fields.emergencyName:'',
-    emergencyPhone:checked?fields.emergencyPhone:''});
-   say(checked?'✓ Your emergency info is visible to joined riders.':'✓ Emergency info removed from Shared Ride.');
-  }catch(e){shareInfo.checked=!checked;say('Could not update emergency info: '+errorText(e),true);}
+  try{
+   await writeSafety({name:fields.name,emergencyShared:true,
+    blood:fields.blood,emergencyName:fields.emergencyName,emergencyPhone:fields.emergencyPhone});
+   say('✓ Your emergency info is now visible to joined riders.');
+  }catch(e){shareInfo.checked=false;say('Could not share emergency info. Nothing was confirmed on Firebase: '+errorText(e),true);}
   finally{detailsBusy=false;shareInfo.disabled=false;}
  }
  async function removeMySafety(){
-  setOptIn(false);markPendingStop(false);stopTimer();
+  setOptIn(false);markPendingStop(true);markEmergencyRemoval(true);stopTimer();
   if(!validContext())return;
-  const ref=currentRef();
-  const record=await cloudTimeout(context.dbM.getDoc(ref),'Checking shared safety data');
-  if(record.exists())await cloudTimeout(context.dbM.deleteDoc(ref),'Removing shared safety data');
+  // Deleting an absent Firestore document is a safe no-op. Avoid a blocking read.
+  await cloudTimeout(context.dbM.deleteDoc(currentRef()),'Removing shared safety data');
+  markPendingStop(false);markEmergencyRemoval(false);
+  mySafety=null;
  }
  function clearLocal(){
   ++generation;
   if(unsubscribe){unsubscribe();unsubscribe=null;}
   stopTimer();
   context=null;mySafety=null;lastCards=[];
-  shareInfo.checked=false;roster.replaceChildren();
+  shareInfo.checked=false;
+  if(retryEmergencyButton)retryEmergencyButton.hidden=true;
+  roster.replaceChildren();
   count.textContent='0 sharing';
  }
  function onRideChange(){
@@ -300,6 +365,8 @@
   clearLocal();
   if(next){
    context=next;initRoster();setLocationButton();
+   if(retryEmergencyButton)retryEmergencyButton.hidden=!needsEmergencyRemoval();
+   if(needsEmergencyRemoval())void syncPendingEmergencyRemoval();
    if(needsStop())void syncPendingStop();
    else if(optedIn())void startLocation(true);
    else say('New ride: live location is OFF. Tap Start Live Location to share your GPS.');
@@ -313,6 +380,7 @@
   else {armWatcher();void postPosition(null,true);}
  });
  window.addEventListener('pageshow',()=>{
+  if(needsEmergencyRemoval())void syncPendingEmergencyRemoval();
   if(!gpsActive && validContext() && optedIn())void startLocation(true);
   else if(gpsActive)void postPosition(null,true);
  });
@@ -322,10 +390,12 @@
   stopTimer();
  });
  window.addEventListener('online',()=>{
+  if(needsEmergencyRemoval())void syncPendingEmergencyRemoval();
   if(needsStop())void syncPendingStop();
   else if(gpsActive)void postPosition(null,true);
  });
  shareInfo.addEventListener('change',toggleEmergency);
+ retryEmergencyButton?.addEventListener('click',()=>{void syncPendingEmergencyRemoval();});
  btnLocation.addEventListener('click',()=>{void startLocation();});
  joinLiveBtn?.addEventListener('click',()=>{
   box.open=true;
@@ -334,12 +404,13 @@
  });
  window.addEventListener('mototrip-ride-change',onRideChange);
  window.addEventListener('mototrip-profile-updated',async()=>{
-  if(!validContext() || !mySafety?.emergencyShared)return;
+  if(!validContext() || needsEmergencyRemoval() || !mySafety?.emergencyShared)return;
   const fields=sanitizedProfile(profile());
   try {
    if(!fields.blood && !fields.emergencyPhone){
-    await writeSafety({emergencyShared:false,blood:'',emergencyName:'',emergencyPhone:''});
-    say('Your emergency details were cleared from the group because your profile no longer contains them.');
+    markEmergencyRemoval(true);
+    shareInfo.checked=false;render(lastCards);
+    await syncPendingEmergencyRemoval();
    }else{
     await writeSafety({...fields,emergencyShared:true});
     say('✓ Updated emergency info shared with your ride.');
