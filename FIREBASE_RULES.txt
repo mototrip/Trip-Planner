@@ -45,6 +45,36 @@ service cloud.firestore {
     allow delete: if loggedIn() && (request.auth.uid == userId ||
      get(/databases/$(database)/documents/sharedRides/$(rideId)).data.ownerUid == request.auth.uid);
    }
+   // V7.6: Group packing board. All verified joined members can view and add items.
+   // Each member can update ONLY their own packed checklist, never another rider's status.
+   match /packingBoard/{boardId} {
+    function validPackingBoard(d) {
+     return d.keys().hasAll(['customItems','updatedAt'])
+       && d.keys().hasOnly(['customItems','updatedAt'])
+       && d.customItems is list && d.customItems.size() <= 100
+       && d.updatedAt is string && d.updatedAt.size() <= 35;
+    }
+    allow get, list: if isMember(rideId) && boardId == 'main';
+    allow create, update: if isMember(rideId) && boardId == 'main'
+       && validPackingBoard(request.resource.data);
+    allow delete: if false;
+   }
+   match /packing/{userId} {
+    function validPacked(d) {
+     return d.keys().hasAll(['uid','name','packed','updatedAt'])
+       && d.keys().hasOnly(['uid','name','packed','updatedAt'])
+       && d.uid == userId && d.name is string && d.name.size() > 0 && d.name.size() <= 80
+       && d.name == get(/databases/$(database)/documents/sharedRides/$(rideId)/members/$(userId)).data.name
+       && d.packed is list && d.packed.size() <= 112
+       && d.updatedAt is string && d.updatedAt.size() <= 35;
+    }
+    allow get, list: if isMember(rideId);
+    allow create: if isMember(rideId) && request.auth.uid == userId
+       && validPacked(request.resource.data);
+    allow update: if isMember(rideId) && request.auth.uid == userId
+       && validPacked(request.resource.data) && resource.data.uid == userId;
+    allow delete: if isMember(rideId) && request.auth.uid == userId;
+   }
    // V5.8: Explicitly opted-in rider safety cards. ONLY ride members may read.
    // A user can create/update/delete ONLY their own record.
    match /safety/{userId} {

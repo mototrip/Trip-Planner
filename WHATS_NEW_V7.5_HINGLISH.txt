@@ -1,0 +1,12 @@
+MotoTrip V7.5 — Stay Logged In
+
+1. Signed-in Firebase account remains signed in after iPhone/Android app close/reopen and PWA updates.
+2. Firebase browserLocalPersistence saves authentication; on reopen the restored UID must match the account scope before entry is unlocked.
+3. Saved Rider Profile is reused, without forcing Save & Continue after every app restart.
+4. First-ever entry still requires Login/Sign up/Guest and a saved Rider Profile.
+5. Logout, Delete Account (if successful), or Exit Guest Mode resets entry; Guest remains signed in locally until exit.
+6. Existing V7.4 users with locally stored signed-in Firebase identity and a valid Rider Profile migrate automatically.
+7. Network errors do NOT delete the remembered account; reconnect/reopen to retry.
+8. Clearing app/browser data, Incognito/Private mode, revoked Firebase credentials, or iOS storage eviction can still require re-login.
+
+GitHub: upload index.html, account.js, sw.js to your repository root, commit, choose Update now on the app (or reload). Uninstall is not required.

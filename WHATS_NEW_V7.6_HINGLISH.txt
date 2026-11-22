@@ -1,0 +1,11 @@
+MotoTrip V7.6 — Collaborative Group Packing + Simple Zero Start
+
+- Fresh users see zero distance and estimated cost until valid trip details are entered. Already-saved drafts and trips are preserved.
+- Gear tab: while in a Shared Ride, all group members see one live packing matrix (Items | Me | other joined riders).
+- Every rider may tick/untick ONLY their own column. Everyone can add/remove group custom items.
+- Other riders see new packing ticks through Firestore live updates. Offline personal checklist is unchanged.
+- Bill Split: redundant Record a payment accordion hidden; Mark paid and Payment history remain.
+
+CRITICAL: PUBLISH the updated FIREBASE_RULES.txt in Firebase Console > Firestore > Rules.
+Without published rules the group packing feature cannot synchronize and shows an error, not false synced state.
+A mobile PWA may pause network updates when backgrounded.

@@ -116,6 +116,7 @@
   state.split=normalizeGroup(d);persist();
   lastLocal=clone(state.split);
   if(window.renderSplit)window.renderSplit();
+  window.dispatchEvent(new Event('mototrip-group-data'));
   $('shared-current').textContent='Shared: '+current.name+' · '+state.split.members.length+' riders';
   badge('Live sync');
  }
@@ -379,6 +380,8 @@
   leaving=true;
   try{
    if(window.motoTripSafety?.removeMySafety)await window.motoTripSafety.removeMySafety();
+   // Group packing is shared; clean up this user's tick status before revoking membership.
+   try{await window.motoTripGroupGear?.removeMine?.();}catch(e){console.warn('Packing status cleanup pending',e);}
    // Revoke this device's cloud membership when leaving (not just local session).
    await withTimeout(sdk.dbM.deleteDoc(memberRef(current.rideId,me.uid)), 'Revoking ride access');
   }catch(e){

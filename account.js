@@ -1,4 +1,4 @@
-/* MotoTrip V7.3 | Two-step mandatory entry + protected sign-out; required entry choice (Login / Sign up / Guest) + Firebase email login + PRIVATE device-only rider profile with optional opt-in Group Safety sharing.
+/* MotoTrip V7.5 | Persistent verified login + two-step mandatory entry + protected sign-out; required entry choice (Login / Sign up / Guest) + Firebase email login + PRIVATE device-only rider profile with optional opt-in Group Safety sharing.
    © 2026 Satish Kumar Gupta. Profile details go to Firestore only after separate Group Safety consent. */
 (() => {
  'use strict';
@@ -21,6 +21,15 @@
  // saving of the Rider Profile. Existing, valid profiles are prefilled but the
  // rider must confirm Save & Continue for each new entry session.
  const profileApprovedKey = 'mototrip-profile-approved-v73';
+ // Persistent approval is an ACCESS PREFERENCE, never an authentication token.
+ // A saved email account is always checked against the restored Firebase UID.
+ const rememberedEntryKey = 'mototrip-remembered-entry-v75';
+ function rememberedChoice(){
+   try { const v=localStorage.getItem(rememberedEntryKey)||'';return v==='guest'||/^uid-[a-zA-Z0-9_-]+$/.test(v)?v:''; }
+   catch(_){return '';}
+ }
+ function rememberChoice(choice){try{localStorage.setItem(rememberedEntryKey,choice);}catch(_){}}
+ function forgetChoice(){try{localStorage.removeItem(rememberedEntryKey);}catch(_){}}
  let entryRequired = true, gateStep = 'welcome', acceptedChoice = '';
  const main = document.querySelector('main');
  if (main) main.inert = true;
@@ -55,9 +64,10 @@
    setMessage('Review your Rider Profile and tap Save & Continue to enter MotoTrip.');
  }
  function finishEntry(choice){
-   if (!choice || !storedProfileIsValid()) return false;
+   if (!choice || choice!==scope || !storedProfileIsValid()) return false;
    acceptedChoice=choice;
    try { sessionStorage.setItem(entryKey,choice); sessionStorage.setItem(profileApprovedKey,choice); } catch(_) {}
+   rememberChoice(choice); // Survives app close and PWA update until explicit logout/exit.
    entryRequired=false; gateStep='';
    document.documentElement.classList.remove('mt-entry-locked');
    if(main)main.inert=false;
@@ -66,6 +76,7 @@
    return true;
  }
  function resetEntry(){
+   forgetChoice();
    try { sessionStorage.removeItem(entryKey); sessionStorage.removeItem(profileApprovedKey); } catch(_) {}
    acceptedChoice='';lockApp('welcome');
  }
@@ -155,6 +166,11 @@
      const app = appM.getApps().length ? appM.getApp() : appM.initializeApp(cfg);
      auth = authM.getAuth(app);
      if (typeof auth.authStateReady === 'function') await auth.authStateReady();
+     // Explicit LOCAL persistence, not SESSION/NONE. Firebase stores credentials
+     // securely in browser-managed storage; passwords are never stored by MotoTrip.
+     if (typeof authM.setPersistence === 'function' && authM.browserLocalPersistence) {
+       await authM.setPersistence(auth, authM.browserLocalPersistence);
+     }
      modules = authM;
      return auth;
    })().catch(e => { loadPromise = null; throw e; });
@@ -193,6 +209,8 @@
    } catch (e) { throw Error('Storage full/unavailable. Export a JSON backup before creating your account.'); }
  }
  function switchAndReload(uid, isNew = false) {
+   // Re-login requires one profile confirmation, but not on every app reopen.
+   forgetChoice();
    // Saved offline trips MUST remain scoped to the original rider, not mixed with another login.
    if (isNew) copyGuestDataIfRequested(uid);
    // If the account already has a profile, leave it untouched. A former Guest
@@ -385,6 +403,7 @@
        if(auth.currentUser && !auth.currentUser.isAnonymous) await modules.signOut(auth);
      }
      markSeen();
+     forgetChoice(); // Explicitly choosing Guest cancels the former login preference.
      if(scope !== 'guest'){
        setScope(null);
        try{sessionStorage.setItem(entryKey,'guest');sessionStorage.removeItem(profileApprovedKey);}catch(_){}
@@ -411,33 +430,54 @@
  $('mt-reset-password').addEventListener('click', resetPassword);
  $('mt-emergency-phone').addEventListener('input', e => updateEmergencyCall(e.target.value));
  fillLabel();
- // A session may reload for a PWA update. Reuse the *already approved* step
- // only when the original identity and its saved profile still match.
- const initialChoice=entryChoice();
- const isApproved = choice => approvedChoice()===choice && storedProfileIsValid();
- if(initialChoice==='guest' && scope==='guest'){
-   if(isApproved('guest'))finishEntry('guest');
+ // V7.5: closing a PWA window does not mean the user signed out.
+ // The previous version only checked sessionStorage, which iOS can discard
+ // when the app is closed. Keep an approval marker across restarts, and ALWAYS
+ // verify signed-in accounts with Firebase before unlocking account data.
+ const initialChoice = entryChoice();
+ const remembered = rememberedChoice();
+ const isApproved = choice => approvedChoice() === choice && storedProfileIsValid();
+ if (scope === 'guest' && (initialChoice === 'guest' || remembered === 'guest')) {
+   // Guest also remains active until Exit Guest Mode (no Firebase identity).
+   if ((isApproved('guest') || remembered === 'guest') && storedProfileIsValid()) finishEntry('guest');
    else openProfileGate('guest');
- } else if(initialChoice.startsWith('uid-')){
+ } else if (scope.startsWith('uid-')) {
    openDialog('welcome');
-   setMessage('Checking your saved login…');
-   void loadAuth().then(()=>{
-     const user=auth?.currentUser;
-     if(!user || user.isAnonymous || ('uid-'+user.uid)!==initialChoice){
-       resetEntry();
-       if(scope.startsWith('uid-')){setScope(null);location.reload();return;}
-       show('welcome');setMessage('Log in or choose Guest to continue.');return;
-     }
-     if(scope!==initialChoice){setScope(user.uid);location.reload();return;}
-     if(isApproved(initialChoice))finishEntry(initialChoice);
-     else openProfileGate(initialChoice);
-   }).catch(()=>{
-     resetEntry();show('welcome');
-     setMessage('Could not verify your account. Check the internet and log in again, or choose Guest.',true);
+   setMessage('Restoring your saved login…');
+   let restoring = false;
+   async function restoreAccount() {
+     if (restoring || !entryRequired || !scope.startsWith('uid-')) return;
+     restoring = true;
+     try {
+       await loadAuth();
+       const user = auth?.currentUser;
+       if (!user || user.isAnonymous || ('uid-' + user.uid) !== scope) {
+         // Firebase reports that this browser is NOT signed in to this account.
+         // Never grant access from the local marker alone or expose its trips.
+         forgetChoice();
+         resetEntry();
+         setScope(null);
+         location.reload();
+         return;
+       }
+       // Existing V7.4 users are upgraded: if the verified UID has a saved
+       // rider profile, it is enough to keep them signed in after an app close.
+       if (storedProfileIsValid()) finishEntry(scope);
+       else openProfileGate(scope); // A new/unfilled profile still requires Save.
+     } catch (error) {
+       // A transient offline/CDN error is NOT logout. Keep saved identity and
+       // try again on connectivity recovery, without deleting account data.
+       show('welcome');
+       setMessage('Saved login could not be verified yet. Connect to the internet and reopen MotoTrip, or tap Log in. Your profile and trips are still saved.', true);
+     } finally { restoring = false; }
+   }
+   window.addEventListener('online', () => { if (entryRequired) void restoreAccount(); });
+   document.addEventListener('visibilitychange', () => {
+     if (document.visibilityState === 'visible' && entryRequired) void restoreAccount();
    });
+   void restoreAccount();
  } else {
-   // Even if Firebase silently restores an email account, *do not* enter the
-   // app without choosing Log in / Sign up / Guest in this session.
+   // First-ever visit or explicit sign-out: choose Login, Sign up, or Guest.
    resetEntry();
    openDialog('welcome');
    setMessage('Choose Create account, Log in, or Guest to continue.');
