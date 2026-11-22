@@ -1,0 +1,17 @@
+MotoTrip V7.8 — Active Riders + Compact Bill Split
+
+1. GEAR: Group Packing columns now show only currently joined Firebase members.
+   A rider who leaves the Shared Ride is removed from the live board, even if
+   historical Bill Split expenses still mention their name. The old packing
+   record is not used to decide who is currently in the ride.
+2. BILL SPLIT: Same familiar screen, less height: smaller margins, cards,
+   form fields, rider chips and 2-column total stats; Paid/Share/Balance,
+   settlements, payment history and Firebase expense sync are unchanged.
+3. FIREBASE: IMPORTANT — Publish the complete FIREBASE_RULES.txt in Firestore
+   Rules. V7.8 needs a member-list permission limited to joined riders.
+   The read contains member names plus their existing inviteId; do not share
+   invite links publicly. The per-user packing write rules stay in place.
+
+GitHub: from the Quick ZIP upload index.html, group-gear.js, style.css, sw.js.
+Firebase: publish FIREBASE_RULES.txt separately. NEVER publish allow read,write: if true.
+Existing trips, group expenses, local packing history and profiles are untouched.

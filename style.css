@@ -1193,3 +1193,70 @@ html[data-theme=dark] #gear .mt76-board-table th.mt76-me{background:#26615a;colo
 #gear .gear-checklist:not([hidden]){margin-top:8px}
 @media(max-width:440px){#gear .mt76-head strong{font-size:13px}#gear .mt76-head small{font-size:10px}#gear .mt76-board-table th,#gear .mt76-board-table td{font-size:11px}}
 html[data-theme=dark] #gear .mt76-group-packing.mt77-sync-blocked .mt76-board-status{color:#ffc5a4}
+
+
+/* MotoTrip V7.8 — Classic Bill Split, compact like Planner; functionality unchanged */
+#split{min-width:0}
+#split>h2{font-size:20px!important;line-height:1.2!important;margin:4px 0 7px!important}
+#split>h2:not(:first-child){font-size:16px!important;margin:10px 0 5px!important}
+#split>p.muted{display:none!important} /* same instructions already appear in the form */
+#split .shared-ride-card{margin:6px 0!important;padding:9px 11px!important;border-radius:13px!important}
+#split .shared-ride-head{gap:5px!important;margin:0!important}
+#split .shared-ride-head strong{font-size:14px!important}
+#split .shared-ride-head p{font-size:11px!important;margin:2px 0!important;line-height:1.25!important}
+#split .shared-mode{font-size:10px!important;padding:4px 7px!important}
+#split .shared-tip{font-size:11px!important;margin:5px 0!important;line-height:1.3!important}
+#split #shared-message{font-size:11px!important;line-height:1.35!important;margin:5px 0!important}
+#split .mt60-ride-actions{gap:6px!important;margin:7px 0!important}
+#split .mt60-ride-actions button{min-height:39px!important;padding:6px!important;font-size:11px!important}
+#split #shared-ride-active .invite-send-main{min-height:39px!important;padding:7px 11px!important;margin:6px 0!important}
+#split #shared-ride-active .mt-leave-ride{min-height:33px!important;padding:5px 10px!important;margin:5px 0!important;font-size:11px!important}
+#split .group-name-row{margin:6px 0 3px!important}
+#split .group-name-row label{font-size:11px!important;margin:2px 0!important}
+#split #group-name{min-height:38px!important;margin-top:4px!important;padding:7px 10px!important;font-size:14px!important}
+#split #group-sync-help{display:none!important} /* name is already read-only and auto-synced */
+#split #rider-panel,#split #expense-form{margin:7px 0!important;padding:9px 10px!important;border-radius:13px!important}
+#split #rider-panel>.mt-block-title{font-size:13px!important;margin:0 0 6px!important}
+#split #member-form{margin:0 0 6px!important;gap:7px!important}
+#split #member-form label{font-size:11px!important;margin:0!important}
+#split #member-name{min-height:39px!important;padding:7px 10px!important;margin-top:3px!important;font-size:16px!important}
+#split #member-form button{min-height:39px!important;margin:0!important;padding:7px 8px!important;font-size:12px!important}
+#split .members-heading{margin:4px 0!important}
+#split .members-heading strong,#split #rider-count{font-size:11px!important}
+#split #members{margin:4px 0!important;gap:5px!important}
+#split #members .rider-chip{font-size:11px!important;padding:3px 4px 3px 8px!important;gap:5px!important;border-radius:10px!important}
+#split #members .remove-rider{width:26px!important;height:26px!important;min-height:26px!important}
+#split #expense-form>h2{font-size:16px!important;margin:0 0 6px!important}
+#split #expense-form>h2:before{width:24px!important;height:24px!important;flex-basis:24px!important;font-size:16px!important;border-radius:8px!important}
+#split #expense-form>label,#split #expense-form .grid>label{font-size:11px!important;margin:3px 0 5px!important;line-height:1.25!important}
+#split #expense-form input:not([type=checkbox]),#split #expense-form select{min-height:39px!important;padding:7px 10px!important;margin-top:4px!important;font-size:16px!important;line-height:1.25!important}
+#split #expense-form .grid{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:7px!important;margin:3px 0 6px!important}
+#split #expense-form .mt-field-hint{font-size:10px!important;margin:2px 0 5px!important;line-height:1.3!important}
+#split #expense-form .mt-split-between{margin:7px 0 8px!important;padding:8px!important;border-radius:11px!important}
+#split #expense-form .mt-split-between .mt-block-title{font-size:12px!important;margin:0 0 5px!important}
+#split #expense-form #beneficiaries{grid-template-columns:repeat(auto-fit,minmax(87px,1fr))!important;gap:5px!important}
+#split #expense-form #beneficiaries .check{padding:5px 6px!important;font-size:11px!important;border-radius:9px!important;gap:5px!important}
+#split #expense-form #beneficiaries .check input{width:16px!important;height:16px!important;flex-basis:16px!important}
+#split #expense-form>button.primary{min-height:40px!important;padding:7px!important;margin:4px 0 0!important;font-size:13px!important}
+#split #recent-expenses{margin:6px 0 8px!important}
+#split #recent-expenses .recent-disclosure-header{padding:8px 10px!important}
+#split #split-summary{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:7px!important;margin:6px 0 9px!important}
+#split #split-summary .split-stat{padding:9px 10px!important;border-radius:12px!important;min-width:0!important}
+#split #split-summary .split-stat small{font-size:10px!important;letter-spacing:0!important}
+#split #split-summary .split-stat strong{font-size:clamp(14px,3.5vw,19px)!important;margin-top:3px!important;overflow-wrap:anywhere}
+#split #balances,#split #settlements{margin:4px 0 8px!important}
+#split #balances .split-table{font-size:11px!important;width:100%!important}
+#split #balances .split-table th,#split #balances .split-table td{padding:7px 4px!important;line-height:1.2!important;overflow-wrap:anywhere}
+#split #balances .split-table th:first-child,#split #balances .split-table td:first-child{min-width:74px!important}
+#split #balances .balance small{font-size:9px!important}
+#split #settlements .settlement-row{padding:8px!important;margin:5px 0!important;gap:7px!important;font-size:12px!important}
+#split #settlements .settlement-row button{min-height:35px!important;padding:5px 9px!important;font-size:11px!important}
+#split>details:not(.mt-safety){margin:6px 0!important}
+#split>details:not(.mt-safety)>summary{padding:8px 10px!important;font-size:12px!important}
+#split .mt-reset-row{margin:5px 0!important}
+#split .mt-reset-row #new-group{min-height:32px!important;padding:5px 9px!important;font-size:10px!important}
+@media(max-width:370px){
+ #split .shared-ride-card{padding:8px!important}
+ #split #expense-form #beneficiaries{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+ #split #balances .split-table th,#split #balances .split-table td{font-size:10px!important;padding:6px 2px!important}
+}

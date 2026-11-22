@@ -30,7 +30,9 @@ service cloud.firestore {
    match /members/{userId} {
     allow get: if loggedIn() && (request.auth.uid == userId ||
      get(/databases/$(database)/documents/sharedRides/$(rideId)).data.ownerUid == request.auth.uid);
-    allow list: if false;
+    // V7.8: joined riders can observe the active member roster for Gear.
+    // This is NOT public; deleted /members docs disappear from live listeners.
+    allow list: if isMember(rideId);
     allow create: if loggedIn() && request.auth.uid == userId
        && request.resource.data.keys().hasAll(['name','inviteId','joinedAt'])
        && request.resource.data.keys().hasOnly(['name','inviteId','joinedAt'])
