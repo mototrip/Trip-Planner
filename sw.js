@@ -2,7 +2,7 @@
  * Original application © 2026 Satish Kumar Gupta.
  * IMPORTANT: cache cleanup here does not delete trips/expenses in localStorage.
  */
-const CACHE_NAME = 'mototrip-v9.3';
+const CACHE_NAME = 'mototrip-v9.4';
 const PREVIOUS_CACHE_PREFIX = 'mototrip-';
 const APP_SHELL = [
   './index.html','./app-update.js?v=80','./style.css?v=93',
@@ -10,9 +10,9 @@ const APP_SHELL = [
   './exports.js?v=80','./firebase-config.js?v=80','./qr-code.js?v=80','./shared-ride.js?v=80','./group-gear.js?v=80','./safety.js?v=80','./qr-scanner.js?v=80',
   './report.html','./report.js?v=80','./privacy.html',
   './terms.html','./ownership.html','./manifest.json',
-  './mt80-planner.js?v=85','./icon-192.png','./icon-512.png',
-  './assets/trip-himalayas.webp','./assets/traveling-obsession-banner.svg'
+  './mt80-planner.js?v=85','./icon-192.png','./icon-512.png'
 ];
+const OPTIONAL_IMAGE_ASSETS = ['./assets/trip-himalayas.webp','./assets/traveling-obsession-banner.svg'];
 const appIndex = new URL('./index.html', self.registration.scope).href;
 
 self.addEventListener('message', event => {
@@ -24,6 +24,10 @@ self.addEventListener('install', event => {
     const cache = await caches.open(CACHE_NAME);
     // A newly deployed bundle must be complete before it replaces an old one.
     await cache.addAll(APP_SHELL.map(path => new Request(path, {cache: 'reload'})));
+    // Images are already embedded in index.html; don't block an update if
+    // someone uploaded only the Quick Update files without assets/.
+    await Promise.allSettled(OPTIONAL_IMAGE_ASSETS.map(path =>
+      cache.add(new Request(path, {cache: 'reload'}))));
     // Do NOT force-activate a new version. The user chooses Update now or Later.
     // First install activates normally; upgrades stay waiting while an old client is open.
   })());

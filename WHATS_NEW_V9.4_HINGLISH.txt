@@ -1,0 +1,17 @@
+MotoTrip V9.4 — iPhone/Android image fix
+
+Problem: V9.3 Quick Update ZIP did not include assets/ folder. Image URLs failed on devices where assets/ were never uploaded. Service worker also required those image files during installation.
+
+Fix:
+- Himalayan trip photo and Traveling Obsession banner are embedded directly in index.html as image data URLs. Both will render even if assets/ folder was not uploaded.
+- Original separate images also remain in assets/ for future editing / server hosting.
+- Service worker cache v9.4 now treats separate asset files as optional during installation. Offline shell no longer fails because of missing image files.
+- Ad is still placed immediately above Food days and Hotel nights. No financial calculation/storage/group logic altered.
+
+GitHub Pages:
+1. Full ZIP: upload its contents (index.html and assets/ must be at same root) OR use the Quick Update ZIP, which includes all image assets as well.
+2. Quick ZIP: extract and upload index.html, sw.js and assets/ folder. Other files remain unchanged.
+3. On phone open site over HTTPS, reload. If an old service worker is still serving previous version, tap app's Update now or fully close and reopen/reload.
+4. The images are embedded in index.html and should load even before assets/ upload completes. They do not need image hosting, external permission, or a server database.
+
+Back up trip data before moving to a different website address. Browser saved data is domain-specific.
