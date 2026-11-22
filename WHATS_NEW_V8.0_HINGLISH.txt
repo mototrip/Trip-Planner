@@ -1,0 +1,13 @@
+MotoTrip V8.0 — Compact trip cards inside ORIGINAL V7.8 Planner
+
+1. Old V7.8 blue/nav layout maintained. Only Planner top estimate area changed.
+2. Two new Pic-1 style cards: trip route/date/riders/total and compact trip estimate with Fuel, Stay, Food, Toll.
+3. Quick fields are LIVE controls connected to the original Planner form; change in either place syncs the values.
+4. Planned Distance is total trip distance (return journey included). Existing One-way km remains unchanged underneath.
+5. Dates are optional: tap Add trip dates to edit dates and save with the draft/trip.
+6. Rider +/- count is a Planner estimate, not an expense member management action. Group Bill Split data unaffected.
+7. No extra tech/dependencies; existing HTML, CSS, JS, SVG supports iPhone and Android.
+8. No fake sample budget or sponsor banner; values are calculated from the original Planner and local storage.
+9. Existing localStorage keys unchanged; existing saved trips/groups and Firebase setup retained.
+
+Github: extract full zip and upload contents directly to repository root. Do not upload zip itself. Commit and refresh; if old PWA still shown, choose app's update control.

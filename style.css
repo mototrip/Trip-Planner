@@ -1260,3 +1260,55 @@ html[data-theme=dark] #gear .mt76-group-packing.mt77-sync-blocked .mt76-board-st
  #split #expense-form #beneficiaries{grid-template-columns:repeat(2,minmax(0,1fr))!important}
  #split #balances .split-table th,#split #balances .split-table td{font-size:10px!important;padding:6px 2px!important}
 }
+
+
+/* MotoTrip V8.0 — only Planner overview receives the reference-inspired white cards.
+   V7.8 header, other tabs, forms, saved trips and underlying calculations are untouched. */
+#plan .hero {background:transparent!important;border:0!important;box-shadow:none!important;padding:0!important;margin:0 0 10px!important;overflow:visible!important;color:var(--ink)!important;}
+#plan .hero>.bike-row{padding:8px 3px!important;margin:0 0 4px!important;}
+#plan .hero>.bike-row #bike-title{color:var(--muted)!important;font-weight:800!important;font-size:10px!important;}
+#plan .hero>.bike-row #edit-bike{background:#e8f7f5!important;border-color:#bfe2da!important;color:#0c6354!important;box-shadow:none!important;}
+#plan .hero>#bike-details{color:var(--muted)!important;padding:0 3px;margin:1px 0 9px!important;}
+#plan .hero>.mt80-original-data{display:none!important;}
+#plan .mt80-panel{font-family:inherit;color:#10213a;min-width:0;margin:8px 0 4px;}
+#plan .mt80-trip-card{display:grid;grid-template-columns:clamp(68px,19%,103px) minmax(0,1fr) minmax(112px,37%);gap:11px;align-items:center;background:linear-gradient(110deg,#fff 0%,#fff 67%,#f1faf7 100%);border:1px solid #d0e5e7;border-radius:17px;padding:10px;box-shadow:0 7px 16px #0c2b4b18;min-height:112px;}
+#plan .mt80-scene{align-self:stretch;min-height:90px;overflow:hidden;border-radius:13px;background:#d7edfa;}
+#plan .mt80-trip-art{display:block;width:100%;height:100%;min-height:90px;object-fit:cover;}
+#plan .mt80-trip-main{min-width:0;align-self:center;}
+#plan .mt80-trip-main>strong{display:block;font-size:clamp(12px,3.6vw,21px);letter-spacing:-.045em;white-space:nowrap;color:#0e2241;line-height:1.23;overflow-wrap:anywhere;margin:0 0 8px;}
+#plan .mt80-date-details{position:relative;font-size:11px;min-width:0;}
+#plan .mt80-date-details summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:5px;font-size:clamp(10px,2.7vw,12px);white-space:normal;line-height:1.3;color:#18314d;padding:2px 0;}
+#plan .mt80-date-details summary::-webkit-details-marker{display:none;}
+#plan .mt80-date-details summary>span:first-child{color:#068c72;font-size:15px;}
+#plan .mt80-date-details[open] .mt80-date-fields{position:absolute;z-index:9;top:100%;left:-8px;width:min(300px,80vw);display:grid;grid-template-columns:1fr 1fr;gap:8px;border:1px solid #c5d9dd;border-radius:13px;background:#fff;padding:10px;box-shadow:0 13px 30px #11243f30;}
+#plan .mt80-date-fields label{color:#1f3b4d!important;font-size:11px;margin:0;min-width:0;}
+#plan .mt80-date-fields input{background:#f4f9fa!important;color:#10213a!important;width:100%!important;margin:4px 0 0!important;padding:5px 3px!important;min-height:35px!important;font-size:12px!important;border:1px solid #bad9e0!important;}
+#plan .mt80-trip-members{display:flex;align-items:center;gap:6px;color:#17334c;font-size:clamp(11px,2.8vw,13px);margin-top:5px;}
+#plan .mt80-trip-members span:first-child{font-size:17px;font-weight:800;}
+#plan .mt80-trip-budget{padding:5px 0 5px 8px;border-left:1px solid #cadee0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;min-width:0;}
+html body #plan .mt80-trip-card .mt80-trip-budget small{color:#172c40!important;font-size:clamp(9px,2.45vw,12px)!important;letter-spacing:0!important;line-height:1.3;color:#172c40!important;font-weight:550;}
+#plan .mt80-trip-budget>strong{display:block;margin:6px 0 7px;font-size:clamp(23px,6.2vw,40px);letter-spacing:-.06em;line-height:1;color:#059464;font-weight:850;white-space:nowrap;}
+#plan .mt80-trip-budget>span{display:block;background:#d4f8e8;border-radius:999px;padding:5px 7px;color:#155a46;font-size:clamp(10px,2.55vw,13px);font-weight:700;white-space:nowrap;max-width:100%;}
+#plan .mt80-est-title{font-size:clamp(19px,5.2vw,26px)!important;line-height:1.15!important;letter-spacing:-.045em!important;color:#10213a!important;margin:16px 3px 9px!important;font-weight:800!important;}
+#plan .mt80-calculator{padding:7px 10px;border:1px solid #cfdee9;border-radius:14px;background:#fff;box-shadow:0 4px 12px #0e2c4820;min-width:0;}
+#plan .mt80-calc-row{display:flex;align-items:center;justify-content:space-between;gap:7px;border-bottom:1px solid #d5e1ea;margin:0!important;min-width:0;min-height:45px;padding:5px 0!important;color:#10213a!important;font-size:clamp(11px,3.1vw,15px)!important;font-weight:500!important;}
+#plan .mt80-calc-row:last-child{border-bottom:0;}
+#plan .mt80-calc-caption{display:flex;align-items:center;gap:8px;min-width:0;line-height:1.2;}
+#plan .mt80-calc-symbol{display:inline-flex;justify-content:center;align-items:center;width:27px;font-size:19px;flex:0 0 27px;color:#112846;font-weight:800;}
+#plan .mt80-calc-symbol.mt80-green{color:#009b81;}
+#plan .mt80-entry{display:flex;align-items:center;gap:6px;justify-content:flex-end;flex:0 0 34%;min-width:113px;height:33px;border-radius:11px;border:1px solid #bfe6c9;background:linear-gradient(135deg,#ebfaee,#f2f8f3);padding:3px 9px;white-space:nowrap;color:#101e30;font-size:12px;}
+#plan .mt80-entry>span{flex:0 0 auto;}
+#plan .mt80-entry input{flex:1 1 35px;min-width:20px;width:100%;height:29px;min-height:29px!important;margin:0!important;padding:0!important;border:0!important;border-radius:0!important;background:transparent!important;color:#10213a!important;font-size:clamp(14px,4vw,19px)!important;font-weight:740;text-align:left;box-shadow:none!important;outline-offset:2px;}
+#plan .mt80-entry input::-webkit-inner-spin-button,#plan .mt80-entry input::-webkit-outer-spin-button{appearance:none;margin:0;}
+#plan .mt80-entry input[type=number]{-moz-appearance:textfield;}
+#plan .mt80-rider-stepper{display:flex;gap:7px;align-items:center;justify-content:space-between;width:128px;flex-shrink:0;color:#0e263d;}
+#plan .mt80-rider-stepper>button{border-radius:50%!important;width:33px!important;height:33px!important;min-height:33px!important;padding:0!important;background:#f6fafb!important;color:#17334c!important;border:1px solid #c7dce4!important;font-size:24px!important;line-height:1!important;box-shadow:none!important;}
+#plan .mt80-rider-stepper output{font-size:17px;color:#11213b;font-weight:780;min-width:22px;text-align:center;}
+#plan .mt80-costs{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:0;background:linear-gradient(105deg,#effaf3,#e1f9eb,#edfaf2);border-radius:13px;margin-top:9px;padding:9px 2px;min-width:0;}
+#plan .mt80-costs>div{padding:2px 4px;border-right:1px solid #c5e4d5;min-width:0;text-align:center;}
+#plan .mt80-costs>div:last-child{border-right:none;}
+#plan .mt80-costs span{display:block;font-size:clamp(10px,2.75vw,13px);color:#10213a;font-weight:550;}
+#plan .mt80-costs strong{display:block;margin-top:2px;font-size:clamp(12px,3.5vw,19px);letter-spacing:-.03em;color:#101e34;white-space:nowrap;}
+#plan .mt80-cost-note{font-size:10px;color:var(--muted);text-align:center;margin:7px 0 0;line-height:1.35;}
+@media(max-width:365px){#plan .mt80-trip-card{grid-template-columns:60px minmax(0,1fr) minmax(99px,36%);gap:6px;padding:7px;}#plan .mt80-scene,#plan .mt80-trip-art{min-height:78px;}#plan .mt80-trip-budget{padding-left:4px;}#plan .mt80-trip-budget>span{padding:4px 3px;}#plan .mt80-calc-row{font-size:11px!important;}#plan .mt80-calc-symbol{font-size:16px;width:21px;flex-basis:21px;}#plan .mt80-entry{min-width:104px;padding:3px 5px;}}
+@media(min-width:540px){#plan .mt80-trip-card{padding:13px;gap:15px;}#plan .mt80-calc-row{min-height:53px;}}

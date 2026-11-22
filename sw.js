@@ -2,15 +2,15 @@
  * Original application © 2026 Satish Kumar Gupta.
  * IMPORTANT: cache cleanup here does not delete trips/expenses in localStorage.
  */
-const CACHE_NAME = 'mototrip-v7.8';
+const CACHE_NAME = 'mototrip-v8.0';
 const PREVIOUS_CACHE_PREFIX = 'mototrip-';
 const APP_SHELL = [
-  './index.html','./app-update.js?v=78','./style.css?v=78',
-  './app.js?v=78','./account.js?v=78','./split.js?v=78','./route.js?v=78','./ui.js?v=78',
-  './exports.js?v=78','./firebase-config.js?v=78','./qr-code.js?v=78','./shared-ride.js?v=78','./group-gear.js?v=78','./safety.js?v=78','./qr-scanner.js?v=78',
-  './report.html','./report.js?v=78','./privacy.html',
+  './index.html','./app-update.js?v=80','./style.css?v=80',
+  './app.js?v=80','./account.js?v=80','./split.js?v=80','./route.js?v=80','./ui.js?v=80',
+  './exports.js?v=80','./firebase-config.js?v=80','./qr-code.js?v=80','./shared-ride.js?v=80','./group-gear.js?v=80','./safety.js?v=80','./qr-scanner.js?v=80',
+  './report.html','./report.js?v=80','./privacy.html',
   './terms.html','./ownership.html','./manifest.json',
-  './icon-192.png','./icon-512.png'
+  './mt80-planner.js?v=80','./icon-192.png','./icon-512.png'
 ];
 const appIndex = new URL('./index.html', self.registration.scope).href;
 
