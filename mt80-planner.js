@@ -1,4 +1,4 @@
-/* MotoTrip V9.12: original trip card + iPhone-safe trip-date editor. */
+/* MotoTrip V9.13: original trip card + compact iPhone date popover. */
 (() => {
   'use strict';
   const el=id=>document.getElementById(id);
@@ -66,6 +66,7 @@
       else if(start) dates='From '+prettyDate(start);
       else if(end) dates='Until '+prettyDate(end);
       el('mt80-date-summary').textContent=dates;
+      el('mt80-date-fields').classList.toggle('mt913-has-dates',!!(start||end));
     } finally {rendering=false;}
   }
   const previousUpdate=update;
@@ -92,8 +93,8 @@
     persist();
     render();
   });
-  // iOS Safari can leave an open <details> popover visible after the system
-  // date wheel closes. An explicit, inline editor avoids native details state.
+  // iOS Safari can leave a native <details> overlay visually stuck.
+  // Use a compact anchored popover with explicit JS visibility instead.
   const dateToggle=el('mt80-date-toggle');
   const dateEditor=el('mt80-date-fields');
   const closeDates=()=>{
@@ -101,9 +102,18 @@
     dateEditor.hidden=true;
     dateToggle.setAttribute('aria-expanded','false');
   };
+  const positionDatePopover=()=>{
+    if(dateEditor.hidden)return;
+    const rect=dateToggle.getBoundingClientRect();
+    const width=Math.min(292,window.innerWidth-16);
+    // Match original compact screenshot, but keep the popover inside tiny screens.
+    const targetX=Math.min(Math.max(8,rect.left-62),Math.max(8,window.innerWidth-width-8));
+    dateEditor.style.left=(targetX-rect.left)+'px';
+  };
   const openDates=()=>{
     dateEditor.hidden=false;
     dateToggle.setAttribute('aria-expanded','true');
+    positionDatePopover();
   };
   dateToggle.addEventListener('click',()=>dateEditor.hidden?openDates():closeDates());
   el('mt80-date-close').addEventListener('click',closeDates);
@@ -118,14 +128,21 @@
   });
   // Close on tapping elsewhere and when switching tabs; do not interfere with
   // native iOS date selection or close the sheet prematurely on input events.
-  document.addEventListener('pointerdown',event=>{
+  const maybeDismissDates=event=>{
     if(!dateEditor.hidden && !dateEditor.contains(event.target) && !dateToggle.contains(event.target)) closeDates();
-  });
+  };
+  document.addEventListener('pointerdown',maybeDismissDates);
+  // Fallback for older WebKit versions that do not dispatch pointer events reliably.
+  if(!window.PointerEvent)document.addEventListener('touchstart',maybeDismissDates,{passive:true});
+  window.addEventListener('resize',positionDatePopover);
   document.addEventListener('keydown',event=>{if(event.key==='Escape')closeDates();});
   document.querySelectorAll('nav button[data-tab]').forEach(button=>button.addEventListener('click',closeDates));
   for(const [id,name] of [['mt80-start-date','departDate'],['mt80-end-date','endDate']]) el(id).addEventListener('change',()=>{
     field(name).value=el(id).value;
     field(name).dispatchEvent(new Event('input',{bubbles:true}));
+    // iOS native calendar Done only dismisses the system picker.  Close our
+    // anchored popover as soon as both dates have been selected.
+    if(el('mt80-start-date').value && el('mt80-end-date').value) closeDates();
   });
   if(quickRound) quickRound.addEventListener('change',()=>{
     const total=Number(quick.distance.value)||0;

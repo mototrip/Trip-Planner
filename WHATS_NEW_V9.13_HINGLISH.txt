@@ -1,0 +1,1 @@
+MotoTrip V9.13: iPhone par Trip Dates old-style compact popup (Add trip dates ke neeche). Existing iPhone close/clear fix retained; Start/End date fields remain synced to original Planner and storage. Old Trip Card, mountain image, Budget per Rider and Route unchanged.

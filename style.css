@@ -1776,3 +1776,69 @@ html[data-theme=dark] #plan .mt912-date-editor{background:#192c41;border-color:#
 html[data-theme=dark] #plan .mt912-date-head,html[data-theme=dark] #plan .mt912-date-editor .mt80-date-fields label,html[data-theme=dark] #plan .mt912-date-trigger{color:#eaf7ff!important;}
 html[data-theme=dark] #plan .mt912-date-x{background:#253d54;color:#eaf7ff;border-color:#4a6278;}
 @media(max-width:350px){#plan .mt912-date-editor{padding:9px;}#plan .mt912-date-editor .mt80-date-fields{gap:6px;}}
+
+
+/* MotoTrip V9.13: matching compact old-date-popup layout on iPhone. */
+#plan .mt80-panel{position:relative;z-index:5;}
+#plan .mt80-trip-card{position:relative;overflow:visible!important;}
+#plan .mt80-trip-main,#plan .mt80-trip-main .mt80-date-details{overflow:visible!important;}
+#plan .mt80-trip-main .mt80-date-details{position:relative;z-index:8;}
+#plan .mt80-date-details .mt913-compact-date-popover{
+  position:absolute!important;z-index:100!important;
+  top:calc(100% + 5px);left:-62px;
+  display:block;box-sizing:border-box;
+  width:min(292px,calc(100vw - 16px))!important;max-width:none!important;min-width:0;
+  padding:10px!important;margin:0!important;
+  border:1px solid #bad7df!important;border-radius:13px!important;
+  background:#fff!important;box-shadow:0 12px 26px #0c2b4b35!important;
+}
+#plan .mt913-compact-date-popover .mt80-date-fields{
+  display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  gap:8px!important;min-width:0!important;
+}
+#plan .mt913-compact-date-popover .mt80-date-fields label{
+  font-size:11px!important;font-weight:650!important;color:#1c3a50!important;
+  line-height:1.25!important;margin:0!important;min-width:0!important;
+}
+#plan .mt913-compact-date-popover .mt80-date-fields input{
+  -webkit-appearance:auto!important;appearance:auto!important;
+  display:block!important;box-sizing:border-box!important;min-width:0!important;
+  margin:5px 0 0!important;padding:5px 4px!important;
+  width:100%!important;max-width:100%!important;min-height:36px!important;
+  background:#f8fbfc!important;color:#14334c!important;
+  border:1px solid #bfd8e0!important;border-radius:8px!important;
+  font-family:inherit!important;font-size:16px!important;line-height:1.15!important;
+  letter-spacing:-.025em!important;
+}
+/* Small unobtrusive close button, without adding a title or an extra row. */
+#plan .mt913-compact-date-popover .mt913-date-x{
+  position:absolute;top:-9px;right:-8px;display:grid;place-items:center;
+  width:23px;height:23px;min-width:23px;min-height:23px;
+  border-radius:50%;border:1px solid #c4dce0!important;
+  padding:0!important;margin:0!important;background:#fff!important;
+  box-shadow:0 2px 6px #142b3f20!important;color:#355465!important;
+  font-size:16px!important;line-height:1!important;touch-action:manipulation;
+}
+/* Functional Clear / Done controls are kept for accessibility and easy date removal,
+   but styled as a small unobtrusive bottom row. */
+#plan .mt913-compact-date-popover .mt913-date-tools{
+  display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:6px;
+}
+#plan .mt913-compact-date-popover .mt913-date-tools button{
+  display:inline-flex;align-items:center;justify-content:center;
+  background:transparent!important;border:0!important;box-shadow:none!important;
+  color:#31677b!important;padding:2px 4px!important;margin:0!important;
+  min-height:24px!important;font-size:10px!important;font-weight:700!important;
+}
+#plan .mt913-compact-date-popover .mt913-date-tools #mt80-date-done{color:#00836c!important;}
+html[data-theme=dark] #plan .mt913-compact-date-popover{background:#192b43!important;border-color:#55778a!important;}
+html[data-theme=dark] #plan .mt913-compact-date-popover .mt80-date-fields label{color:#e6f3fb!important;}
+html[data-theme=dark] #plan .mt913-compact-date-popover .mt913-date-x{background:#233b54!important;color:#fff!important;border-color:#5c7486!important;}
+@media(max-width:365px){
+  #plan .mt913-compact-date-popover .mt80-date-fields{gap:6px!important;}
+  #plan .mt913-compact-date-popover{padding:8px!important;}
+}
+
+/* On first open, match the supplied screenshot: exactly two date fields.
+   Clear / Done become visible only if a date has actually been chosen. */
+#plan .mt913-compact-date-popover:not(.mt913-has-dates) .mt913-date-tools{display:none!important;}
