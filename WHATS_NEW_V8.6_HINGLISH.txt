@@ -1,0 +1,4 @@
+MotoTrip V8.6
+- Route section ko full active redesign diya gaya.
+- Start, Stops aur Destination blocks ab zyada clear aur modern hain.
+- Route tools aur search area ko better spacing aur stronger buttons ke saath update kiya gaya.

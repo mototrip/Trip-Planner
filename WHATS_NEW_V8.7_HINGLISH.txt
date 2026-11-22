@@ -1,0 +1,1 @@
+MotoTrip V8.7: Route buttons alignment improvements on small screens. GPS, Add Stop and Google Search buttons preserve the same functionality. Existing data storage unchanged.
