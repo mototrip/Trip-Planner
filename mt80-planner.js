@@ -88,8 +88,10 @@
   });
   if(quickRound) quickRound.addEventListener('change',()=>{
     const total=Number(quick.distance.value)||0;
+    const wasRound=getBoolField('round',true);
+    const oneWay=total/(wasRound?2:1);
     setBoolField('round',quickRound.checked);
-    field('distance').value=formatNum(total/(quickRound.checked?2:1));
+    field('distance').value=formatNum(oneWay);
     field('distance').dispatchEvent(new Event('input',{bubbles:true}));
   });
   if(quickFuel) quickFuel.addEventListener('change',()=>setBoolField('includeFuel',quickFuel.checked));
