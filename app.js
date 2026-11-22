@@ -15,9 +15,9 @@ function renderTheme(){const light=state.theme==='light';document.documentElemen
 $('theme-toggle').onclick=()=>{state.theme=state.theme==='light'?'dark':'light';persist();renderTheme();};
 function dashboard(){const totals=state.trips.reduce((a,t)=>{const c=calc(t.data);a.km+=c.km;a.total+=c.total;return a;},{km:0,total:0});$('dash-trips').textContent=state.trips.length;$('dash-km').textContent=totals.km.toLocaleString('en-IN')+' km';$('dash-budget').textContent=money(totals.total);}
 
-$("edit-bike").onclick=()=>{$("bike-name").value=bikeName();const b=profile();$("bike-cc").value=b.cc;$("bike-tank").value=b.tank;$("bike-mileage").value=b.mileage;$("bike-message").textContent="";refreshMileageCalculator();$("bike-editor").hidden=false;$("bike-name").focus();};
+$("edit-bike").onclick=()=>{$("bike-message").textContent="";refreshMileageCalculator();$("bike-editor").hidden=false;$("mileage-distance").focus();};
 $("cancel-bike").onclick=()=>{$("bike-editor").hidden=true;};
-// Mileage calculator is a helper within Edit Bike; it never changes a saved profile until Save Bike.
+// Mileage calculator applies its result directly to the Planner; legacy bike metadata stays unchanged.
 let computedMileage=null;
 function refreshMileageCalculator(){
  const distanceInput=$("mileage-distance"), expenseInput=$("mileage-expense");
@@ -34,19 +34,23 @@ function refreshMileageCalculator(){
  rateText.textContent=validRate?`Using Planner fuel price: ₹${price.toLocaleString('en-IN',{maximumFractionDigits:2})}/L. Fuel used ≈ ${litres===null?'—':litres.toFixed(2)} L. If prices varied, mileage is approximate.`:'Set a fuel price greater than ₹0/L in Planner to calculate mileage.';
  $("mileage-result").textContent=usable?computedMileage.toFixed(2)+" km/L":"— km/L";
  $("apply-mileage").disabled=!usable;
- $("mileage-hint").textContent=!validRate?'Enter a valid fuel price in Planner first.':!validValues?'Enter distance travelled and total fuel expense (₹).':!usable?'Result must be between 0.1 and 300 km/L. Check distance, total expense and fuel price.':'Mileage estimated from total fuel expense. Tap Use mileage, then Save Bike.';
+ $("mileage-hint").textContent=!validRate?'Enter a valid fuel price in Planner first.':!validValues?'Enter distance travelled and total fuel expense (₹).':!usable?'Result must be between 0.1 and 300 km/L. Check distance, total expense and fuel price.':'Mileage estimated from total fuel expense. Tap Use mileage to apply it to the Planner.';
 }
 for(const id of ["mileage-distance","mileage-expense"])$(id).addEventListener("input",refreshMileageCalculator);
 // Keep the result in sync if the user changes the fuel price in Planner.
 form.elements.namedItem('price').addEventListener('input',refreshMileageCalculator);
 $("apply-mileage").onclick=()=>{
- if(computedMileage===null||computedMileage<0.1||computedMileage>300)return;
- $("bike-mileage").value=Number(computedMileage.toFixed(2));
- $("bike-message").textContent="Mileage applied. Tap Save Bike to update your trip estimates.";
+ if(computedMileage===null||!Number.isFinite(computedMileage)||computedMileage<0.1||computedMileage>300)return;
+ const mileage=Number(computedMileage.toFixed(2));
+ const oldProfile=state.bikeProfile;
+ state.bikeProfile={...profile(),mileage};
+ // Keep the existing top calculator, estimate and saved draft synchronized.
+ form.elements.mileage.value=String(mileage);
+ form.elements.mileage.dispatchEvent(new Event('input',{bubbles:true}));
+ renderBike();
+ $("bike-message").textContent="Mileage updated in Planner: "+mileage+" km/L.";
 };
 
-$("save-bike").onclick=()=>{const n=$("bike-name").value.trim();if(!n){$("bike-message").textContent="Enter a bike name.";return;}const fields=['bike-cc','bike-tank','bike-mileage'].map($);if(fields.some(x=>!x.value||!x.checkValidity())){$('bike-message').textContent='Enter valid positive bike specifications.';return;}const old={...state};state.bikeName=n;state.bikeProfile={cc:Number(fields[0].value),tank:Number(fields[1].value),mileage:Number(fields[2].value)};const previous=form.elements.mileage.value;form.elements.mileage.value=state.bikeProfile.mileage;state.draft=read();if(!persist()){state=old;form.elements.mileage.value=previous;$("bike-message").textContent="Could not save. Please try again.";return;}renderBike();update(false);$("bike-editor").hidden=true;notice("Bike profile saved on this device.");};
-$("bike-name").addEventListener("keydown",e=>{if(e.key==="Enter")$("save-bike").click();});
 function persist(){try{localStorage.setItem(key,JSON.stringify(state));return true;}catch(e){notice('Storage unavailable. Export a backup before closing.');return false;}}
 const money=n=>new Intl.NumberFormat('en-IN',{style:'currency',currency:'INR',maximumFractionDigits:0}).format(n);
 function read(){const d=Object.fromEntries([...new FormData(form)].map(([k,v])=>[k,v]));const roundField=form.elements.namedItem('round'),fuelField=form.elements.namedItem('includeFuel');d.round=roundField&&roundField.type==='hidden'?String(roundField.value)!=='false':!!roundField?.checked;d.includeFuel=fuelField&&fuelField.type==='hidden'?String(fuelField.value)!=='false':(fuelField?!!fuelField.checked:true);d.stops=Array.isArray(state.routeStops)?state.routeStops.map(s=>({name:String(s.name||'').slice(0,180),lat:Number.isFinite(Number(s.lat))&&s.lat!==null?Number(s.lat):null,lon:Number.isFinite(Number(s.lon))&&s.lon!==null?Number(s.lon):null})).filter(s=>s.name):[{name:d.to,lat:null,lon:null}];return d;}

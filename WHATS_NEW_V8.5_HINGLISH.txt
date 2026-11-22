@@ -1,0 +1,6 @@
+MotoTrip V8.5 — Simple Mileage Check
+
+1. Bike & Mileage Check se Your bike name, Engine (cc), Tank capacity (L), Default mileage (km/L) fields hata diye.
+2. Real Mileage Calculator same hai. Use mileage par tap karne se result directly Planner ke upper Bike Mileage (Avg) mein apply hoga.
+3. Existing saved bike name / engine / tank records delete nahi kiye; Trips, Group, Bill Split, Safety aur old layouts unchanged.
+4. Same localStorage keys. Upload full archive contents or quick update files, then Commit changes on GitHub.

@@ -1348,3 +1348,6 @@ html[data-theme=dark] #plan .mt82-mini-check{color:#d9ebf5!important;}
 #planner .mt84-cost-row input{margin-top:4px!important;padding:6px 5px!important;font-size:13px!important;min-width:0!important}
 #plan .mt-extra-costs{display:none!important}
 @media(max-width:420px){#planner .mt84-cost-row{grid-template-columns:repeat(4,minmax(0,1fr))!important}#planner .mt84-cost-row label{padding:6px 4px!important;font-size:10px!important}#planner .mt84-cost-row input{font-size:12px!important;padding:6px 4px!important}}
+
+/* V8.5: simplified mileage-check panel, no bike configuration fields. */
+#plan #bike-editor .bike-actions{display:flex;justify-content:flex-end;margin:7px 0 3px;}
