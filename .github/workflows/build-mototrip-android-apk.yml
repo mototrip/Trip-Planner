@@ -1,0 +1,78 @@
+name: Build MotoTrip Android APK
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'android-app/**'
+      - '.github/workflows/build-mototrip-android-apk.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download repository
+        uses: actions/checkout@v4
+      - name: Install Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - name: Install Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.11.1'
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+      - name: Install Android SDK components
+        run: sdkmanager 'platforms;android-35' 'build-tools;35.0.0'
+      - name: Compile installable debug APK
+        run: gradle -p android-app :app:assembleDebug --no-daemon --stacktrace
+      - name: Prepare debug APK
+        run: cp android-app/app/build/outputs/apk/debug/app-debug.apk MotoTrip-Android-TEST.apk
+      - name: Upload debug APK for testing
+        uses: actions/upload-artifact@v4
+        with:
+          name: MotoTrip-Android-TEST-APK
+          path: MotoTrip-Android-TEST.apk
+          if-no-files-found: error
+
+      # Persistent signing key is REQUIRED for a publicly shared updateable APK.
+      # GitHub Secrets (never commit the keystore):
+      # MOTOTRIP_SIGNING_KEYSTORE_BASE64 and MOTOTRIP_SIGNING_PASSWORD
+      - name: Decode private signing key
+        if: ${{ github.event_name == 'workflow_dispatch' }}
+        env:
+          SIGNING_B64: ${{ secrets.MOTOTRIP_SIGNING_KEYSTORE_BASE64 }}
+          SIGNING_PASS: ${{ secrets.MOTOTRIP_SIGNING_PASSWORD }}
+        run: |
+          if [[ -n "$SIGNING_B64" && -n "$SIGNING_PASS" ]]; then
+            printf '%s' "$SIGNING_B64" | base64 --decode > "$RUNNER_TEMP/mototrip-signing.p12"
+            echo "MOTOTRIP_RELEASE_KEYSTORE=$RUNNER_TEMP/mototrip-signing.p12" >> "$GITHUB_ENV"
+            echo 'HAS_RELEASE_KEY=true' >> "$GITHUB_ENV"
+          else
+            echo 'HAS_RELEASE_KEY=false' >> "$GITHUB_ENV"
+            echo 'No release signing key configured; producing TEST APK only.'
+          fi
+      - name: Build signed release APK
+        if: ${{ env.HAS_RELEASE_KEY == 'true' }}
+        env:
+          MOTOTRIP_RELEASE_PASSWORD: ${{ secrets.MOTOTRIP_SIGNING_PASSWORD }}
+        run: |
+          gradle -p android-app :app:assembleRelease --no-daemon --stacktrace
+          cp android-app/app/build/outputs/apk/release/app-release.apk MotoTrip-Android.apk
+      - name: Publish signed APK as a directly downloadable GitHub Release
+        if: ${{ env.HAS_RELEASE_KEY == 'true' }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if gh release view mototrip-android >/dev/null 2>&1; then
+            gh release upload mototrip-android MotoTrip-Android.apk --clobber
+          else
+            gh release create mototrip-android MotoTrip-Android.apk \
+              --title 'MotoTrip Android (Direct Install)' \
+              --notes 'Signed MotoTrip Android APK. Install only from the official MotoTrip GitHub repository.'
+          fi
