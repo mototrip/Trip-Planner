@@ -49,8 +49,16 @@ public final class MainActivity extends Activity {
         settings.setDatabaseEnabled(true);
         settings.setGeolocationEnabled(true);
         settings.setMixedContentMode(WebSettings.MIXED_CONTENT_NEVER_ALLOW);
+        // Web content never needs access to local file:// documents or cross-file origins.
         settings.setAllowFileAccess(false);
+        settings.setAllowFileAccessFromFileURLs(false);
+        settings.setAllowUniversalAccessFromFileURLs(false);
+        // Keep selected content:// uploads available for the explicit file picker.
+        // Do not grant any JavaScript-to-native interface to remote pages.
         settings.setAllowContentAccess(true);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            settings.setSafeBrowsingEnabled(true);
+        }
         settings.setJavaScriptCanOpenWindowsAutomatically(false);
         settings.setMediaPlaybackRequiresUserGesture(true);
         CookieManager.getInstance().setAcceptCookie(true);
@@ -59,8 +67,10 @@ public final class MainActivity extends Activity {
             @Override public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
                 Uri url = request.getUrl();
                 if (isMotoTrip(url)) return false;
-                if ("about".equals(url.getScheme())) return false;
-                openExternal(url);
+                if ("about:blank".equalsIgnoreCase(url.toString())) return false;
+                // Frames may contain third-party resources; only main-frame links
+                // may be opened outside the trusted MotoTrip WebView.
+                if (request.isForMainFrame()) openExternal(url);
                 return true;
             }
         });
@@ -141,17 +151,35 @@ public final class MainActivity extends Activity {
             }
         });
 
+        // Always load the fixed HTTPS application origin, never an externally
+        // supplied arbitrary WebView URL. Preserve the 32-hex Shared Ride invite
+        // fragment so links keep working in the Android wrapper.
         Uri deeplink = getIntent() == null ? null : getIntent().getData();
-        webView.loadUrl(isMotoTrip(deeplink) ? deeplink.toString() : APP_URL);
+        String launchUrl = APP_URL;
+        if (isMotoTrip(deeplink)) {
+            String fragment = deeplink.getFragment();
+            if (fragment != null && fragment.matches("(?i)join=[0-9a-f]{32}")) {
+                launchUrl = APP_URL + "#" + fragment;
+            }
+        }
+        webView.loadUrl(launchUrl);
     }
 
     private boolean isMotoTrip(Uri uri) {
         return uri != null && "https".equalsIgnoreCase(uri.getScheme())
                 && "mototrip.github.io".equalsIgnoreCase(uri.getHost())
+                && uri.getPort() == -1
                 && uri.getPath() != null && uri.getPath().startsWith("/Trip-Planner/");
     }
 
     private void openExternal(Uri uri) {
+        if (uri == null) return;
+        String scheme = uri.getScheme();
+        if (scheme == null ||
+            !("https".equalsIgnoreCase(scheme) || "http".equalsIgnoreCase(scheme)
+              || "tel".equalsIgnoreCase(scheme) || "sms".equalsIgnoreCase(scheme)
+              || "mailto".equalsIgnoreCase(scheme) || "geo".equalsIgnoreCase(scheme)
+              || "market".equalsIgnoreCase(scheme))) return;
         try {
             startActivity(new Intent(Intent.ACTION_VIEW, uri));
         } catch (Exception e) {
