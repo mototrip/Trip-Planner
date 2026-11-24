@@ -6,6 +6,10 @@ on:
     paths:
       - '.github/workflows/mototrip-security-alerts-audit.yml'
   workflow_dispatch:
+  workflow_run:
+    workflows:
+      - 'MotoTrip CodeQL - Complete Security Scan'
+    types: [completed]
 
 permissions:
   contents: read
