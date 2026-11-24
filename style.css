@@ -2429,3 +2429,21 @@ html[data-theme=dark] #split #mt-safety-panel>summary .mt-safety-mini{color:#b1c
 /* V9.28 — Bill Split saves without Planner details */
 #split .group-name-row input:not([readonly]){cursor:text}
 #split .mt918-save-status{font-size:12px;line-height:1.45;margin-top:8px;overflow-wrap:anywhere}
+
+/* MotoTrip V9.32 — keep onboarding Step 2 instructions inside the Rider Profile.
+   At narrow viewport sizes and large accessibility text, do not force one line. */
+#mt-account-overlay #mt-profile-form #mt-profile-gate-note:not([hidden]){
+  display:block!important;
+  box-sizing:border-box!important;
+  width:100%!important;
+  min-width:0!important;
+  max-width:100%!important;
+  height:auto!important;
+  padding:10px 12px!important;
+  margin:12px 0 8px!important;
+  white-space:normal!important;
+  overflow-wrap:anywhere!important;
+  word-break:normal!important;
+  line-height:1.5!important;
+  font-size:clamp(12px,3.25vw,14px)!important;
+}

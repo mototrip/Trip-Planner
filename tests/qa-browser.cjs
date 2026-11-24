@@ -25,6 +25,29 @@ const BASE='http://127.0.0.1:8765';
    assert.equal(await page.locator('#mt-account-overlay').isVisible(),true,'Account onboarding is absent');
    await page.locator('#mt-welcome-guest').click();
    await page.locator('#mt-profile-panel').waitFor({state:'visible',timeout:10000});
+   // Regression: Step 2 onboarding notice should never extend past its card.
+   // Verify smallest phones, ordinary phones and desktop without changing data.
+   const sizes = label === 'Android narrow' ? [320,360,390] : [1440];
+   for (const vw of sizes) {
+     await page.setViewportSize({width:vw,height:844});
+     const box = await page.locator('#mt-profile-gate-note').evaluate(el=>{
+       const parent=el.parentElement.getBoundingClientRect();
+       const rect=el.getBoundingClientRect();
+       const computed=getComputedStyle(el);
+       return {visible:rect.width>0&&rect.height>0,
+         x:rect.x,right:rect.right,parentLeft:parent.left,parentRight:parent.right,
+         scrollWidth:el.scrollWidth,clientWidth:el.clientWidth,
+         whiteSpace:computed.whiteSpace};
+     });
+     assert.equal(box.visible,true,'Missing Step 2 note at '+vw+'px');
+     assert.equal(box.whiteSpace,'normal','Step 2 wrapping disabled at '+vw+'px');
+     assert.ok(box.right<=box.parentRight+2 && box.x>=box.parentLeft-2,
+       'Step 2 notice extends beyond profile form at '+vw+'px: '+JSON.stringify(box));
+     assert.ok(box.scrollWidth<=box.clientWidth+2,
+       'Step 2 text overflows the note at '+vw+'px: '+JSON.stringify(box));
+   }
+   await page.setViewportSize({width,height});
+   console.log('PASS',label,'Rider Profile Step 2 text wrapping on narrow screens');
    await page.locator('#mt-profile-name').fill('QA Test Rider');
    await page.locator('#mt-profile-save').click();
    await page.waitForFunction(()=>!document.documentElement.classList.contains('mt-entry-locked'),null,{timeout:10000});
