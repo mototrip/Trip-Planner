@@ -2,7 +2,7 @@ plugins { id 'com.android.application' }
 
 android {
     namespace 'com.mototrip.app'
-    compileSdk 35
+    compileSdk 36
 
     defaultConfig {
         // Distinct preview package: preserves the already installed WebView
