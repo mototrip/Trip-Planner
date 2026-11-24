@@ -1,0 +1,37 @@
+name: MotoTrip Security Alerts Audit
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/mototrip-security-alerts-audit.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  security-events: read
+
+jobs:
+  report-open-code-scanning-alerts:
+    name: Report open Code Scanning alerts
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Query Code Scanning open alerts (read-only)
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          echo "Repository: $GITHUB_REPOSITORY"
+          echo "Fetching open Code Scanning alerts..."
+          gh api --paginate "/repos/$GITHUB_REPOSITORY/code-scanning/alerts?state=open&per_page=100" \
+            --jq '.[] | [.number, .rule.id, (.rule.security_severity_level // .rule.severity // "unknown"), (.most_recent_instance.location.path // "unknown")] | @tsv' > "$RUNNER_TEMP/codeql-open-alerts.tsv"
+          count=$(wc -l < "$RUNNER_TEMP/codeql-open-alerts.tsv" | tr -d ' ')
+          echo "OPEN_CODE_SCANNING_ALERTS=$count"
+          if [[ "$count" -gt 0 ]]; then
+            echo 'Number | Rule | Severity | File'
+            cat "$RUNNER_TEMP/codeql-open-alerts.tsv"
+          else
+            echo 'No open Code Scanning alerts.'
+          fi
