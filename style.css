@@ -2159,3 +2159,9 @@ html[data-theme="dark"] #plan .mt921-return-toggle{background:#1e3c40;color:#bdf
  #plan .mt80-panel > .mt80-costs { padding:8px 2px; }
  #plan .mt80-panel > .mt82-quick-toggles { gap:6px!important; }
 }
+
+/* MotoTrip V9.23 — startup / iPhone text contrast */
+html[data-theme="dark"] #plan .mt80-est-title{color:#f1f9ff!important;text-shadow:none!important}
+html[data-theme="light"] #plan .mt80-est-title{color:#10213a!important}
+#theme-toggle{white-space:nowrap!important;min-width:44px!important;min-height:44px!important;display:inline-grid!important;place-items:center!important;font-size:22px!important;line-height:1!important;overflow:hidden!important}
+#mt923-boot-cover{box-sizing:border-box}

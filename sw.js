@@ -2,15 +2,15 @@
  * Original application © 2026 Satish Kumar Gupta.
  * IMPORTANT: cache cleanup here does not delete trips/expenses in localStorage.
  */
-const CACHE_NAME = 'mototrip-v9.22';
+const CACHE_NAME = 'mototrip-v9.23';
 const PREVIOUS_CACHE_PREFIX = 'mototrip-';
 const APP_SHELL = [
-  './index.html','./app-update.js?v=80','./style.css?v=922',
-  './app.js?v=921','./account.js?v=80','./split.js?v=920','./route.js?v=915','./ui.js?v=920',
+  './index.html','./app-update.js?v=80','./style.css?v=923',
+  './app.js?v=923','./account.js?v=80','./split.js?v=923','./route.js?v=915','./ui.js?v=920',
   './exports.js?v=918','./firebase-config.js?v=80','./qr-code.js?v=80','./shared-ride.js?v=917','./group-gear.js?v=80','./safety.js?v=80','./qr-scanner.js?v=80',
   './report.html','./report.js?v=918','./privacy.html',
   './terms.html','./ownership.html','./manifest.json',
-  './mt80-planner.js?v=921','./icon-192.png','./icon-512.png'
+  './mt80-planner.js?v=923','./boot-ready.js?v=923','./icon-192.png','./icon-512.png'
 ];
 const OPTIONAL_IMAGE_ASSETS = ['./assets/trip-himalayas.webp','./assets/traveling-obsession-banner.svg'];
 const appIndex = new URL('./index.html', self.registration.scope).href;
@@ -47,8 +47,9 @@ self.addEventListener('activate', event => {
 function cacheKey(request) {
   if (request.mode !== 'navigate') return request;
   const url = new URL(request.url);
-  // Query parameters should never make the HTML shell inaccessible offline.
-  return new Request(url.origin + url.pathname);
+  // PWA root and index.html are the same cached application entry point.
+  const pathname = url.pathname.endsWith('/') ? url.pathname + 'index.html' : url.pathname;
+  return new Request(url.origin + pathname);
 }
 
 self.addEventListener('fetch', event => {
@@ -59,16 +60,18 @@ self.addEventListener('fetch', event => {
   event.respondWith((async () => {
     const cache = await caches.open(CACHE_NAME);
     const key = cacheKey(request);
+    // Serve the versioned, atomic app bundle from the current service worker.
+    // Network-first JS/CSS caused a half-rendered interface and taps before
+    // handlers were installed when mobile networks were slow or intermittent.
+    const cached = await cache.match(key);
+    if (cached) return cached;
     try {
-      // Always fetch the newest HTML, JS, Firebase configuration, icons and CSS.
-      // Avoid browser HTTP cache retaining old credentials/configuration or bundles.
       const response = await fetch(request, {cache: 'no-store'});
       if (!response.ok) throw new Error('Network response: ' + response.status);
+      // Non-shell local files (user-requested reports, etc.) can still be used offline.
       await cache.put(key, response.clone());
       return response;
     } catch (err) {
-      const cached = await cache.match(key);
-      if (cached) return cached;
       if (request.mode === 'navigate') {
         const offline = await cache.match(appIndex);
         if (offline) return offline;

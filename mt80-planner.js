@@ -71,21 +71,26 @@
   }
   const previousUpdate=update;
   update=function(...args){const result=previousUpdate(...args);render();return result;};
+  function syncQuick(name,input){
+    // Some iOS number pads fire 'change' on Done/blur but delay 'input'.
+    // Empty fields mean zero for the preview — never retain stale hidden values.
+    const raw=input.value;
+    const n=raw.trim()===''?0:Number(raw);
+    if(!Number.isFinite(n)||n<0)return;
+    if(name==='distance'){
+      const oneWay=n/(getBoolField('round',false)?2:1);
+      field('distance').value=formatNum(oneWay);
+      field('distance').dispatchEvent(new Event('input',{bubbles:true}));
+    }else{
+      field(name).value=raw.trim()===''?'0':raw;
+      field(name).dispatchEvent(new Event('input',{bubbles:true}));
+    }
+  }
   for(const [name,input] of Object.entries(quick)){
-    input.addEventListener('input',()=>{
-      const value=input.value;
-      if(name==='distance'){
-        const total=Number(value);
-        if(value===''||!Number.isFinite(total)||total<0)return;
-        field('distance').value=formatNum(total/(getBoolField('round',true)?2:1));
-        field('distance').dispatchEvent(new Event('input',{bubbles:true}));
-      }else{
-        if(value===''||!Number.isFinite(Number(value))||Number(value)<0)return;
-        field(name).value=value;
-        field(name).dispatchEvent(new Event('input',{bubbles:true}));
-      }
-    });
-    input.addEventListener('change',()=>{if(input.value==='')render();});
+    input.addEventListener('input',()=>syncQuick(name,input));
+    input.addEventListener('change',()=>syncQuick(name,input));
+    // On older WebKit, the activeElement may remain an input after Done.
+    input.addEventListener('blur',()=>{syncQuick(name,input);render();});
   }
   for(const [id,increment] of [['mt80-minus',-1],['mt80-plus',1]]) el(id).addEventListener('click',()=>{
     const next=Math.min(99,Math.max(1,riderCount()+increment));
@@ -146,12 +151,16 @@
   });
   if(quickRound) quickRound.addEventListener('change',()=>{
     const total=Number(quick.distance.value)||0;
-    const wasRound=getBoolField('round',true);
+    const wasRound=getBoolField('round',false);
     const oneWay=total/(wasRound?2:1);
     setBoolField('round',quickRound.checked);
     field('distance').value=formatNum(oneWay);
     field('distance').dispatchEvent(new Event('input',{bubbles:true}));
   });
   if(quickFuel) quickFuel.addEventListener('change',()=>setBoolField('includeFuel',quickFuel.checked));
+  // iOS PWA resume/bfcache: redraw estimates from the last saved form state.
+  window.addEventListener('pageshow',()=>{
+    try { update(false); render(); } catch (error) { console.error('MotoTrip estimate refresh:',error); }
+  });
   render();
 })();

@@ -1,0 +1,32 @@
+MotoTrip V9.23 — Bug Audit & QA Report
+
+Bugs addressed:
+1. Slow iPhone reopen: Versioned app CSS/JS were network-first through Service Worker. Changed app shell to cache-first for consistent, faster PWA reopen.
+2. Half-styled UI on reopen: Added a full-screen startup cover, removed automatically after core scripts and account screen are ready. Failed startup shows a Reload control.
+3. Theme button briefly saying "Light mode" instead of icon: Initial icon set in HTML; theme and contrast restored by app.js.
+4. Dark theme estimate heading hard to read: High-contrast dark-mode rule added.
+5. iPhone mileage/petrol/distance not updating top summary: Added input + change + blur synchronization of visible fields with the hidden Planner form. Clearing a field now clears old preview instead of retaining stale estimates.
+6. Navigation: panel switch now affects the five real tabs, not unrelated status/notification sections.
+7. Bill Split: local expense/payment ID fallback when Android WebView lacks randomUUID.
+8. Hidden numeric fields: trip save requires valid >0 distance and mileage, preventing zero-distance report records.
+
+Browser QA performed (Chromium JS/DOM simulation, 320/360/390/430/768px):
+- 15 app scripts loaded, no runtime errors in tested flows.
+- Login previously-approved Guest, startup cover, theme icons.
+- Planner: distance, mileage, price, overnight food/stay/toll, return checkbox, live budget.
+- Clearing price zeroes fuel rather than keeping old value.
+- Date popup open/close; Route/Gear opt-in; Planner/Bill Split/Trips navigation.
+- Gear checklist check/persistence.
+- Same-name trip Save and Update keeps one record and ID; reports selector stays one item.
+- Bill Split: riders, expense, per-person sharing and settlement.
+- Private Group disclosure opens.
+- Light/dark mode toggle.
+- No horizontal overflow at tested widths.
+
+Not live-tested here:
+- Actual iPhone Safari PWA (reopen/background, native date picker, GPS permissions).
+- Firebase Authentication, Firestore, invite sync, QR camera, live location (requires live accounts/device permission).
+- Physical Android APK install and vendor-specific WebView.
+- Google Maps/geocoding network responses.
+
+Safety: Does not clear localStorage, report history, Firestore, or Firebase settings. Preserve the same GitHub path and upload all Quick Update files (including the new boot-ready.js and sw.js). On iPhone open MotoTrip and select Update now if offered; then reopen it. Save a data backup from Trips before switching between PWA/APK or clearing browser storage.

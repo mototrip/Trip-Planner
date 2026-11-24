@@ -14,6 +14,17 @@ function group(){
  }
  return g;
 }
+// IDs for locally saved expense/payment rows are not security tokens. Some
+// Android WebViews disable crypto.randomUUID outside secure contexts; don't
+// let that break offline Bill Split. Invitation IDs still require secure crypto.
+function localRecordId(){
+ if(globalThis.crypto && typeof crypto.randomUUID==='function')return crypto.randomUUID();
+ if(globalThis.crypto && typeof crypto.getRandomValues==='function'){
+  const bytes=new Uint8Array(16);crypto.getRandomValues(bytes);
+  return Array.from(bytes,b=>b.toString(16).padStart(2,'0')).join('');
+ }
+ return Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,12);
+}
 const cash=p=>new Intl.NumberFormat('en-IN',{style:'currency',currency:'INR'}).format(p/100);
 function calculateSplit(g){
  const rows=g.members.map(name=>({name,paid:0,share:0,net:0}));
@@ -48,7 +59,7 @@ function saveSplit(){persist();renderSplit();if(window.motoTripSharedRide?.activ
 function recordPayment(from,to,amount){
  const g=group();
  if(from===to||!g.members.includes(from)||!g.members.includes(to)||!Number.isSafeInteger(amount)||amount<=0)return false;
- g.transfers.push({id:crypto.randomUUID(),from,to,amount,date:new Date().toISOString(),status:'paid'});saveSplit();return true;
+ g.transfers.push({id:localRecordId(),from,to,amount,date:new Date().toISOString(),status:'paid'});saveSplit();return true;
 }
 // Toggle one payment, not the expense itself; the accounting is fully recalculated.
 // No history is discarded, so a mistaken Undo can also be corrected.
@@ -179,7 +190,7 @@ function renderSplit(){
  prevChecks=new Map([...$('beneficiaries').querySelectorAll('input[type=checkbox]')].map(x=>[x.value,x.checked]));
  $('group-name').value=g.name||'';
  $('rider-count').textContent=g.members.length+' added';
- for(const id of ['members','payer','beneficiaries','expense-list','balances','settlements','split-summary','payment-from','payment-to','payment-list'])$(id).replaceChildren();
+ for(const id of ['members','payer','beneficiaries','expense-list','balances','settlements','payment-from','payment-to','payment-list'])$(id).replaceChildren();
  if(!g.members.length)$('members').append(node('p','No riders yet. Add a rider above.','no-riders'));
  for(const name of g.members){
   const chip=node('span','','rider-chip'),label=node('span',name),remove=node('button','×','remove-rider');
@@ -210,20 +221,23 @@ function renderSplit(){
  history('payment-list',g.transfers,e=>e.from+' → '+e.to+' · '+cash(e.amount)+' · '+paymentStatusText(e),'payment');
  recentExpenses(g);
  const result=calculateSplit(g);
- const stats=[
-  {label:'Total spending',value:cash(result.total),meta:`${g.expenses.length} ${g.expenses.length===1?'expense':'expenses'}`,icon:'₹',tone:'primary'},
-  {label:'Average per rider',value:cash(g.members.length?Math.round(result.total/g.members.length):0),meta:`${g.members.length} ${g.members.length===1?'rider':'riders'}`,icon:'👥',tone:'secondary'}
- ];
- for(const stat of stats){
-  const a=node('div','','split-stat split-stat--'+stat.tone);
-  const head=node('div','','split-stat-head');
-  head.append(node('span',stat.icon,'split-stat-icon'));
-  const copy=node('div','','split-stat-copy');
-  copy.append(node('small',stat.label),node('strong',stat.value));
-  head.append(copy);
-  a.append(head,node('span',stat.meta,'split-stat-meta'));
-  $('split-summary').append(a);
+ // Reuse the Planner's trip-card layout and mountain image.
+ // Only live text changes; no new cards or duplicate DOM are created on render.
+ const tripTitle=$('split-summary-name');
+ const tripDates=$('split-summary-dates');
+ const totalSpending=$('split-summary-total');
+ const perRider=$('split-summary-average');
+ if(tripTitle)tripTitle.textContent=String(g.name||form.elements.name?.value||'My Trip').trim()||'My Trip';
+ if(tripDates)tripDates.textContent=$('mt80-date-summary')?.textContent?.trim()||'Add trip dates';
+ if($('split-summary-riders'))$('split-summary-riders').textContent=g.members.length+' Rider'+(g.members.length===1?'':'s');
+ const compactCash=cents=>new Intl.NumberFormat('en-IN',{style:'currency',currency:'INR',minimumFractionDigits:0,maximumFractionDigits:2}).format(cents/100);
+ const totalText=compactCash(result.total), averageText=compactCash(g.members.length?Math.round(result.total/g.members.length):0);
+ if(totalSpending){
+  totalSpending.textContent=totalText;
+  totalSpending.title=totalText;
+  totalSpending.style.fontSize=totalText.length>=13?'12px':totalText.length>=10?'clamp(12px,3.6vw,16px)':totalText.length>=7?'clamp(15px,4.4vw,20px)':'';
  }
+ if(perRider)perRider.textContent='≈ '+averageText+' / Rider';
  const table=node('table','','split-table'),head=node('thead'),hr=node('tr');
  for(const s of ['Member','Paid','Share','Balance'])hr.append(node('th',s));
  head.append(hr);table.append(head);
@@ -257,6 +271,7 @@ function plannerTripName(){return form.elements.name.value.trim().slice(0,100);}
 function syncGroupName(){
  const g=group();
  $('group-name').value=g.name;
+ if($('split-summary-name'))$('split-summary-name').textContent=g.name||'My Trip';
  persist();
  renderBudget();
 }
@@ -277,7 +292,7 @@ $('expense-form').onsubmit=e=>{
  if(!people.length||!name||!g.members.includes(payer)||!Number.isSafeInteger(amount)||amount<=0){
   alert('Enter an amount, choose who paid, and select at least one rider.');return;
  }
- g.expenses.push({id:crypto.randomUUID(),name,payer,amount,people,date:new Date().toISOString()});
+ g.expenses.push({id:localRecordId(),name,payer,amount,people,date:new Date().toISOString()});
  $('expense-name').value='';$('expense-amount').value='';$('expense-suggestions').hidden=true;
  saveSplit();
 };

@@ -1,0 +1,13 @@
+MotoTrip V9.23 — Phone reliability and bug audit
+
+• Reopen ke waqt half-loaded UI aur unstyled theme text ko startup cover se fix.
+• Versioned CSS/JS/service-worker shell cache-first kiya. Full update activate hone ke baad fast/offline reopen.
+• Number inputs par iOS change/blur fallback: mileage, petrol rate, distance change karne par estimate update.
+• Empty number input se purane amount stale nahi rahenge; zero preview aayega.
+• Return Journey default OFF; saved trips ka choice unchanged.
+• Bill Split offline Android WebView par UUID API missing ho to bhi expense/payment save.
+• Navigation ab sirf Planner/Route/Bill Split/Gear/Trips panels switch karega.
+• Dark mode mein Trip Plan & Estimate heading readable.
+• Saved trips ka existing localStorage, reports, group expenses aur Firebase config unchanged.
+
+Note: Browser static checks done. iPhone Safari, Firebase live services aur external map APIs ke end-to-end tests live phone/account par karne honge.
