@@ -150,7 +150,9 @@ const BASE='http://127.0.0.1:8765';
    await page.route('https://photon.komoot.io/**',route=>route.fulfill({
      status:503,contentType:'application/json',body:'{"error":"QA simulated outage"}'
    }));
-   await page.evaluate(()=>tab('route'));
+   // Route tab is optional in MotoTrip; enable it before opening.
+   await page.locator('#mt916-toggle-route').check({force:true});
+   await page.locator('nav button[data-tab="route"]').click();
    const city=page.locator('#route-start-input');
    await city.fill('QA Search Failure City');
    await page.locator('.place-suggestion-message')
