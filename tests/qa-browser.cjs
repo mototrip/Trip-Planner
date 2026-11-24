@@ -123,10 +123,10 @@ const BASE='http://127.0.0.1:8765';
    console.log('PASS',label,'startup, Guest, Planner save, tabs, split math');
 
    if(label==='Android narrow'){
-    // Return from Bill Split to the tab that owns the backup control.
-    await page.locator('nav button[data-tab="plan"]').click();
+    // Backup controls live in Trips, not inside the Bill Split tab.
+    await page.locator('nav button[data-tab="trips"]').click();
     assert.equal(await page.locator('#export').isVisible(),true,
-      'Backup export action is not visible on Planner');
+      'Backup export action is not visible on Trips');
     // Verify JSON backup can be downloaded and restored without data loss.
     const downloadPromise=page.waitForEvent('download',{timeout:15000});
     await page.locator('#export').click();
