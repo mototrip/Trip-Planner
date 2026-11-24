@@ -66,6 +66,17 @@ public final class MainActivity extends Activity {
         CookieManager.getInstance().setAcceptCookie(true);
 
         webView.setWebViewClient(new WebViewClient() {
+            @Override public void onPageStarted(WebView view, String url, android.graphics.Bitmap favicon) {
+                super.onPageStarted(view, url, favicon);
+                // shouldOverrideUrlLoading is not invoked for every redirect/POST.
+                // Enforce a trusted origin before an unexpected top-level page runs.
+                if (url != null && !"about:blank".equalsIgnoreCase(url) &&
+                    !isMotoTrip(Uri.parse(url))) {
+                    view.stopLoading();
+                    view.loadUrl(APP_URL);
+                }
+            }
+
             @Override public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
                 Uri url = request.getUrl();
                 if (isMotoTrip(url)) return false;
