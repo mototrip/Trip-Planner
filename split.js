@@ -269,26 +269,47 @@ function deletePayment(i){
 }
 window.renderSplit=renderSplit;
 function plannerTripName(){return form.elements.name.value.trim().slice(0,100);}
-function syncGroupName(){
+function syncGroupName(fromPlanner=false){
  const g=group();
- if(!window.motoTripSharedRide?.active){g.manualTripName=false;g.name=plannerTripName();g.autoTripName=g.name;}
- $('group-name').value=g.name;
+ if(!window.motoTripSharedRide?.active){
+  if(fromPlanner || !g.manualTripName || !g.name){
+   g.manualTripName=false;g.name=plannerTripName();g.autoTripName=g.name;
+  }else if(plannerTripName()!==g.name){
+   // Restore a manually renamed bill on reload; keep riders and expenses intact.
+   form.elements.name.value=g.name;
+   if($('route-trip-name'))$('route-trip-name').value=g.name;
+   state.draft=read();
+  }
+ }
+ $('group-name').value=g.name||'';
  if($('split-summary-name'))$('split-summary-name').textContent=g.name||'My Trip';
+ // Match the first-page Planner title to the active Bill Split title.
+ if($('mt80-route')){$('mt80-route').textContent=g.name||'My Trip';$('mt80-route').title=g.name||'My Trip';}
  persist();
  renderBudget();
 }
-window.syncSplitTripName=syncGroupName;
-// Bill Split can have its own group name without requiring route/Planner details.
+// Opening a saved Planner trip explicitly uses that trip's name.
+window.syncSplitTripName=()=>syncGroupName(true);
+// Renaming Bill Split keeps the Planner's first-page title and draft in sync.
 $('group-name').addEventListener('change',()=>{
  if(window.motoTripSharedRide?.active){$('group-name').value=group().name;return;}
  const name=$('group-name').value.trim().slice(0,100);
  if(!name){$('group-name').value=group().name;return;}
- const g=group();g.name=name;g.manualTripName=true;persist();renderSplit();
+ const g=group();g.name=name;g.manualTripName=true;g.autoTripName=name;
+ if(form.elements.name.value!==name){
+  form.elements.name.value=name;
+  form.elements.name.dispatchEvent(new Event('input',{bubbles:true}));
+ }
+ // Planner input handlers must not reset the custom rename marker.
+ g.name=name;g.manualTripName=true;g.autoTripName=name;
+ state.draft=read();
+ persist();renderSplit();
+ if(typeof update==='function')update(false);
  if(typeof updateSaveButtons==='function')updateSaveButtons();
 });
-// Update instantly with each change in Planner, including clearing or editing.
-form.elements.name.addEventListener('input',syncGroupName);
-form.elements.name.addEventListener('change',syncGroupName);
+// User edits in Planner/Route are deliberate and may replace the Bill Split name.
+form.elements.name.addEventListener('input',()=>syncGroupName(true));
+form.elements.name.addEventListener('change',()=>syncGroupName(true));
 $('member-form').onsubmit=e=>{
  e.preventDefault();const n=$('member-name').value.trim(),g=group();
  if(!n||g.members.some(x=>x.toLocaleLowerCase()===n.toLocaleLowerCase())){
