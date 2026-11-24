@@ -2,7 +2,7 @@
  * Original application © 2026 Satish Kumar Gupta.
  * IMPORTANT: cache cleanup here does not delete trips/expenses in localStorage.
  */
-const CACHE_NAME = 'mototrip-v9.29';
+const CACHE_NAME = 'mototrip-v9.30-security';
 const PREVIOUS_CACHE_PREFIX = 'mototrip-';
 const APP_SHELL = [
   './index.html','./app-update.js?v=80','./style.css?v=929',
@@ -16,6 +16,14 @@ const OPTIONAL_IMAGE_ASSETS = ['./assets/trip-himalayas.webp','./assets/travelin
 const appIndex = new URL('./index.html', self.registration.scope).href;
 
 self.addEventListener('message', event => {
+  // Only a page controlled by this app may activate its waiting update.
+  // Never accept update commands from a cross-origin message source.
+  const sourceUrl = event.source && typeof event.source.url === 'string'
+    ? event.source.url : '';
+  if (!sourceUrl || event.origin !== self.location.origin) return;
+  const clientUrl = new URL(sourceUrl);
+  if (clientUrl.origin !== self.location.origin ||
+      !clientUrl.href.startsWith(self.registration.scope)) return;
   if (event.data?.type === 'SKIP_WAITING') self.skipWaiting();
 });
 
