@@ -36,7 +36,15 @@ const BASE='http://127.0.0.1:8765';
    }
 
    // Use the user's real Planner save action; do not create fake records.
-   await page.locator('#planner [name="name"]').fill('QA Mountain Ride');
+   // The canonical planner form contains a hidden legacy trip-name field.
+   // Modern quick inputs are used below; set the legacy name through the same
+   // input/change events the user-facing route name adapter triggers.
+   await page.evaluate(() => {
+     const name = document.querySelector('#planner [name="name"]');
+     name.value = 'QA Mountain Ride';
+     name.dispatchEvent(new Event('input', { bubbles: true }));
+     name.dispatchEvent(new Event('change', { bubbles: true }));
+   });
    await page.locator('#planner [name="days"]').fill('2');
    await page.locator('#mt80-distance').fill('480');
    await page.locator('#mt80-mileage').fill('30');
