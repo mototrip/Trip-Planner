@@ -8,7 +8,20 @@
         android:theme="@style/MotoTripTheme"
         android:usesCleartextTraffic="false"
         android:allowBackup="false"
+        android:manageSpaceActivity="com.google.androidbrowserhelper.trusted.ManageDataLauncherActivity"
         android:supportsRtl="true">
+        <!-- Android Browser Helper 2.7.4 calls this activity on first launch.
+             Without a manifest entry, LauncherActivity throws on Pixel devices. -->
+        <activity
+            android:name="com.google.androidbrowserhelper.trusted.ManageDataLauncherActivity"
+            android:exported="false">
+            <meta-data
+                android:name="android.support.customtabs.trusted.MANAGE_SPACE_URL"
+                android:value="https://mototrip.github.io/Trip-Planner/" />
+        </activity>
+        <activity
+            android:name="com.google.androidbrowserhelper.trusted.FocusActivity"
+            android:exported="false" />
         <activity
             android:name=".MainActivity"
             android:exported="true">
