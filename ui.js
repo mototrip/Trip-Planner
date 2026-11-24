@@ -20,6 +20,8 @@
      if(previousPayments!==null && count>previousPayments)status.open=true;
      previousPayments=count;
    }
+   const launcher=$('shared-ride-launcher');
+   if(launcher && window.motoTripSharedRide?.active)launcher.open=true;
  }
  // Applies to the page once and to every later expense/settlement render.
  window.MotoTripUI={afterSplitRender,selectionStatus};
@@ -32,9 +34,11 @@
  });
  const joinTrigger=$('join-ride-trigger'),joinPanel=$('join-ride-panel');
  if(joinTrigger&&joinPanel)joinTrigger.addEventListener('click',()=>{
+   const launcher=$('shared-ride-launcher');
+   if(launcher)launcher.open=true;
    joinPanel.hidden=!joinPanel.hidden;
    joinTrigger.setAttribute('aria-expanded',String(!joinPanel.hidden));
-   if(!joinPanel.hidden){const field=$('shared-code');if(field)field.focus({preventScroll:true});}
+   if(!joinPanel.hidden){const field=$('shared-code');if(field)field.focus({preventScroll:true});joinPanel.scrollIntoView({block:'nearest',behavior:'smooth'});}
  });
  // A bottom nav tap should always land at the top of the new section.
  const nav=$('main-nav');

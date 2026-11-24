@@ -1,0 +1,10 @@
+MotoTrip V9.18 — Saved Trips & Simple Reports
+
+1. Saved Trips / Distance / Budget stats tab tak hidden, jab tak trip save na ho.
+2. Bill Split ke Reset Group Expenses ke paas Save Trip aur Update Trip buttons.
+3. Same trip name (case/spacing ignore) save karne par purani trip update hoti hai, nayi duplicate nahi banti.
+4. Purane same-name duplicate records data se delete nahi hote, lekin reports aur Trips list mein ek latest trip dikhayi jaati hai.
+5. Report PDF/Excel/CSV se Bike/Vehicle naam remove; KTM Duke 250 auto-add nahi hoga.
+6. Reports ko simple banaya; existing JSON/XLSX backup compatibility preserve ki.
+7. Save/Update ke waqt existing matching group expenses ka snapshot bhi stored hota hai.
+8. Current user data and Firebase config untouched.

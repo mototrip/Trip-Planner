@@ -73,6 +73,8 @@
   if(!localStorage.getItem(key))localStorage.setItem(key,JSON.stringify(dataOnly(window.state?.split||state.split||{name:'',members:[],expenses:[],transfers:[]})));
  };
  function updateUI(active) {
+  const launcher=$('shared-ride-launcher');
+  if(launcher && active)launcher.open=true;
   $('shared-ride-setup').hidden=active;
   $('shared-ride-active').hidden=!active;
   badge(active?'Syncing':configured?'Ready to connect':'Setup needed');

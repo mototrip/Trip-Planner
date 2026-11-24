@@ -1,0 +1,5 @@
+MotoTrip V9.14 — Route screen clean-up + Planner bike specs removal.
+
+Route tab: Removed duplicate "Route Planner / Plan your route", "TRIP BASICS", "Plan your ride" and top Maps icon. Trip Name is the first card. Starting Point, My Location, Clear, Stops, Final Destination, map preview and Google Maps action below are preserved.
+Planner: Removed the "250 cc · 30 km/L · 13.5 L tank" display line beneath Traveling Obsession. Bike & Mileage Check calculator and saved bike profile data remain unchanged.
+Trip date popup, budget per rider, app storage and Firebase features are preserved.

@@ -5,15 +5,26 @@ const places = {
 'Andaman and Nicobar Islands':'Port Blair,Diglipur,Havelock Island,Neil Island,Mayabunder', 'Andhra Pradesh':'Visakhapatnam,Vijayawada,Tirupati,Amaravati,Kurnool,Nellore,Anantapur,Araku Valley,Rajahmundry,Srikakulam', 'Arunachal Pradesh':'Itanagar,Tawang,Ziro,Bomdila,Pasighat,Roing,Dirang,Mechuka', 'Assam':'Guwahati,Dibrugarh,Silchar,Tezpur,Jorhat,Kaziranga,Majuli,Tinsukia', 'Bihar':'Patna,Gaya,Bodh Gaya,Rajgir,Nalanda,Bhagalpur,Muzaffarpur,Darbhanga,Purnia', 'Chandigarh':'Chandigarh', 'Chhattisgarh':'Raipur,Bilaspur,Durg,Bhilai,Jagdalpur,Ambikapur,Korba', 'Dadra and Nagar Haveli and Daman and Diu':'Silvassa,Daman,Diu', 'Delhi':'Delhi,New Delhi,Dwarka,Rohini,Connaught Place', 'Goa':'Panaji,Margao,Mapusa,Vasco da Gama,Calangute,Anjuna,Palolem', 'Gujarat':'Ahmedabad,Surat,Vadodara,Rajkot,Bhuj,Dwarka,Somnath,Junagadh,Gandhinagar,Rann of Kutch,Saputara', 'Haryana':'Gurugram,Faridabad,Panipat,Ambala,Karnal,Hisar,Rohtak,Kurukshetra,Panchkula', 'Himachal Pradesh':'Manali,Shimla,Dharamshala,McLeod Ganj,Dalhousie,Chamba,Manimahesh,Bharmour,Kasol,Kullu,Kaza,Spiti,Keylong,Jispa,Kalpa,Sangla,Chitkul,Bir,Mandi,Solan,Narkanda,Chail,Sissu', 'Jammu and Kashmir':'Srinagar,Jammu,Gulmarg,Pahalgam,Sonamarg,Patnitop,Katra,Anantnag,Bandipora', 'Jharkhand':'Ranchi,Jamshedpur,Dhanbad,Deoghar,Bokaro,Netarhat,Hazaribagh', 'Karnataka':'Bengaluru,Mysuru,Mangaluru,Udupi,Hampi,Coorg,Chikmagalur,Gokarna,Belgaum,Hubballi,Badami', 'Kerala':'Kochi,Thiruvananthapuram,Munnar,Alappuzha,Wayanad,Kozhikode,Varkala,Thekkady,Kannur,Thrissur', 'Ladakh':'Leh,Kargil,Nubra Valley,Pangong Lake,Tso Moriri,Hanle,Diskit,Padum,Dras,Khardung La', 'Lakshadweep':'Kavaratti,Agatti,Minicoy,Andrott', 'Madhya Pradesh':'Bhopal,Indore,Ujjain,Gwalior,Jabalpur,Khajuraho,Pachmarhi,Orchha,Satna,Sagar', 'Maharashtra':'Mumbai,Pune,Nashik,Nagpur,Thane,Shirdi,Lonavala,Mahabaleshwar,Alibaug,Ratnagiri,Kolhapur,Chhatrapati Sambhajinagar,Satara,Solapur,Matheran', 'Manipur':'Imphal,Ukhrul,Churachandpur,Moirang,Moreh', 'Meghalaya':'Shillong,Cherrapunji,Dawki,Mawlynnong,Tura,Jowai', 'Mizoram':'Aizawl,Lunglei,Champhai,Serchhip', 'Nagaland':'Kohima,Dimapur,Mokokchung,Mon,Dzukou Valley', 'Odisha':'Bhubaneswar,Puri,Cuttack,Konark,Rourkela,Sambalpur,Balasore,Chilika', 'Puducherry':'Puducherry,Karaikal,Mahe,Yanam', 'Punjab':'Amritsar,Ludhiana,Jalandhar,Patiala,Bathinda,Pathankot,Hoshiarpur,Mohali', 'Rajasthan':'Jaipur,Jodhpur,Udaipur,Jaisalmer,Bikaner,Ajmer,Pushkar,Mount Abu,Kota,Chittorgarh,Alwar,Bundi', 'Sikkim':'Gangtok,Pelling,Lachung,Lachen,Yumthang,Namchi,Ravangla,Tsongmo Lake', 'Tamil Nadu':'Chennai,Coimbatore,Madurai,Ooty,Kodaikanal,Rameswaram,Kanyakumari,Salem,Thanjavur,Tiruchirappalli,Yercaud', 'Telangana':'Hyderabad,Warangal,Karimnagar,Nizamabad,Khammam,Adilabad', 'Tripura':'Agartala,Udaipur,Dharmanagar,Unakoti', 'Uttar Pradesh':'Lucknow,Agra,Mathura,Vrindavan,Varanasi,Ayodhya,Prayagraj,Kanpur,Noida,Ghaziabad,Meerut,Bareilly,Gorakhpur,Jhansi', 'Uttarakhand':'Dehradun,Rishikesh,Haridwar,Mussoorie,Nainital,Almora,Auli,Joshimath,Kedarnath,Badrinath,Gangotri,Yamunotri,Chopta,Munsiyari,Chakrata,Pithoragarh,Tehri', 'West Bengal':'Kolkata,Darjeeling,Siliguri,Kalimpong,Digha,Durgapur,Asansol,Malda,Mirik,Sundarbans'};
 function allGear(){return [...gear,...(Array.isArray(state.customGear)?state.customGear:[])];}
 const accountScope=(()=>{try{return localStorage.getItem('mototrip-account-scope')||'guest';}catch(_){return 'guest';}})();
-const key=accountScope.startsWith('uid-')?'mototrip-v1-'+accountScope:'mototrip-v1'; let state={trips:[],packed:[],draft:null,bikeName:"KTM Duke 250",theme:"light"};
+const key=accountScope.startsWith('uid-')?'mototrip-v1-'+accountScope:'mototrip-v1'; let state={trips:[],packed:[],draft:null,bikeName:"",theme:"light"};
 function notice(t){$('notice').textContent=t;}
 try{const raw=localStorage.getItem(key);if(raw)state={...state,...JSON.parse(raw)};}catch(e){notice('Storage could not be read.');}
-function bikeName(){return typeof state.bikeName==="string"&&state.bikeName.trim()?state.bikeName.trim().slice(0,80):"KTM Duke 250";}
+// Bike names are legacy metadata only; estimates use mileage, not a bike label.
+function bikeName(){return "";}
 function profile(){const b=state.bikeProfile||{};return {cc:Number(b.cc)>0?Number(b.cc):250,tank:Number(b.tank)>0?Number(b.tank):13.5,mileage:Number(b.mileage)>0?Number(b.mileage):30};}
 function renderBike(){ $("bike-title").textContent="TRAVELING OBSESSION";}
 function renderTheme(){const light=state.theme==='light';document.documentElement.dataset.theme=light?'light':'dark';const b=$('theme-toggle');const label=light?'Switch to dark mode':'Switch to light mode';b.textContent=light?'☾':'☀';b.setAttribute('aria-label',label);b.title=label;}
 $('theme-toggle').onclick=()=>{state.theme=state.theme==='light'?'dark':'light';persist();renderTheme();};
-function dashboard(){const totals=state.trips.reduce((a,t)=>{const c=calc(t.data);a.km+=c.km;a.total+=c.total;return a;},{km:0,total:0});$('dash-trips').textContent=state.trips.length;$('dash-km').textContent=totals.km.toLocaleString('en-IN')+' km';$('dash-budget').textContent=money(totals.total);}
+// One visible report/trip per name (case- and whitespace-insensitive).
+// Legacy duplicate records remain in the user's original backup data; never silently delete them.
+function tripKey(name){return String(name||'').trim().replace(/\s+/g,' ').toLocaleLowerCase();}
+function uniqueTrips(){
+ const seen=new Set();return (Array.isArray(state.trips)?state.trips:[]).filter(t=>{
+  const k=tripKey(t?.data?.name);if(!k||seen.has(k))return false;
+  seen.add(k);return true;
+ });
+}
+function dashboard(){const saved=uniqueTrips(),panel=$('saved-trip-dashboard');if(panel)panel.hidden=!saved.length;
+ const totals=saved.reduce((a,t)=>{const c=calc(t.data);a.km+=c.km;a.total+=c.total;return a;},{km:0,total:0});$('dash-trips').textContent=saved.length;$('dash-km').textContent=totals.km.toLocaleString('en-IN')+' km';$('dash-budget').textContent=money(totals.total);}
 
 $("edit-bike").onclick=()=>{$("bike-message").textContent="";refreshMileageCalculator();$("bike-editor").hidden=false;$("mileage-distance").focus();};
 $("cancel-bike").onclick=()=>{$("bike-editor").hidden=true;};
@@ -104,12 +115,104 @@ function update(save=true){
  totalRow.append(node('strong','Total Estimated Budget'),node('strong',money(c.total)));
  $('breakdown').append(totalRow);
 }
-function tab(id){for(const s of document.querySelectorAll('section'))s.hidden=s.id!==id;for(const b of document.querySelectorAll('nav button'))b.classList.toggle('active',b.dataset.tab===id);if(id==='route'&&window.onRouteTabOpen)window.onRouteTabOpen();}
+// V9.16: Route and Gear remain available in the app, but are opt-in from Trips.
+// Settings live alongside the account-scoped local trip data; disabling a tab never erases it.
+function isOptionalTabOn(id){return !!(state.optionalTabs&&state.optionalTabs[id]===true);}
+function renderOptionalTabs(){
+ const nav=$('main-nav');
+ for(const id of ['route','gear']){
+  const enabled=isOptionalTabOn(id);
+  const button=nav.querySelector('button[data-tab="'+id+'"]');
+  if(button){button.hidden=!enabled;button.setAttribute('aria-hidden',String(!enabled));}
+  const input=$('mt916-toggle-'+id);
+  if(input){input.checked=enabled;input.setAttribute('aria-checked',String(enabled));}
+  const status=$('mt916-'+id+'-status');
+  if(status)status.textContent=enabled?'On':'Off';
+ }
+ nav.style.setProperty('--mt-nav-count',String(nav.querySelectorAll('button[data-tab]:not([hidden])').length));
+}
+for(const id of ['route','gear']){
+ const input=$('mt916-toggle-'+id);
+ if(!input)continue;
+ input.addEventListener('change',()=>{
+  state.optionalTabs={route:isOptionalTabOn('route'),gear:isOptionalTabOn('gear'),[id]:input.checked};
+  persist();
+  renderOptionalTabs();
+ });
+}
+function tab(id){
+ if((id==='route'||id==='gear')&&!isOptionalTabOn(id))id='trips';
+ for(const s of document.querySelectorAll('section'))s.hidden=s.id!==id;
+ for(const b of document.querySelectorAll('nav button'))b.classList.toggle('active',b.dataset.tab===id);
+ if(id==='route'&&window.onRouteTabOpen)window.onRouteTabOpen();
+}
 function renderGear(){$('checklist').replaceChildren();for(const g of allGear()){const label=node('label','','check'),input=document.createElement('input');input.type='checkbox';input.checked=state.packed.includes(g);input.onchange=()=>{state.packed=input.checked?[...state.packed,g]:state.packed.filter(x=>x!==g);persist();renderGear();};label.append(input,document.createTextNode(g));if(!gear.includes(g)){const remove=node("button","Remove");remove.type="button";remove.onclick=e=>{e.preventDefault();state.customGear=allGear().filter(x=>!gear.includes(x)&&x!==g);state.packed=state.packed.filter(x=>x!==g);persist();renderGear();};label.append(remove);}$('checklist').append(label);}$('progress').max=allGear().length;$('progress').value=state.packed.length;$('count').textContent=state.packed.length+' / '+allGear().length+' packed';}
 $('custom-gear').onsubmit=e=>{e.preventDefault();const g=$('gear-name').value.trim();if(!g||allGear().some(x=>x.toLowerCase()===g.toLowerCase()))return;state.customGear=[...(state.customGear||[]),g];persist();$('gear-name').value='';renderGear();};
-function renderTrips(){dashboard();$('history').replaceChildren();if(!state.trips.length)$('history').append(node('p','No saved trips yet.'));for(const t of state.trips){const c=calc(t.data),el=node('article','','trip'),open=node('button','Edit / reuse'),del=node('button','Delete');open.onclick=()=>{fill(t.data);update();if(window.syncSplitTripName)window.syncSplitTripName();if(window.refreshRoute)window.refreshRoute();tab('plan');};del.onclick=()=>{if(confirm('Delete this trip?')){state.trips=state.trips.filter(x=>x.id!==t.id);persist();renderTrips();}};el.append(node('h2',t.data.name),node('p',t.data.from+' → '+t.data.to),node('p',c.km+' km · '+money(c.total)));const details=node('details','');details.append(node('summary','View full trip details'));for(const [label,value] of [['Bike',t.bikeName||'Not recorded'],['From state',t.data.fromState||'Not recorded'],['To state',t.data.toState||'Not recorded'],['Journey',t.data.round?'Round trip':'One way'],['Petrol included',t.data.includeFuel===false?'No':'Yes'],['Departure', [t.data.departDate,t.data.departTime].filter(Boolean).join(' ')||'Not recorded'],['End', [t.data.endDate,t.data.endTime].filter(Boolean).join(' ')||'Not recorded'],['Duration',timingLabel(t.data)||'Not recorded'],['Food days',t.data.days],['Hotel nights',t.data.nights??Math.max(0,Number(t.data.days)-1)],['One-way distance',t.data.distance+' km'],['Total distance',c.km+' km'],['Mileage',t.data.mileage+' km/L'],['Fuel required',c.litres.toFixed(1)+' L'],['Petrol price',money(Number(t.data.price))+'/L'],['Fuel cost',money(c.fuel)],['Hotel',money(c.stay)],['Food',money(c.food)],['Toll',money(c.toll)],['Other',money(c.other)],['Total estimated budget',money(c.total)]]){const row=node('div','','line');row.append(node('span',label),node('strong',String(value)));details.append(row);}el.append(details,open,del);$('history').append(el);}}
-form.addEventListener('input',e=>{if(e.target.tagName!=='SELECT')update();});form.onsubmit=e=>{e.preventDefault();state.trips.unshift({id:Date.now().toString(),data:read(),bikeName:bikeName()});const ok=persist();renderTrips();tab('trips');if(ok)notice('Trip saved on this device.');};document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>tab(b.dataset.tab));$('reset').onclick=()=>{state.packed=[];persist();renderGear();};$('export').onclick=()=>{const url=URL.createObjectURL(new Blob([JSON.stringify(state,null,2)],{type:'application/json'}));const a=document.createElement('a');a.href=url;a.download='mototrip-backup.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);};$('clear-local-data').onclick=()=>{if(!confirm('Permanently delete saved trips, rider expenses, payments, bike profile and settings on this device? This cannot be undone unless you exported a backup.'))return;try{localStorage.removeItem(key);location.reload();}catch(e){notice('Could not delete saved data. Clear this site\'s storage in your browser settings.');}};$('import').onchange=async e=>{try{const file=e.target.files?.[0];if(!file||file.size>12*1024*1024)throw Error('Backup too large');const s=file.name.toLowerCase().endsWith('.xlsx')?await window.motoTripReadXlsx(file):JSON.parse(await file.text());const valid=d=>d&&['name','from','to'].every(k=>typeof d[k]==='string')&&['distance','days','mileage'].every(k=>Number.isFinite(Number(d[k]))&&Number(d[k])>0)&&['price','hotel','food','extra'].every(k=>Number.isFinite(Number(d[k]))&&Number(d[k])>=0)&&(d.toll==null||(Number.isFinite(Number(d.toll))&&Number(d.toll)>=0))&&(d.nights==null||(Number.isInteger(Number(d.nights))&&Number(d.nights)>=0))&&typeof d.round==='boolean'&&(d.includeFuel==null||typeof d.includeFuel==='boolean');if(!Array.isArray(s.trips)||!s.trips.every(t=>t&&typeof t.id==='string'&&valid(t.data))||!Array.isArray(s.packed)||!s.packed.every(g=>gear.includes(g)||(Array.isArray(s.customGear)&&s.customGear.includes(g)))||(s.draft&&!valid(s.draft)&&!(Number(s.draft.distance)===0&&Number(s.draft.days)===0&&Number(s.draft.nights)===0)))throw Error();if(s.split!=null){const g=s.split;if(typeof g!=='object'||!Array.isArray(g.members)||g.members.length>150||!g.members.every(n=>typeof n==='string'&&n.length<=80)||!Array.isArray(g.expenses)||g.expenses.length>15000||!g.expenses.every(e=>e&&typeof e.name==='string'&&e.name.length<=100&&typeof e.payer==='string'&&Number.isSafeInteger(e.amount)&&e.amount>0&&Array.isArray(e.people)&&e.people.every(n=>typeof n==='string'))||!Array.isArray(g.transfers||[])||(g.transfers||[]).length>15000||!(g.transfers||[]).every(x=>x&&typeof x.from==='string'&&typeof x.to==='string'&&Number.isSafeInteger(x.amount)&&x.amount>0))throw Error('Invalid expense data');}if(s.routeStops!=null&&(!Array.isArray(s.routeStops)||s.routeStops.length>40||!s.routeStops.every(x=>x&&typeof x.name==='string'&&x.name.length<=180)))throw Error('Invalid route data');if(confirm('Replace current data with backup?')){state={...s,bikeName:typeof s.bikeName==="string"?s.bikeName:bikeName()};persist();renderTheme();renderBike();fill(state.draft);update(false);renderGear();renderTrips();if(window.renderSplit)window.renderSplit();if(window.refreshRoute)window.refreshRoute();}}catch(err){notice('Could not restore. Choose a MotoTrip Excel/JSON backup (not a CSV or PDF).');}};
-renderTheme();renderBike();fill(state.draft);update(false);renderGear();renderTrips();tab('plan');/* App update registration now lives in app-update.js (V5.0). */
+function renderTrips(){
+ dashboard();$('history').replaceChildren();
+ const saved=uniqueTrips();
+ if(!saved.length)$('history').append(node('p','No saved trips yet.'));
+ for(const t of saved){
+  const c=calc(t.data),el=node('article','','trip'),open=node('button','Edit trip'),del=node('button','Delete');
+  open.onclick=()=>{fill(t.data);update();if(window.syncSplitTripName)window.syncSplitTripName();if(window.refreshRoute)window.refreshRoute();tab('plan');};
+  del.onclick=()=>{
+   if(!confirm('Delete saved trip "'+t.data.name+'"? This removes this trip and older duplicate copies of the same name.'))return;
+   state.trips=state.trips.filter(x=>tripKey(x.data?.name)!==tripKey(t.data.name));
+   persist();renderTrips();
+  };
+  el.append(node('h2',t.data.name),node('p',(t.data.from||'')+' → '+(t.data.to||'')),node('p',c.km+' km · '+money(c.total)));
+  const details=node('details','');details.append(node('summary','Trip details'));
+  const info=[['Journey',t.data.round?'Return':'One way'],
+   ['Departure', [t.data.departDate,t.data.departTime].filter(Boolean).join(' ')||'Not set'],
+   ['End', [t.data.endDate,t.data.endTime].filter(Boolean).join(' ')||'Not set'],
+   ['Distance',c.km+' km'],['Mileage',t.data.mileage+' km/L'],
+   ['Petrol price',money(Number(t.data.price))+'/L'],['Fuel',money(c.fuel)],
+   ['Hotel',money(c.stay)],['Food',money(c.food)],['Toll',money(c.toll)],['Other',money(c.other)],
+   ['Total estimated budget',money(c.total)]];
+  for(const [label,value] of info){const row=node('div','','line');row.append(node('span',label),node('strong',String(value)));details.append(row);}
+  el.append(details,open,del);$('history').append(el);
+ }
+}
+// Save new trips; update the SAME saved trip if its name already exists.
+// Does not clear Bill Split or delete previous data. No new copy for repeat saves.
+function saveOrUpdateTrip({updateOnly=false,stayOnTab=false}={}){
+ const d=read(),name=String(d.name||'').trim(),normalized=tripKey(name);
+ if(!form.checkValidity()||!normalized){
+  notice('Complete required trip details in Planner, then save your trip.');
+  const status=$('split-save-status');if(status)status.textContent='Complete trip details in Planner before saving.';
+  if(stayOnTab){tab('plan');setTimeout(()=>{try{form.reportValidity();}catch(_){}},0);}
+  return false;
+ }
+ const match=state.trips.findIndex(t=>tripKey(t.data?.name)===normalized);
+ if(updateOnly&&match<0){
+  notice('No saved trip with this name yet. Use Save Trip first.');
+  const status=$('split-save-status');if(status)status.textContent='No saved trip yet — tap Save Trip first.';
+  return false;
+ }
+ const now=new Date().toISOString(),old=match>=0?state.trips[match]:null;
+ const currentGroup=state.split;
+ const sameGroup=currentGroup&&tripKey(currentGroup.name)===normalized;
+ const splitSnapshot=sameGroup?JSON.parse(JSON.stringify({name:currentGroup.name||name,members:currentGroup.members||[],expenses:currentGroup.expenses||[],transfers:currentGroup.transfers||[]})):old?.splitSnapshot;
+ const entry={...(old||{}),id:old?.id||Date.now().toString(),data:d,createdAt:old?.createdAt||now,updatedAt:now};
+ delete entry.bikeName; // Do not carry legacy bike-name metadata into saved trips.
+ if(splitSnapshot)entry.splitSnapshot=splitSnapshot;
+ if(match>=0)state.trips.splice(match,1);
+ state.trips.unshift(entry);
+ if(!persist())return false;
+ renderTrips();
+ const selected=$('report-trip-select');if(selected)selected.value=entry.id;
+ const message=old?'Trip updated: '+name+'. Saved report will show the latest details.':'Trip saved: '+name+'.';
+ notice(message);const status=$('split-save-status');if(status)status.textContent=message;
+ if(!stayOnTab)tab('trips');
+ return true;
+}
+function updateSaveButtons(){
+ const name=tripKey(form.elements.name.value),found=uniqueTrips().some(t=>tripKey(t.data?.name)===name);
+ const plannerButton=$('planner-save-trip');if(plannerButton)plannerButton.textContent=found?'Update Trip':'Save Trip';
+ const splitUpdate=$('split-update-trip');if(splitUpdate)splitUpdate.disabled=!found;
+}
+form.addEventListener('input',e=>{if(e.target.tagName!=='SELECT')update();updateSaveButtons();});form.onsubmit=e=>{e.preventDefault();saveOrUpdateTrip();};$('split-save-trip').addEventListener('click',()=>saveOrUpdateTrip({stayOnTab:true}));$('split-update-trip').addEventListener('click',()=>saveOrUpdateTrip({updateOnly:true,stayOnTab:true}));document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>tab(b.dataset.tab));$('reset').onclick=()=>{state.packed=[];persist();renderGear();};$('export').onclick=()=>{const url=URL.createObjectURL(new Blob([JSON.stringify(state,null,2)],{type:'application/json'}));const a=document.createElement('a');a.href=url;a.download='mototrip-backup.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);};$('clear-local-data').onclick=()=>{if(!confirm('Permanently delete saved trips, rider expenses, payments, bike profile and settings on this device? This cannot be undone unless you exported a backup.'))return;try{localStorage.removeItem(key);location.reload();}catch(e){notice('Could not delete saved data. Clear this site\'s storage in your browser settings.');}};$('import').onchange=async e=>{try{const file=e.target.files?.[0];if(!file||file.size>12*1024*1024)throw Error('Backup too large');const s=file.name.toLowerCase().endsWith('.xlsx')?await window.motoTripReadXlsx(file):JSON.parse(await file.text());const valid=d=>d&&['name','from','to'].every(k=>typeof d[k]==='string')&&['distance','days','mileage'].every(k=>Number.isFinite(Number(d[k]))&&Number(d[k])>0)&&['price','hotel','food','extra'].every(k=>Number.isFinite(Number(d[k]))&&Number(d[k])>=0)&&(d.toll==null||(Number.isFinite(Number(d.toll))&&Number(d.toll)>=0))&&(d.nights==null||(Number.isInteger(Number(d.nights))&&Number(d.nights)>=0))&&typeof d.round==='boolean'&&(d.includeFuel==null||typeof d.includeFuel==='boolean');if(!Array.isArray(s.trips)||!s.trips.every(t=>t&&typeof t.id==='string'&&valid(t.data))||!Array.isArray(s.packed)||!s.packed.every(g=>gear.includes(g)||(Array.isArray(s.customGear)&&s.customGear.includes(g)))||(s.draft&&!valid(s.draft)&&!(Number(s.draft.distance)===0&&Number(s.draft.days)===0&&Number(s.draft.nights)===0)))throw Error();if(s.split!=null){const g=s.split;if(typeof g!=='object'||!Array.isArray(g.members)||g.members.length>150||!g.members.every(n=>typeof n==='string'&&n.length<=80)||!Array.isArray(g.expenses)||g.expenses.length>15000||!g.expenses.every(e=>e&&typeof e.name==='string'&&e.name.length<=100&&typeof e.payer==='string'&&Number.isSafeInteger(e.amount)&&e.amount>0&&Array.isArray(e.people)&&e.people.every(n=>typeof n==='string'))||!Array.isArray(g.transfers||[])||(g.transfers||[]).length>15000||!(g.transfers||[]).every(x=>x&&typeof x.from==='string'&&typeof x.to==='string'&&Number.isSafeInteger(x.amount)&&x.amount>0))throw Error('Invalid expense data');}if(s.routeStops!=null&&(!Array.isArray(s.routeStops)||s.routeStops.length>40||!s.routeStops.every(x=>x&&typeof x.name==='string'&&x.name.length<=180)))throw Error('Invalid route data');if(confirm('Replace current data with backup?')){state={...s,bikeName:typeof s.bikeName==="string"?s.bikeName:""};persist();renderOptionalTabs();renderTheme();renderBike();fill(state.draft);update(false);renderGear();renderTrips();if(window.renderSplit)window.renderSplit();if(window.refreshRoute)window.refreshRoute();}}catch(err){notice('Could not restore. Choose a MotoTrip Excel/JSON backup (not a CSV or PDF).');}};
+renderOptionalTabs();renderTheme();renderBike();fill(state.draft);update(false);renderGear();renderTrips();tab('plan');/* App update registration now lives in app-update.js (V5.0). */
 
 // V2.9: read-only budget comparison for the current planner and active expense group.
 function renderBudget(){
@@ -127,39 +230,44 @@ const originalUpdate=update;update=function(...args){originalUpdate(...args);ren
 // V7.1: choose which SAVED trip's real details to export.
 // The active planner draft is not a saved trip and is never silently substituted.
 const reportSelect=$('report-trip-select');
+let reportPickerInitialized=false;
 function refreshReportPicker(){
  if(!reportSelect)return;
  const previous=reportSelect.value;
  reportSelect.replaceChildren();
- const all=document.createElement('option');all.value='__all__';all.textContent='All saved trips ('+state.trips.length+')';reportSelect.append(all);
- for(const [i,t] of state.trips.entries()){
+ const saved=uniqueTrips();
+ for(const [i,t] of saved.entries()){
    const option=document.createElement('option');option.value=t.id;
    const d=t.data||{};
    option.textContent=(i+1)+'. '+String(d.name||'Unnamed trip')+' · '+String(d.from||'?')+' → '+String(d.to||'?');
    reportSelect.append(option);
  }
- if([...reportSelect.options].some(o=>o.value===previous))reportSelect.value=previous;
+ const all=document.createElement('option');all.value='__all__';all.textContent='All saved trips ('+saved.length+')';reportSelect.append(all);
+ if(reportPickerInitialized&&[...reportSelect.options].some(o=>o.value===previous))reportSelect.value=previous;
+ else reportSelect.value=saved[0]?.id||'__all__';
+ reportPickerInitialized=true;
  const hint=$('mt71-report-hint');
- if(hint) hint.textContent=state.trips.length
-   ? state.trips.length+' saved trip'+(state.trips.length===1?'':'s')+' on this device. Select one or all to download.'
+ if(hint) hint.textContent=saved.length
+   ? saved.length+' saved trip'+(saved.length===1?'':'s')+'. Choose one to download its report.'
    : 'No saved trips in this account/device yet. Save a trip in Planner first.';
  for(const id of ['export-xlsx','export-csv','export-pdf']){
-   const button=$(id);if(button)button.disabled=!state.trips.length;
+   const button=$(id);if(button)button.disabled=!saved.length;
  }
 }
 function reportData(){
  const id=reportSelect?.value||'__all__';
- if(id==='__all__')return {...state,__reportAll:true};
+ if(id==='__all__')return {...state,trips:uniqueTrips(),__reportAll:true};
  const trip=state.trips.find(t=>t.id===id);
  if(!trip)throw Error('Selected saved trip not found. Choose it again.');
  // A shared expense group's records belong only when its title matches that trip.
  // Otherwise prevent unrelated group spending from appearing in a selected trip report.
- const matched=String(state.split?.name||'').trim().toLowerCase()===String(trip.data?.name||'').trim().toLowerCase();
- return {...state,trips:[trip],split:matched?state.split:{name:'',members:[],expenses:[],transfers:[]},__reportAll:false};
+ const matched=tripKey(state.split?.name)===tripKey(trip.data?.name);
+ const snapshot=trip.splitSnapshot||{name:'',members:[],expenses:[],transfers:[]};
+ return {...state,trips:[trip],split:matched?state.split:snapshot,__reportAll:false};
 }
 const oldRenderTrips=renderTrips;
-renderTrips=function(...args){const value=oldRenderTrips(...args);refreshReportPicker();return value;};
-refreshReportPicker();
+renderTrips=function(...args){const value=oldRenderTrips(...args);refreshReportPicker();updateSaveButtons();return value;};
+refreshReportPicker();updateSaveButtons();
 
 // V4.8: on-device report exports (no data sent to a server).
 for(const [id,fn] of [["export-xlsx","motoTripExportXlsx"],["export-csv","motoTripExportCsv"],["export-pdf","motoTripExportPdf"]]){const el=$(id);if(el)el.addEventListener("click",()=>{try{if(!state.trips.length){notice("Save a trip first, then download the report.");return;}const task=window[fn](reportData());if(task&&task.catch)task.catch(e=>{console.error(e);notice("Export failed: "+e.message);});}catch(e){console.error(e);notice("Export failed: "+e.message);}});}

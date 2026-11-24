@@ -1,0 +1,11 @@
+MotoTrip V9.8 — My Location / Clear bug fix
+
+1. Route -> My location: full GPS address stays in Route, Planner overview shows compact “My location”.
+2. Planner trip card long route names now wrap/clamp instead of overlapping the Budget card.
+3. Route -> Clear start/end updates the Planner immediately and saves the cleared value.
+4. Clearing cancels pending GPS / reverse-lookup requests so an old result cannot restore cleared location.
+5. Clearing the final destination persists after app restart; no unwanted Manali reset.
+6. Route typing updates Planner instantly. Other features, data, and images preserved.
+
+QUICK UPDATE: upload included files at GitHub root, preserving existing app files.
+FULL ZIP: complete standalone project. Do not delete existing browser localStorage.

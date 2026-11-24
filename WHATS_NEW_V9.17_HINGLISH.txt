@@ -1,0 +1,7 @@
+MotoTrip V9.17
+
+- Bill Split UI ko modern, cleaner aur less complicated banaya gaya.
+- Total spending aur Average per rider cards ko premium card style diya gaya.
+- Shared Ride ko compact "Private Group" pill banaya; tap karne par open hota hai.
+- Riders, Add Expense, Summary, Contributions aur Final Settlement ko cleaner card layout diya gaya.
+- Data logic, calculations aur existing saved data same rakha gaya.

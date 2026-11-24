@@ -1,0 +1,9 @@
+MotoTrip V9.16 | Optional Route & Gear Tabs
+
+- Route aur Gear default mein hidden; Planner, Bill Split aur Trips visible.
+- Trips > Trip tools se Route/Gear independently ON/OFF kar sakte hain.
+- Switch enable karte hi menu mein tab appear hota hai; disable karne se data delete nahi hota.
+- Choice local device/account mein save rahegi; reload par retained.
+- Mobile bottom navigation 3, 4 ya 5 tabs mein automatically adjust hoti hai.
+- Existing trips, calculations, Firebase, group checklist aur route data untouched.
+- Backups restore karne par saved tab preferences bhi restore hoti hain if included.

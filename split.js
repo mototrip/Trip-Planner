@@ -210,8 +210,19 @@ function renderSplit(){
  history('payment-list',g.transfers,e=>e.from+' → '+e.to+' · '+cash(e.amount)+' · '+paymentStatusText(e),'payment');
  recentExpenses(g);
  const result=calculateSplit(g);
- for(const [label,value] of [['Total spending',cash(result.total)],['Average per person',cash(g.members.length?Math.round(result.total/g.members.length):0)]]){
-  const a=node('div','','split-stat');a.append(node('small',label),node('strong',value));$('split-summary').append(a);
+ const stats=[
+  {label:'Total spending',value:cash(result.total),meta:`${g.expenses.length} ${g.expenses.length===1?'expense':'expenses'}`,icon:'₹',tone:'primary'},
+  {label:'Average per rider',value:cash(g.members.length?Math.round(result.total/g.members.length):0),meta:`${g.members.length} ${g.members.length===1?'rider':'riders'}`,icon:'👥',tone:'secondary'}
+ ];
+ for(const stat of stats){
+  const a=node('div','','split-stat split-stat--'+stat.tone);
+  const head=node('div','','split-stat-head');
+  head.append(node('span',stat.icon,'split-stat-icon'));
+  const copy=node('div','','split-stat-copy');
+  copy.append(node('small',stat.label),node('strong',stat.value));
+  head.append(copy);
+  a.append(head,node('span',stat.meta,'split-stat-meta'));
+  $('split-summary').append(a);
  }
  const table=node('table','','split-table'),head=node('thead'),hr=node('tr');
  for(const s of ['Member','Paid','Share','Balance'])hr.append(node('th',s));
