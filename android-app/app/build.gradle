@@ -5,34 +5,28 @@ android {
     compileSdk 35
 
     defaultConfig {
-        applicationId 'com.mototrip.app'
+        // Distinct preview package: preserves the already installed WebView
+        // app (com.mototrip.app) and all its on-device localStorage/IndexedDB.
+        applicationId 'com.mototrip.app.twa'
         minSdk 24
         targetSdk 34
-        versionCode 915
-        versionName '9.15'
+        versionCode 1
+        versionName '1.0.0-preview'
     }
+
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_17
         targetCompatibility JavaVersion.VERSION_17
     }
 
-    signingConfigs {
-        if (System.getenv('MOTOTRIP_RELEASE_KEYSTORE') && System.getenv('MOTOTRIP_RELEASE_PASSWORD')) {
-            create('mototripRelease') {
-                storeFile file(System.getenv('MOTOTRIP_RELEASE_KEYSTORE'))
-                storePassword System.getenv('MOTOTRIP_RELEASE_PASSWORD')
-                keyAlias 'mototrip'
-                keyPassword System.getenv('MOTOTRIP_RELEASE_PASSWORD')
-            }
-        }
-    }
-
     buildTypes {
         release {
             minifyEnabled false
-            if (signingConfigs.findByName('mototripRelease')) {
-                signingConfig signingConfigs.getByName('mototripRelease')
-            }
+            // No signed release is automatically published for the preview.
         }
     }
+}
+
+dependencies {
+    implementation 'com.google.androidbrowserhelper:androidbrowserhelper:2.7.4'
 }
