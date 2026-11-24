@@ -2024,3 +2024,138 @@ html[data-theme="dark"] #split #rider-count{background:rgba(88,114,158,.18);colo
 #split .mt918-save-status{width:100%;margin:0!important;color:var(--accent);font-size:12px;line-height:1.5}
 #split .mt918-save-status:empty{display:none!important}
 @media(max-width:440px){#split #split-more.mt-reset-row{gap:9px!important}#split .mt918-save-actions{flex-basis:100%}#split #split-more #new-group{width:100%!important;justify-content:center}}
+
+
+/* MotoTrip V9.19 — Compact Split header & one-card form, iPhone first */
+#split{position:relative!important;}
+#split .split-hero{min-height:64px;padding-right:150px;margin:10px 0 8px!important;}
+#split .split-hero h2{margin-bottom:0!important;}
+#split .split-modern-intro{font-size:11px!important;line-height:1.35!important;margin-top:4px!important;}
+/* Keep native <details> for full accessibility and existing group sync handlers.
+   Its summary is a small top-right pill; opened content remains in document flow. */
+#split #shared-ride-launcher{position:static!important;margin:0!important;padding:0!important;background:transparent!important;border:0!important;border-radius:0!important;box-shadow:none!important;}
+#split #shared-ride-launcher:not([open]){height:0!important;min-height:0!important;overflow:visible!important;}
+#split #shared-ride-launcher>summary.shared-ride-pill{
+ position:absolute!important;top:7px!important;right:0!important;z-index:3;
+ display:inline-flex!important;align-items:center!important;justify-content:center!important;
+ width:auto!important;max-width:150px!important;min-width:0!important;min-height:38px!important;
+ padding:6px 10px!important;gap:6px!important;margin:0!important;
+ border-radius:12px!important;background:linear-gradient(135deg,#eafbf8,#e7f7ff)!important;
+ border:1px solid #b5e0d4!important;box-shadow:0 3px 10px rgba(25,87,90,.07)!important;
+ color:#196760!important;font-size:12px!important;font-weight:800!important;
+ white-space:nowrap!important;cursor:pointer;
+}
+#split #shared-ride-launcher>summary.shared-ride-pill:focus-visible{outline:3px solid #27bfa6!important;outline-offset:3px!important;}
+#split #shared-ride-launcher .shared-pill-icon{background:transparent!important;display:inline!important;flex:none!important;width:auto!important;height:auto!important;padding:0!important;font-size:15px!important;border:0!important;}
+#split #shared-ride-launcher .shared-pill-copy{display:inline!important;flex:none!important;min-width:0!important;}
+#split #shared-ride-launcher .shared-pill-copy strong{font-size:12px!important;font-weight:800!important;line-height:1.2!important;}
+#split #shared-ride-launcher .shared-pill-arrow{font-size:15px!important;line-height:1!important;opacity:.8!important;}
+#split #shared-ride-launcher[open] .shared-pill-arrow{transform:rotate(180deg)!important;}
+#split #shared-ride-launcher[open] .shared-ride-card{margin:4px 0 12px!important;position:relative!important;width:100%!important;}
+html[data-theme="dark"] #split #shared-ride-launcher>summary.shared-ride-pill{
+ background:linear-gradient(135deg,#1c4647,#1d4357)!important;border-color:#397e83!important;color:#c6ffeb!important;
+}
+/* Trip name + rider form = one shared surface. Inner cards lose their old borders. */
+#split .mt919-trip-rider-card{padding:14px 15px!important;margin:10px 0 14px!important;
+ border-radius:21px!important;background:linear-gradient(180deg,#fff,#f7fbff)!important;
+ border:1px solid #cfdef0!important;box-shadow:0 9px 22px rgba(27,62,103,.05)!important;}
+html[data-theme="dark"] #split .mt919-trip-rider-card{background:linear-gradient(170deg,#202e49,#192a43)!important;border-color:#45617e!important;}
+#split .mt919-trip-rider-card>.group-name-row,
+#split .mt919-trip-rider-card>#rider-panel{
+ background:none!important;border:0!important;box-shadow:none!important;
+ border-radius:0!important;padding:0!important;margin:0!important;
+}
+#split .mt919-trip-rider-card>.group-name-row label{margin:0!important;}
+#split .mt919-trip-rider-card>.group-name-row input{margin-bottom:0!important;}
+#split .mt919-trip-rider-card>.group-sync-hint{font-size:11px!important;margin:5px 0 12px!important;line-height:1.3!important;opacity:.74;}
+#split .mt919-trip-rider-card>#rider-panel{border-top:1px solid #dce7f2!important;padding-top:12px!important;}
+html[data-theme="dark"] #split .mt919-trip-rider-card>#rider-panel{border-top-color:#3a526f!important;}
+#split .mt919-trip-rider-card>#rider-panel .mt-block-title{margin:0 0 6px!important;font-size:15px!important;}
+#split .mt919-trip-rider-card #member-form{display:grid!important;grid-template-columns:minmax(0,1fr) auto!important;align-items:end!important;gap:8px!important;margin:2px 0 11px!important;}
+#split .mt919-trip-rider-card #member-form>label{min-width:0;margin:0!important;}
+#split .mt919-trip-rider-card #member-form button{width:auto!important;min-width:70px!important;min-height:42px!important;margin:0!important;padding:8px 14px!important;border-radius:12px!important;}
+#split .mt919-trip-rider-card .members-heading{margin:6px 0 8px!important;}
+/* Single dynamic save/update next to reset, same behavior as Planner. */
+#split .mt918-save-actions{flex:1 1 145px!important;max-width:100%!important;}
+#split .mt919-save-update{width:100%!important;min-height:43px!important;font-weight:800!important;}
+#split #split-more.mt-reset-row{gap:10px!important;}
+@media(max-width:440px){
+ #split .split-hero{padding-right:138px!important;min-height:67px;}
+ #split #shared-ride-launcher>summary.shared-ride-pill{min-height:36px!important;max-width:136px!important;padding:5px 8px!important;}
+ #split #shared-ride-launcher .shared-pill-copy strong{font-size:11px!important;}
+ #split .mt919-trip-rider-card{padding:12px!important;}
+ #split #split-more.mt-reset-row .mt918-save-actions{flex:1 1 120px!important;}
+ #split #split-more.mt-reset-row #new-group{flex:1 1 125px!important;width:auto!important;}
+}
+@media(max-width:340px){
+ #split .split-hero{padding-right:125px!important;}
+ #split #shared-ride-launcher>summary.shared-ride-pill{max-width:124px!important;}
+ #split #shared-ride-launcher .shared-pill-copy strong{font-size:10px!important;}
+ #split .mt919-trip-rider-card #member-form button{min-width:60px!important;padding:7px 9px!important;}
+}
+
+
+/* MotoTrip V9.20 — Bill Split summary mirrors the original Planner trip card. */
+#split .mt920-summary-wrap{padding:0!important;margin:2px 0 12px!important;border:0!important;background:none!important;box-shadow:none!important;max-width:100%;}
+html body #split #split-summary.mt920-trip-card{
+  box-sizing:border-box!important;display:grid!important;grid-template-columns:minmax(62px,23%) minmax(0,1fr) minmax(94px,31%)!important;
+  align-items:stretch!important;gap:9px!important;padding:10px!important;
+  min-height:134px!important;width:100%;max-width:100%;min-width:0;
+  margin:0!important;background:linear-gradient(110deg,#fff 0%,#fff 67%,#f1faf7 100%)!important;
+  border:1px solid #d0e5e7!important;border-radius:17px!important;box-shadow:0 7px 16px #0c2b4b18!important;
+  color:#142c40!important;
+}
+#split #split-summary.mt920-trip-card>*{min-width:0;max-width:100%;}
+#split #split-summary .mt80-scene{align-self:stretch;min-height:112px;overflow:hidden;border-radius:13px;background:#d7edfa;}
+#split #split-summary .mt91-trip-photo{display:block;width:100%;height:100%;min-height:112px;object-fit:cover;object-position:51% center;border-radius:inherit;}
+#split #split-summary .mt80-trip-main{display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:7px;min-width:0;color:#0e2241!important;}
+#split #split-summary .mt80-trip-main>strong{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;line-clamp:2;overflow:hidden;overflow-wrap:anywhere;min-width:0;max-width:100%;font-size:clamp(12px,3.45vw,19px);letter-spacing:-.025em;line-height:1.23;color:#0e2241!important;}
+#split #split-summary .mt920-date-jump{display:flex;align-items:center;gap:4px;min-width:0;max-width:100%;width:auto!important;border:0!important;background:transparent!important;color:#15334b!important;padding:1px 0!important;margin:0!important;min-height:26px!important;text-align:left!important;font-size:clamp(10px,2.6vw,12px)!important;font-weight:700;line-height:1.25;box-shadow:none!important;cursor:pointer;}
+#split #split-summary .mt920-date-jump>span:last-child{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+#split #split-summary .mt920-date-jump>span:first-child{font-size:14px;color:#06957b;}
+#split #split-summary .mt80-trip-members{display:flex;align-items:center;gap:5px;margin-top:1px;font-size:clamp(10px,2.6vw,13px);line-height:1.3;color:#18314d;font-weight:600;}
+#split #split-summary .mt80-trip-members>span:first-child{font-size:19px;color:#163857;}
+#split #split-summary .mt80-trip-budget{display:flex;flex-direction:column;align-items:center;justify-content:center;min-width:0;width:100%;padding:5px 0 5px 8px;border-left:1px solid #cadee0;text-align:center;overflow:hidden;}
+html body #split #split-summary .mt80-trip-budget>small{font-size:clamp(9px,2.3vw,11px)!important;line-height:1.22!important;white-space:normal;overflow-wrap:anywhere;color:#172c40!important;font-weight:550;letter-spacing:0!important;}
+html body #split #split-summary .mt80-trip-budget>strong{display:block;max-width:100%;margin:6px 0 7px;font-size:clamp(22px,5.8vw,37px);letter-spacing:-.06em;line-height:1.1;color:#059464!important;font-weight:850;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+html body #split #split-summary .mt80-trip-budget>span{box-sizing:border-box;display:block;max-width:100%;padding:6px 5px;border-radius:999px;background:#d4f8e8;color:#155a46!important;font-size:clamp(9px,2.45vw,12px);line-height:1.2;font-weight:700;white-space:normal;overflow-wrap:anywhere;}
+@media(max-width:390px){
+ html body #split #split-summary.mt920-trip-card{grid-template-columns:59px minmax(0,1fr) minmax(88px,31%)!important;gap:6px!important;padding:7px!important;min-height:110px!important;}
+ #split #split-summary .mt80-scene,#split #split-summary .mt91-trip-photo{min-height:96px;}
+ #split #split-summary .mt80-trip-main>strong{font-size:12px;}
+ html body #split #split-summary .mt80-trip-budget>strong{font-size:22px;}
+ #split #split-summary .mt80-trip-budget{padding-left:5px;}
+}
+@media(min-width:540px){
+ html body #split #split-summary.mt920-trip-card{grid-template-columns:minmax(82px,20%) minmax(0,1fr) minmax(126px,28%)!important;gap:14px!important;}
+ #split #split-summary .mt80-trip-main>strong{font-size:clamp(16px,2.4vw,22px);}
+}
+html[data-theme=dark] body #split #split-summary.mt920-trip-card{background:linear-gradient(110deg,#192b43,#172e37)!important;border-color:#3c5c70!important;color:#eaf6ff!important;}
+html[data-theme=dark] #split #split-summary .mt80-trip-main>strong,
+html[data-theme=dark] #split #split-summary .mt80-trip-members,
+html[data-theme=dark] #split #split-summary .mt920-date-jump{color:#edf7ff!important;}
+html[data-theme=dark] body #split #split-summary .mt80-trip-budget>small{color:#dce9f5!important;}
+html[data-theme=dark] body #split #split-summary .mt80-trip-budget>strong{color:#8bf2cb!important;}
+html[data-theme=dark] body #split #split-summary .mt80-trip-budget>span{background:#245946;color:#e0fff1!important;}
+
+/* MotoTrip V9.21 — Return journey belongs with Planned Distance; off on new trips. */
+#plan .mt921-distance-block{border-bottom:1px solid #d5e1ea;padding:0 0 7px;min-width:0}
+#plan .mt921-distance-block>.mt80-calc-row{border-bottom:0!important;min-height:44px}
+#plan .mt921-return-toggle{display:flex;align-items:center;gap:7px;width:max-content;max-width:100%;margin:0 1px 0 auto;padding:5px 9px;border:1px solid #cde3dc;border-radius:999px;background:#effbf6;color:#286252!important;font-size:clamp(10px,2.7vw,12px)!important;font-weight:700;line-height:1.35;cursor:pointer;user-select:none;-webkit-tap-highlight-color:transparent}
+#plan .mt921-return-toggle input{appearance:auto!important;-webkit-appearance:checkbox!important;accent-color:#059f76;flex:0 0 auto;width:14px!important;height:14px!important;min-width:14px!important;min-height:14px!important;padding:0!important;margin:0!important;border-radius:3px!important}
+html[data-theme="dark"] #plan .mt921-distance-block{border-color:#475e78}
+html[data-theme="dark"] #plan .mt921-return-toggle{background:#1e3c40;color:#bdf0dc!important;border-color:#427766}
+#plan .mt80-calculator>.mt80-calc-row:last-child{border-bottom:0}
+@media(max-width:355px){#plan .mt921-return-toggle{font-size:10px!important;padding:4px 7px}}
+
+/* MotoTrip V9.22: place the Fuel/Stay/Food/Toll/Others summary above the estimate form. */
+#plan .mt80-panel > .mt80-costs { margin-top:12px; margin-bottom:0; }
+#plan .mt80-panel > .mt82-quick-toggles { margin:7px 0 0!important; display:flex!important; gap:8px!important; align-items:center!important; justify-content:flex-start!important; flex-wrap:wrap!important; }
+#plan .mt80-panel > .mt80-cost-note { margin:4px 0 0!important; }
+#plan .mt80-panel > .mt80-est-title { margin-top:16px!important; }
+#plan .mt82-quick-toggles .mt921-return-toggle { margin:0!important; min-height:25px; }
+#plan .mt80-calculator > .mt80-calc-row:first-child { border-top:none; }
+@media(max-width:380px){
+ #plan .mt80-panel > .mt80-costs { padding:8px 2px; }
+ #plan .mt80-panel > .mt82-quick-toggles { gap:6px!important; }
+}

@@ -1,0 +1,3 @@
+MotoTrip V9.22 — Layout Direction Fix
+
+Planner mountain card ke just neeche Fuel, Stay, Food, Toll aur Others cost summary shift kar di hai. Return Journey aur Include Petrol Cost toggles isi summary ke neeche aate hain. Trip Plan & Estimate inputs ab inke neeche aayenge. Return Journey default OFF rahega (user manually tick kare). Existing trip settings/data unchanged.
