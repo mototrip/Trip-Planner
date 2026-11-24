@@ -84,6 +84,8 @@ const BASE='http://127.0.0.1:8765';
    await page.locator('#settlements button').first().click();
    assert.equal(await page.evaluate(()=>calculateSplit(group()).payments.length),0,
      'Marked payment did not settle the balance');
+   // Payment history is intentionally collapsed on mobile and desktop.
+   await page.locator('#payment-list').evaluate(el=>{el.closest('details').open=true;});
    await page.locator('#payment-list .payment-history-toggle').first().click();
    assert.equal(await page.evaluate(()=>calculateSplit(group()).payments.length),1,
      'Undo payment did not restore the settlement');
