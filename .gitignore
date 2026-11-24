@@ -6,3 +6,10 @@ local.properties
 *.jks
 *.p12
 *.keystore
+
+# Never commit Android release keys, certificates with private material or credentials.
+*.pem
+*.pfx
+keystore.properties
+**/keystore.properties
+*signing-secrets*

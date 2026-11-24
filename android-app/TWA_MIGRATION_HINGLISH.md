@@ -78,3 +78,43 @@ and a deliberate distribution/rollback plan.
 - [ ] Final Google Play Data Safety form, store listing screenshots, content rating, contact info and closed testing after Play Console registration.
 
 Note: A green CodeQL security scan and a successful unsigned AAB build are NOT Google Play approval.
+
+## Signed AAB delivery (prepared 25 November 2026)
+
+A new, separate **MotoTrip upload key** was generated for package `com.mototrip.app.twa`.
+The key is **NOT stored in this GitHub repository**, and the same user-owned
+key must be securely backed up to sign future updates. Do not regenerate an
+unrelated key when releasing an update. Google Play may issue a distinct
+**app-signing certificate**; Digital Asset Links for Play installs must include
+that **Play app-signing certificate SHA-256** (not merely our upload key).
+
+This repo has a manual GitHub Actions workflow `MotoTrip Signed Play Candidate`.
+It requires these four **Repository Secrets** under Settings → Secrets and
+variables → Actions:
+
+- `MOTOTRIP_UPLOAD_KEYSTORE_BASE64` — Base64 of the private JKS upload key
+- `MOTOTRIP_UPLOAD_STORE_PASSWORD` — keystore password
+- `MOTOTRIP_UPLOAD_KEY_ALIAS` — alias
+- `MOTOTRIP_UPLOAD_KEY_PASSWORD` — key password
+
+These are deliberately **not checked into Git**. The build aborts when a
+required secret is missing. The signed release bundle appears only as a
+workflow artifact when all secrets are correctly configured.
+
+An independently signed candidate AAB was also created for the current code,
+but it still uses preview package/name settings and is NOT equivalent to an
+approved Play Store release.
+
+### Full-screen verification blocker
+
+The GitHub user-site repository `mototrip/mototrip.github.io` was not
+accessible at the time this code was prepared. Publishing
+`Trip-Planner/.well-known/assetlinks.json` **does not work**: Digital Asset
+Links requires `https://mototrip.github.io/.well-known/assetlinks.json` at
+root. A root-site starter is included under
+`docs/root-site-template/.well-known/assetlinks.json`; this file must be
+published from a real root-site repository/host that controls the origin.
+Its current certificate fingerprint is for **upload-key sideload tests only**.
+After enrolling in Play App Signing, add the Play Console app-signing SHA-256
+before distributing the Play-installed app. Do not claim full-screen until
+it is verified on a real Android browser and device.

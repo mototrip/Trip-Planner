@@ -1,5 +1,20 @@
 plugins { id 'com.android.application' }
 
+// Never store a Play signing certificate's private key in Git or in Gradle.
+// Production signing is available ONLY when all 4 environment settings exist.
+// Ordinary debug and unsigned preview builds remain unaffected.
+def releaseEnv = [
+    'MOTOTRIP_SIGNING_STORE_FILE',
+    'MOTOTRIP_SIGNING_STORE_PASSWORD',
+    'MOTOTRIP_SIGNING_KEY_ALIAS',
+    'MOTOTRIP_SIGNING_KEY_PASSWORD'
+].collectEntries { key -> [(key): System.getenv(key)] }
+def hasSomeSigning = releaseEnv.values().any { it != null && !it.trim().isEmpty() }
+def releaseSigningReady = releaseEnv.values().every { it != null && !it.trim().isEmpty() }
+if (hasSomeSigning && !releaseSigningReady) {
+    throw new GradleException('Partial signing configuration: supply all 4 MOTOTRIP_SIGNING_* variables.')
+}
+
 android {
     namespace 'com.mototrip.app'
     compileSdk 36
@@ -19,10 +34,26 @@ android {
         targetCompatibility JavaVersion.VERSION_17
     }
 
+    signingConfigs {
+        release {
+            if (releaseSigningReady) {
+                storeFile file(releaseEnv['MOTOTRIP_SIGNING_STORE_FILE'])
+                storePassword releaseEnv['MOTOTRIP_SIGNING_STORE_PASSWORD']
+                keyAlias releaseEnv['MOTOTRIP_SIGNING_KEY_ALIAS']
+                keyPassword releaseEnv['MOTOTRIP_SIGNING_KEY_PASSWORD']
+                storeType 'JKS'
+            }
+        }
+    }
+
     buildTypes {
         release {
             minifyEnabled false
-            // No signed release is automatically published for the preview.
+            // Only manual CI with user-provided secrets may sign releases.
+            // Preview / automatic builds deliberately remain unsigned.
+            if (releaseSigningReady) {
+                signingConfig signingConfigs.release
+            }
         }
     }
 }

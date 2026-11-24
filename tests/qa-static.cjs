@@ -46,6 +46,8 @@ const appGradle=file('android-app/app/build.gradle');
 assert.ok(appGradle.includes("applicationId 'com.mototrip.app.twa'"));
 assert.ok(/compileSdk\s+36\b/.test(appGradle), 'Compile SDK must support API 36');
 assert.ok(/targetSdk\s+36\b/.test(appGradle), 'Google Play target SDK must be API 36');
+assert.ok(appGradle.includes('MOTOTRIP_SIGNING_STORE_FILE'), 'Release signing must use environment secrets');
+assert.ok(!/storePassword\s+['"][^'"]+['"]/.test(appGradle),'Do not hardcode upload passwords');
 const dal=file('docs/twa-assetlinks.example.json');
 assert.ok(dal.includes('REPLACE_WITH_REAL_RELEASE_APP_SIGNING_CERT_SHA256'));
 pass('TWA side-by-side package, no embedded WebView, DAL setup marked incomplete');
