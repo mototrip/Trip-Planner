@@ -6,19 +6,25 @@ import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
+import android.net.http.SslError;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.webkit.CookieManager;
 import android.webkit.GeolocationPermissions;
 import android.webkit.PermissionRequest;
+import android.webkit.SslErrorHandler;
 import android.webkit.ValueCallback;
 import android.webkit.WebChromeClient;
 import android.webkit.WebResourceRequest;
+import android.webkit.WebResourceResponse;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.Toast;
+
+import java.io.ByteArrayInputStream;
+import java.util.Collections;
 
 /** MotoTrip Android wrapper. The LIVE website remains the application source of truth. */
 public final class MainActivity extends Activity {
@@ -66,6 +72,26 @@ public final class MainActivity extends Activity {
         CookieManager.getInstance().setAcceptCookie(true);
 
         webView.setWebViewClient(new WebViewClient() {
+            // Reject any unexpected main-frame resource before it can render.
+            // Third-party subresources used by the app (Firebase, maps etc.)
+            // remain subject to HTTPS and the browser's same-origin protections.
+            @Override public WebResourceResponse shouldInterceptRequest(
+                    WebView view, WebResourceRequest request) {
+                if (request.isForMainFrame() && !isMotoTrip(request.getUrl())) {
+                    return new WebResourceResponse("text/plain", "UTF-8",
+                            403, "Forbidden", Collections.emptyMap(),
+                            new ByteArrayInputStream(new byte[0]));
+                }
+                return super.shouldInterceptRequest(view, request);
+            }
+
+            // Never allow a user-added or broken TLS certificate to load code
+            // inside the signed MotoTrip Android application.
+            @Override public void onReceivedSslError(
+                    WebView view, SslErrorHandler handler, SslError error) {
+                handler.cancel();
+            }
+
             @Override public void onPageStarted(WebView view, String url, android.graphics.Bitmap favicon) {
                 super.onPageStarted(view, url, favicon);
                 // shouldOverrideUrlLoading is not invoked for every redirect/POST.
