@@ -1,0 +1,50 @@
+name: MotoTrip Functional QA
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '*.js'
+      - '*.html'
+      - '*.json'
+      - 'android-app/**'
+      - 'tests/**'
+      - '.github/workflows/mototrip-functional-qa.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  static:
+    name: Syntax, assets and PWA integrity
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '22'
+      - run: node tests/qa-static.cjs
+
+  browser:
+    name: Browser smoke - mobile and desktop
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '22'
+      - name: Install Playwright
+        run: |
+          npm install --no-save --no-package-lock playwright@1.56.1
+          npx playwright install --with-deps chromium
+      - name: Start local MotoTrip test server
+        run: |
+          python3 -m http.server 8765 --bind 127.0.0.1 > "$RUNNER_TEMP/mototrip-server.log" 2>&1 &
+          for i in $(seq 1 30); do curl -fsS http://127.0.0.1:8765/index.html -o /dev/null && exit 0; sleep 1; done
+          cat "$RUNNER_TEMP/mototrip-server.log"
+          exit 1
+      - name: Test app in isolated browser
+        run: node tests/qa-browser.cjs
