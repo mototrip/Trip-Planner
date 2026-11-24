@@ -258,7 +258,9 @@
    markSeen();
    // An existing account should re-open the profile too, not land in Planner
    // with its private fields hidden and appearing to have vanished.
-   try { sessionStorage.setItem(afterLoginKey, 'yes'); sessionStorage.setItem(entryKey, 'uid-'+uid); sessionStorage.removeItem(profileApprovedKey); } catch (_) {}
+   // Do not write the Firebase UID to sessionStorage. The authenticated account
+    // is restored after reload from Firebase Auth and checked against scope.
+    try { sessionStorage.setItem(afterLoginKey, 'yes'); sessionStorage.removeItem(entryKey); sessionStorage.removeItem(profileApprovedKey); } catch (_) {}
    location.reload();
  }
  async function signup(event) {
