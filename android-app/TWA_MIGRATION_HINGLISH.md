@@ -1,7 +1,7 @@
 # MotoTrip: Safe Android TWA migration (24 November 2026)
 
 ## What is built
-The Android project now builds a browser-managed Trusted Web Activity preview using Android Browser Helper 2.7.4.
+The Android project now builds a browser-managed Trusted Web Activity preview using Android Browser Helper 2.7.4.\nThe preview now targets Android API 36 to match the Google Play submission requirement.\nThe CI also validates an unsigned release AAB for packaging only; it is NOT Play-uploadable.
 There is **no app-owned WebView** and no `setJavaScriptEnabled(true)` call.
 The preview package is `com.mototrip.app.twa`, NOT `com.mototrip.app`.
 It installs next to the original Android WebView app; it does not update, uninstall,
@@ -64,3 +64,17 @@ is deliberately distinct for data safety; it is not an in-place upgrade.
 Do not rename it to `com.mototrip.app` without a proven export/import
 migration on real devices, compatibility with the existing signing key,
 and a deliberate distribution/rollback plan.
+
+## Play Store preparation status — 24 November 2026
+
+- [x] Target API 36 for Android 16 requirements; compileSdk 36.
+- [x] Build debug APK and verify release AAB contents in GitHub Actions.
+- [x] Privacy page explicitly describes the browser-managed TWA preview.
+- [ ] Test the API 36 experience on Android 16 phones (edge-to-edge/insets, back navigation, permissions, file picker and orientation).
+- [ ] Establish a stable Android signing keystore and configure secure signing (do not commit passwords or keystore files).
+- [ ] Confirm production package name. The safe preview uses `com.mototrip.app.twa` and cannot silently replace the legacy `com.mototrip.app` app.
+- [ ] Publish HTTPS Digital Asset Links at `https://mototrip.github.io/.well-known/assetlinks.json` with SHA-256 from the actual release/Play app-signing certificate.
+- [ ] Verify TWA launches full-screen without browser toolbar on a physical device.
+- [ ] Final Google Play Data Safety form, store listing screenshots, content rating, contact info and closed testing after Play Console registration.
+
+Note: A green CodeQL security scan and a successful unsigned AAB build are NOT Google Play approval.

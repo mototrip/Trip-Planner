@@ -29,20 +29,42 @@ jobs:
         uses: android-actions/setup-android@be39fa834029ff78f1a44aa3bb0819b8fc2bd8fd
       - name: Install Android SDK 36
         run: sdkmanager 'platforms;android-36' 'build-tools;35.0.0'
-      - name: Validate migration guardrails
+      - name: Validate Play target SDK and migration guardrails
         shell: bash
         run: |
           set -euo pipefail
           grep -Fq "applicationId 'com.mototrip.app.twa'" android-app/app/build.gradle
+          grep -Fq 'targetSdk 36' android-app/app/build.gradle
+          grep -Fq 'compileSdk 36' android-app/app/build.gradle
           grep -Fq 'FALLBACK_STRATEGY' android-app/app/src/main/AndroidManifest.xml
           ! grep -R -E 'setJavaScriptEnabled|android.webkit.WebView' android-app/app/src/main/java
           test -s android-app/gradle/wrapper/gradle-wrapper.jar
-      - name: Build preview APK
+      - name: Build preview APK and verify release AAB packaging
         working-directory: android-app
-        run: bash ./gradlew :app:assembleDebug --no-daemon --stacktrace
+        run: bash ./gradlew :app:assembleDebug :app:bundleRelease --no-daemon --stacktrace
+
+      - name: Check bundle and APK integrity
+        shell: bash
+        run: |
+          set -euo pipefail
+          apk='android-app/app/build/outputs/apk/debug/app-debug.apk'
+          bundle='android-app/app/build/outputs/bundle/release/app-release.aab'
+          test -s "$apk"
+          test -s "$bundle"
+          unzip -t "$apk" | tail -n 1
+          unzip -t "$bundle" | tail -n 1
+          echo 'Android APK and unsigned release AAB packaging verified.'
+          echo 'AAB has NO release signing key; do NOT upload it to Google Play.'
       - name: Upload TEST APK (not a signed release)
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
           name: MotoTrip-TWA-SideBySide-Preview-APK
           path: android-app/app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
+
+      - name: Upload UNSIGNED AAB packaging test (DO NOT upload to Play)
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: MotoTrip-TWA-UNSIGNED-AAB-NOT-FOR-PLAY
+          path: android-app/app/build/outputs/bundle/release/app-release.aab
           if-no-files-found: error
