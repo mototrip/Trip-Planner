@@ -1,0 +1,28 @@
+MotoTrip V9.24 — Visual Layout Audit (Hinglish)
+
+Source: V9.23 Startup/Mobile fixes.
+Goal: unnecessary text aur uneven spacing reduce karna, functionality ko bina badle.
+
+Findings & fixes:
+1. Planner mein "Estimate cards stay in sync" repeated helper text hidden; JS node preserved.
+2. Fuel, Stay, Food, Toll, Others mini-cards ko consistent vertical alignment aur mobile text sizing di.
+3. Bill Split se decorative "SMART SPLIT", "Cleaner, easier...", "QUICK ADD", "Fast entry", "Auto", "One tap" filler text hataaya.
+4. Riders heading duplication hataai; group form spacing aur chip wrapping polish ki.
+5. Top-right Private Group pill ko heading ke saath align kiya; create/join functionality preserve hai.
+6. Trips se redundant report helper copy hataaya; report PDF tip short kiya aur cards consistent kiye.
+7. Route mein "ON THE WAY" repeated kicker hataaya; "Stops on the way" title clear hai.
+8. Same photo trip summary, budget, ₹/Rider, Return Journey OFF default aur calculations unchanged.
+9. GPS/privacy warnings aur backup/delete notices retained as necessary safety instructions.
+
+Checks:
+- Browser-rendered light and dark themes; mobile widths: 320, 360, 390, 430px, tablet: 768px.
+- Planner/Bill Split/Trips layout had no horizontal document overflow.
+- Private Group toggle, live fuel calculator after petrol input, saved-trip report, optional Route/Gear tab access.
+- Current regression suite rechecked: saved trip updates, bill split settlements, nav, date editor, dark/light.
+- JS page errors in tested flows: none.
+- Duplicate HTML id scan: no duplicates.
+- PWA cache version: 9.24; local data and Firebase config unchanged.
+
+Limitations:
+- Not tested on a physical iPhone Safari or Android WebView, GPS, live Firebase connections, or actual installed APK.
+- Style previews are actual Chromium renderings with demo content, not real user data.

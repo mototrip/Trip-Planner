@@ -34,7 +34,7 @@ window.motoTripExportPdf=state=>{
  // same origin, so it can read the selected signed-in account data safely.
  let scope='guest';try{scope=localStorage.getItem('mototrip-account-scope')||'guest';}catch(_){}
  localStorage.setItem('mototrip-report-preview-v71',JSON.stringify({createdAt:Date.now(),scope,state}));
- const win=window.open('./report.html?v=918','_blank');
+ const win=window.open('./report.html?v=926','_blank');
  if(!win)throw Error('Pop-up blocked. Allow MotoTrip pop-ups to open the PDF preview.');
  try{win.opener=null;}catch(_){}
 };

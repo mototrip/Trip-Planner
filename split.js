@@ -140,8 +140,8 @@ function recentExpenses(g){
  const action=node('span',recentExpensesOpen?'Hide':'View','recent-disclosure-action');
  head.append(identity,action);
  const latest=g.expenses[g.expenses.length-1];
- const latestText=node('span','Latest: '+latest.name+' · '+cash(latest.amount)+' · '+latest.payer,'recent-disclosure-latest');
- identity.append(latestText);
+ const latestText=node('span',latest.name+' · '+cash(latest.amount)+' · '+latest.payer,'recent-disclosure-latest');
+ head.append(latestText);
  panel.append(head);
 
  const inner=node('div','','recent-disclosure-body');
@@ -326,7 +326,7 @@ function showExpenseSuggestions(){
 }
 $('expense-name').addEventListener('input',showExpenseSuggestions);
 $('expense-name').addEventListener('focus',showExpenseSuggestions);
-document.addEventListener('pointerdown',e=>{
+document.addEventListener('click',e=>{
  if(!e.target.closest('#expense-suggestions')&&!e.target.closest('#expense-name'))$('expense-suggestions').hidden=true;
 });
 $('expense-name').addEventListener('keydown',e=>{

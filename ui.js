@@ -40,6 +40,20 @@
    joinTrigger.setAttribute('aria-expanded',String(!joinPanel.hidden));
    if(!joinPanel.hidden){const field=$('shared-code');if(field)field.focus({preventScroll:true});joinPanel.scrollIntoView({block:'nearest',behavior:'smooth'});}
  });
+ // V9.20: trip dates in Bill Split show the same text as the Planner card.
+ const dateSource=$('mt80-date-summary'),splitDates=$('split-summary-dates');
+ if(dateSource&&splitDates){
+   const refreshDate=()=>{splitDates.textContent=dateSource.textContent.trim()||'Add trip dates';};
+   new MutationObserver(refreshDate).observe(dateSource,{childList:true,characterData:true,subtree:true});
+   refreshDate();
+ }
+ const dateJump=$('split-summary-dates-button');
+ if(dateJump)dateJump.addEventListener('click',()=>{
+   const plannerTab=document.querySelector('#main-nav button[data-tab="plan"]');
+   if(plannerTab)plannerTab.click();
+   const target=$('mt80-date-toggle');
+   if(target){target.scrollIntoView({block:'center',behavior:'smooth'});target.click();}
+ });
  // A bottom nav tap should always land at the top of the new section.
  const nav=$('main-nav');
  if(nav)nav.addEventListener('click',event=>{
