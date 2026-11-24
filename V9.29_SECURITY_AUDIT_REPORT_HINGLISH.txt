@@ -1,0 +1,33 @@
+MOTOTRIP V9.29 — CODEQL SECURITY PATCH + TEST REPORT
+24 November 2026
+
+ISSUE: GitHub CodeQL reported 20 High findings on main:
+- 16 old generated _inline_browser_preview.html (DOM text reinterpreted as HTML and cleartext storage)
+- 4 account.js (clear text storage warnings)
+
+CHANGES:
+- _inline_browser_preview.html replaced with a minimal safe redirect to index.html
+- _static_preview.html also replaced with the same safe redirect
+- profile-vault.js adds real WebCrypto AES-256-GCM encryption for optional gender / blood group / emergency name & phone
+- Encryption key is non-extractable and stored in IndexedDB, ciphertext only in localStorage; older profiles migrate only after successful encrypted write
+- Normal name + vehicle, login state markers, offline trips and expenses are intentionally preserved
+- Group Safety can read decrypted emergency data only after profile hydration and explicit rider opt-in
+- Updated privacy.html to explain limits and deletion
+- sw.js and index.html updated to version 9.29 and to cache/load profile-vault.js
+
+TESTS:
+PASS Node.js syntax: account.js, profile-vault.js, safety.js
+PASS Real Node WebCrypto AES-GCM encryption/migration with IndexedDB test double
+PASS Real WebCrypto decrypt after reload (new JS instance)
+PASS Profile update, clearing private fields, and delete in vault
+PASS Browser simulation 11 Planner/Bill Split/navigation flows, no JavaScript errors (mock storage, Chromium)
+PASS ZIP integrity and required file paths
+
+SECURITY LIMITS AND REQUIRED USER ACTION:
+- These are local code fixes only; not deployed to GitHub automatically.
+- CodeQL findings remain open until user replaces _inline_browser_preview.html and account.js and a new scan confirms results.
+- Some account.js alerts can remain because account scope/guest trips are still intentionally stored locally, not necessarily a credential leak.
+- Device-bound encryption does not protect against malware with same-origin scripting access or an unlocked compromised device.
+- Old installed tabs and older app versions can retain prior plaintext until an updated app is opened; migrating encrypted data does not erase historical browser snapshots, exports or device backups.
+- Firebase Security Rules, backend Firestore data, PWA live device behavior and Android APK were NOT audited in this package.
+- Real iPhone / Android physical devices and live Firebase were not tested; verify before mass rollout.

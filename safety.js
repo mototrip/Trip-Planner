@@ -25,6 +25,7 @@
   })]).finally(()=>clearTimeout(timer));
  };
  const staleAfterMs = 120000;
+ const gpsRetireKey=()=>context?'mototrip-gps-retired-v927-'+context.uid+'-'+context.rideId:'';
  let context = null, unsubscribe = null, gpsTimer = null, gpsWatchId = null, gpsActive = false;
  let locationBusy = false, detailsBusy = false, mySafety = null;
  let locationPending = null, trackingEpoch = 0, lastPublishedAt = 0;
@@ -42,7 +43,7 @@
   try {scope=localStorage.getItem('mototrip-account-scope') || 'guest';}catch(_){/* Storage disabled */}
   try {
    const p = JSON.parse(localStorage.getItem('mototrip-rider-profile-v1-' + scope) || '{}');
-   return p && typeof p === 'object' ? p : {};
+   return p && typeof p === 'object' ? {...p,...(window.motoTripSensitiveProfile?.()||{})} : {};
   }catch(_) {return {};}
  }
  function riderName() {
@@ -144,10 +145,10 @@
  }
  function tag(parent, text){parent.append(el('span','mt-safety-tag',text));}
  function visibleCards(list) {
-  if(!needsEmergencyRemoval())return list;
-  // Optimistic privacy on THIS device only; the status warns that other devices
-  // may still see the previously synced record until Firebase confirms removal.
-  return list.map(d=>d?.uid===context?.uid ? {...d,emergencyShared:false,blood:'',emergencyName:'',emergencyPhone:''}:d);
+  // GPS sharing was retired. Never expose previously shared coordinates in the UI.
+  const withoutGps=list.map(d=>({...d,locationShared:false,latitude:null,longitude:null,accuracy:null,locationUpdatedAt:''}));
+  if(!needsEmergencyRemoval())return withoutGps;
+  return withoutGps.map(d=>d?.uid===context?.uid ? {...d,emergencyShared:false,blood:'',emergencyName:'',emergencyPhone:''}:d);
  }
  function render(list) {
   roster.replaceChildren();
@@ -349,6 +350,7 @@
    void postPosition(null,true);
  }
  async function startLocation(resume = false){
+  return; // V9.27: GPS sharing intentionally discontinued.
   if(gpsActive){if(!resume)await stopLocation();return;}
   if(!validContext()){say('Join Shared Ride before sharing location.',true);return;}
   if(!navigator.geolocation){say('GPS is not available in this browser. Try Safari or Chrome with Location Services enabled.',true);return;}
@@ -386,6 +388,7 @@
    say('Finish removing the old emergency info before sharing again. Tap Retry removal.',true);
    return;
   }
+  try{await window.motoTripProfileReady?.();}catch(_){shareInfo.checked=false;say('Secure profile details are unavailable on this device.',true);return;}
   const fields=sanitizedProfile(profile());
   if(!fields.blood && !fields.emergencyPhone){
    shareInfo.checked=false;
@@ -422,50 +425,74 @@
   roster.replaceChildren();
   count.textContent='0 sharing';
  }
+ const shouldWatchSafety=()=>!!context && document.visibilityState!=='hidden' &&
+   !document.getElementById('split')?.hidden && box.open;
+ function pauseSafetyRoster(){
+  ++generation;
+  if(unsubscribe){unsubscribe();unsubscribe=null;}
+  rosterReady=false;
+ }
+ function syncSafetyRoster(){
+  if(!shouldWatchSafety()){pauseSafetyRoster();return;}
+  if(!unsubscribe)initRoster();
+ }
+ async function retireLegacyGPS(){
+  if(!validContext()||document.hidden)return;
+  // One-time cleanup for people who had GPS enabled in older versions.
+  // Never recreate or publish coordinates. Retry on next visit if offline.
+  const c=context,key=gpsRetireKey();
+  if(!key||localStorage.getItem(key)==='yes')return;
+  setOptIn(false);stopTimer();
+  try{
+   if(needsStop())await syncPendingStop();
+   if(needsStop())return;
+   const snap=await cloudTimeout(c.dbM.getDocFromServer(currentRef()),'Checking previous location');
+   if(!validContext()||context!==c)return;
+   if(snap.exists()&&snap.data()?.locationShared){
+    markPendingStop(true);
+    await syncPendingStop();
+    if(needsStop())return;
+   }
+   localStorage.setItem(key,'yes');
+  }catch(e){if(validContext())say('Old location removal will retry when online. '+errorText(e),true);}
+ }
  function onRideChange(){
   const next=window.motoTripSharedRide?.safetyContext?.();
-  if(next && context?.uid===next.uid && context?.rideId===next.rideId)return;
+  if(next && context?.uid===next.uid && context?.rideId===next.rideId){syncSafetyRoster();return;}
   clearLocal();
   if(next){
-   context=next;initRoster();setLocationButton();
+   context=next;
+   const oldOpted=optedIn();setOptIn(false);
+   if(oldOpted)markPendingStop(true);
    if(retryEmergencyButton)retryEmergencyButton.hidden=!needsEmergencyRemoval();
    if(needsEmergencyRemoval())void syncPendingEmergencyRemoval();
-   if(needsStop())void syncPendingStop();
-   else if(optedIn())void startLocation(true);
-   else say('New ride: live location is OFF. Tap Start Live Location to share your GPS.');
+   syncSafetyRoster();
+   void retireLegacyGPS();
+   say('Emergency contacts are optional. Live GPS is disabled.');
   }
  }
- // Never clear a location just because the app goes into the background.
- // iOS and other browsers can suspend JS/GPS regardless of our preferences.
+ // Stop safety listening as soon as the page is hidden; reconnect only if panel is open.
  document.addEventListener('visibilitychange',()=>{
-  if(!gpsActive)return;
-  if(document.hidden){say('Location sharing is ON. Background GPS may pause on this device; group members can view your last timestamped location.');}
-  else {armWatcher();void postPosition(null,true);}
+  stopTimer();syncSafetyRoster();
+  if(!document.hidden && context){
+   if(needsEmergencyRemoval())void syncPendingEmergencyRemoval();
+   void retireLegacyGPS();
+  }
  });
- window.addEventListener('pageshow',()=>{
-  if(needsEmergencyRemoval())void syncPendingEmergencyRemoval();
-  if(!gpsActive && validContext() && optedIn())void startLocation(true);
-  else if(gpsActive)void postPosition(null,true);
- });
- window.addEventListener('pagehide',()=>{
-  // Discard only this page's watcher. Do NOT revoke the cloud safety record.
-  // Last position remains visible with a stale label until sharing resumes.
-  stopTimer();
- });
+ window.addEventListener('mototrip-tab-changed',syncSafetyRoster);
+ box.addEventListener('toggle',syncSafetyRoster);
+ window.addEventListener('pagehide',()=>{stopTimer();pauseSafetyRoster();});
+ window.addEventListener('pageshow',()=>{syncSafetyRoster();if(context)void retireLegacyGPS();});
  window.addEventListener('online',()=>{
-  if(needsEmergencyRemoval())void syncPendingEmergencyRemoval();
-  if(needsStop())void syncPendingStop();
-  else if(gpsActive)void postPosition(null,true);
+  if(!document.hidden){
+   if(needsEmergencyRemoval())void syncPendingEmergencyRemoval();
+   if(context)void retireLegacyGPS();
+  }
  });
  shareInfo.addEventListener('change',toggleEmergency);
  retryEmergencyButton?.addEventListener('click',()=>{void syncPendingEmergencyRemoval();});
  gpsRetry?.addEventListener('click',retryGps);
- btnLocation.addEventListener('click',()=>{void startLocation();});
- joinLiveBtn?.addEventListener('click',()=>{
-  box.open=true;
-  if(gpsActive){box.scrollIntoView({behavior:'smooth',block:'nearest'});return;}
-  void startLocation();
- });
+ // No GPS event handlers in the new version.
  window.addEventListener('mototrip-ride-change',onRideChange);
  window.addEventListener('mototrip-profile-updated',async()=>{
   if(!validContext() || needsEmergencyRemoval() || !mySafety?.emergencyShared)return;
@@ -482,9 +509,7 @@
   }catch(e){say('Profile changed locally, but group safety info could not update: '+errorText(e),true);}
  });
  // Time labels and stale warning need to update while the panel is visible.
- refreshTimer=setInterval(()=>{
-  if(!document.hidden && context && box.open)render(lastCards);
- },60000);
+ // No GPS polling or periodic safety timer in V9.27.
  window.motoTripSafety={removeMySafety};
  onRideChange();
 })();

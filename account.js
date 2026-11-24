@@ -13,6 +13,32 @@
  let scope = 'guest', auth, modules, loadPromise, busy = false, focusBefore = null;
  try { scope = localStorage.getItem(scopeKey) || 'guest'; } catch (_) { /* Storage may be disabled */ }
  const profilePrefix = 'mototrip-rider-profile-v1-';
+ const vault = window.MotoTripProfileVault;
+ let privateProfile = {};
+ let hydratedScope = null;
+ let privateLoad = null;
+ let savingProfile = false;
+ // Only the rider display name and vehicle stay in localStorage in readable form.
+ // Optional emergency/medical fields are encrypted using a non-extractable device key.
+ function privateForCurrentScope(){return hydratedScope===scope?{...privateProfile}:{};}
+ function hydrateProfile(){
+   if(hydratedScope===scope)return Promise.resolve(privateProfile);
+   if(privateLoad?.scope===scope)return privateLoad.promise;
+   const selectedScope=scope;
+   const promise=(vault?vault.load(selectedScope):Promise.resolve({})).then(p=>{
+     if(scope!==selectedScope)return {};
+     privateProfile=p||{};hydratedScope=scope;
+     if(!savingProfile && !el.hidden && !$('mt-profile-panel').hidden)renderProfile();
+     window.dispatchEvent(new Event('mototrip-private-profile-ready'));
+     return privateProfile;
+   }).catch(e=>{
+     if(scope===selectedScope) setMessage('Private emergency details could not be unlocked: '+String(e.message||e).slice(0,160),true);
+     throw e;
+   }).finally(()=>{if(privateLoad?.scope===selectedScope)privateLoad=null;});
+   privateLoad={scope:selectedScope,promise};return promise;
+ }
+ window.motoTripSensitiveProfile=privateForCurrentScope;
+ window.motoTripProfileReady=hydrateProfile;
  const savedProfileKey = () => profilePrefix + scope;
  const accountProfileKey = uid => profilePrefix + 'uid-' + uid;
  const afterLoginKey = 'mototrip-show-profile-after-login-v65';
@@ -86,7 +112,7 @@
  const panels = ['welcome', 'signup', 'login', 'profile'];
  const setMessage = (text = '', bad = false) => { const box = $('mt-account-message'); box.textContent = text; box.dataset.bad = bad ? 'true' : 'false'; };
  function readProfile() {
-   try { const val = JSON.parse(localStorage.getItem(savedProfileKey()) || 'null'); return val && typeof val === 'object' ? val : {}; }
+   try { const val = JSON.parse(localStorage.getItem(savedProfileKey()) || 'null'); return val && typeof val === 'object' ? {...val,...privateForCurrentScope()} : {}; }
    catch (_) { return {}; }
  }
  // Keep each signed-in rider's private profile under their stable Firebase UID.
@@ -123,6 +149,9 @@
      const source = localStorage.getItem(key);
      if (!source) return false;
      localStorage.setItem(accountProfileKey(uid), source);
+     // A migrated profile has a separate encrypted component. Copy the encrypted
+     // ciphertext to the destination scope without exporting the device key.
+     vault?.copy(key.slice(profilePrefix.length), 'uid-'+uid);
      return true;
    } catch (_) { return false; }
  }
@@ -259,6 +288,8 @@
    });
  }
  function renderProfile() {
+   // Populate public fields immediately, then load optional encrypted fields.
+   if(hydratedScope!==scope)void hydrateProfile().catch(()=>{});
    const p = readProfile();
    const vals = { 'mt-profile-name': 'name', 'mt-profile-vehicle': 'vehicle', 'mt-profile-gender': 'gender', 'mt-emergency-name': 'iceName', 'mt-emergency-phone': 'icePhone', 'mt-profile-blood': 'blood' };
    for (const [id, key] of Object.entries(vals)) $(id).value = typeof p[key] === 'string' ? p[key] : '';
@@ -290,8 +321,11 @@
    button.replaceChildren(avatar,caption);
    button.setAttribute('aria-label','Open rider profile'+(first?' for '+first:''));
  }
- function saveProfile(event) {
+ async function saveProfile(event) {
    event.preventDefault();
+   if(savingProfile)return;
+   savingProfile=true;
+   try{await hydrateProfile();}catch(_){savingProfile=false;setMessage('Secure profile storage unavailable. Existing profile was not changed.',true);return;}
    const p = {
      name: $('mt-profile-name').value.trim().slice(0, 80),
      vehicle: $('mt-profile-vehicle').value,
@@ -300,10 +334,13 @@
      icePhone: $('mt-emergency-phone').value.trim().slice(0, 22),
      blood: $('mt-profile-blood').value
    };
-   if (!p.name) { setMessage('Please enter a rider name.', true); return; }
-   if (p.icePhone && !/^[+0-9() .-]{7,22}$/.test(p.icePhone)) { setMessage('Check the emergency contact number.', true); return; }
-   try { localStorage.setItem(savedProfileKey(), JSON.stringify(p)); }
-   catch (_) { setMessage('Cannot save profile on this device. Browser storage may be blocked.', true); return; }
+   if (!p.name) { savingProfile=false;setMessage('Please enter a rider name.', true); return; }
+   if (p.icePhone && !/^[+0-9() .-]{7,22}$/.test(p.icePhone)) { savingProfile=false;setMessage('Check the emergency contact number.', true); return; }
+   try {
+     if(!vault)throw Error('Encrypted profile storage is unavailable.');
+     privateProfile=await vault.save(scope,p);hydratedScope=scope;
+   } catch (error) { savingProfile=false;setMessage('Cannot securely save Rider Profile: '+String(error.message||error).slice(0,140), true); return; }
+   savingProfile=false;
    if (typeof window.motoTripRefreshRiderName === 'function') window.motoTripRefreshRiderName();
    updateHeaderProfile(p.name);
    updateEmergencyCall(p.icePhone);
@@ -342,7 +379,7 @@
      const u = auth.currentUser;
      if (!u || u.isAnonymous) throw Error('Log in again to delete your account.');
      await modules.deleteUser(u);
-     try { localStorage.removeItem(savedProfileKey()); localStorage.removeItem(privateTripKey(u.uid)); } catch (_) {}
+     try { vault?.remove(scope);localStorage.removeItem(privateTripKey(u.uid)); } catch (_) {}
      setScope(null);
      markSeen();
      resetEntry();
@@ -355,7 +392,8 @@
      setMessage('No previous device profile was restored. Your account profile was not changed.');
      return;
    }
-   renderProfile();
+   privateProfile={};hydratedScope=null;
+   void hydrateProfile().then(()=>renderProfile()).catch(()=>{});
    fillLabel();
    if (typeof window.motoTripRefreshRiderName === 'function') window.motoTripRefreshRiderName();
    window.dispatchEvent(new Event('mototrip-profile-updated'));
@@ -363,7 +401,8 @@
  }
  function clearProfile() {
    if (!confirm('Remove your rider name, emergency contact and blood group saved on this browser? Your trips and expenses will NOT be deleted.')) return;
-   try { localStorage.removeItem(savedProfileKey()); } catch (_) {}
+   try { vault?.remove(scope); } catch (_) {}
+   privateProfile={};hydratedScope=null;
    renderProfile();
    fillLabel();
    window.dispatchEvent(new Event('mototrip-profile-updated'));
@@ -430,6 +469,8 @@
  $('mt-reset-password').addEventListener('click', resetPassword);
  $('mt-emergency-phone').addEventListener('input', e => updateEmergencyCall(e.target.value));
  fillLabel();
+ // Start the safe legacy migration early, without blocking app navigation.
+ void hydrateProfile().catch(()=>{});
  // V7.5: closing a PWA window does not mean the user signed out.
  // The previous version only checked sessionStorage, which iOS can discard
  // when the app is closed. Keep an approval marker across restarts, and ALWAYS

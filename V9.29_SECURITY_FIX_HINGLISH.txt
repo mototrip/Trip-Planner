@@ -1,0 +1,15 @@
+MotoTrip V9.29 — CodeQL Security Patch (Hinglish)
+
+1. GitHub ki purani _inline_browser_preview.html aur _static_preview.html ko safe lightweight redirect se REPLACE kiya. Wahan bundled scripts ka unsafe HTML injection exposure tha.
+2. Rider Profile ke optional emergency contact, blood group aur gender ko plain localStorage ki bajay AES-GCM encrypted localStorage mein rakha hai. Non-extractable device key IndexedDB mein hai.
+3. Purane profile ke sensitive values ko app opening par auto-migrate karte hain: encrypted write complete hone ke baad hi plain copy remove hoti hai. Agar browser encrypted storage unavailable hai to purana record delete nahi hota aur user ko warning milti hai.
+4. Local Rider name aur vehicle intentionally readable rahte hain, taaki offline login/Shared Ride ab bhi work kare.
+5. Firebase Auth passwords MotoTrip code mein store nahi hote; Firebase SDK khud auth persistence manage karta hai.
+6. Group Safety user consent ke baad hi encrypted profile fields use kar sakta hai.
+
+IMPORTANT SECURITY LIMITATIONS:
+- Device-bound encryption localStorage data-at-rest exposure reduce karti hai; compromised device ya same-origin XSS se complete protection nahi milti.
+- Trips / Bill Split financial data ab bhi localStorage mein offline saved hai, as before. Full end-to-end encryption aur backend access policy ka separate security audit zaroori hai.
+- GitHub CodeQL dobara run hone tak alerts ko resolved mat maano. Account.js ki kuch warnings benign account-scope markers par ho sakti hain.
+- Production deploy: Quick Update ZIP extract karke root files replace karo; _inline_browser_preview.html bhi overwrite hona zaroori hai, warna CodeQL ke old alerts nahi hatenge.
+- ZIP file khud GitHub repository mein upload mat karo, extracted files upload karo. Signing keys kabhi upload nahi karni.
