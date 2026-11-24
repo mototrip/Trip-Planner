@@ -26,11 +26,11 @@ jobs:
           echo "Repository: $GITHUB_REPOSITORY"
           echo "Fetching open Code Scanning alerts..."
           gh api --paginate "/repos/$GITHUB_REPOSITORY/code-scanning/alerts?state=open&per_page=100" \
-            --jq '.[] | [.number, .rule.id, (.rule.security_severity_level // .rule.severity // "unknown"), (.most_recent_instance.location.path // "unknown")] | @tsv' > "$RUNNER_TEMP/codeql-open-alerts.tsv"
+            --jq '.[] | [.number, .rule.id, (.rule.security_severity_level // .rule.severity // "unknown"), (.most_recent_instance.location.path // "unknown"), (.most_recent_instance.location.start_line // 0)] | @tsv' > "$RUNNER_TEMP/codeql-open-alerts.tsv"
           count=$(wc -l < "$RUNNER_TEMP/codeql-open-alerts.tsv" | tr -d ' ')
           echo "OPEN_CODE_SCANNING_ALERTS=$count"
           if [[ "$count" -gt 0 ]]; then
-            echo 'Number | Rule | Severity | File'
+            echo 'Number | Rule | Severity | File | Line'
             cat "$RUNNER_TEMP/codeql-open-alerts.tsv"
           else
             echo 'No open Code Scanning alerts.'
