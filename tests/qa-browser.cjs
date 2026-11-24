@@ -145,6 +145,28 @@ const BASE='http://127.0.0.1:8765';
     console.log('PASS',label,'JSON export and confirmed restore');
    }
 
+   // Reproduce the screenshot: Photon unavailable must NOT leave a floating
+   // message over the city input. Run with a deliberate HTTP 503 response.
+   await page.route('https://photon.komoot.io/**',route=>route.fulfill({
+     status:503,contentType:'application/json',body:'{"error":"QA simulated outage"}'
+   }));
+   await page.evaluate(()=>tab('route'));
+   const city=page.locator('#route-start-input');
+   await city.fill('QA Search Failure City');
+   await page.locator('.place-suggestion-message')
+     .filter({hasText:'Search unavailable'}).waitFor({timeout:10000});
+   await page.waitForFunction(()=>!document.querySelector('.place-suggestions'),
+     null,{timeout:7000});
+   assert.equal(await city.getAttribute('aria-expanded'),'false');
+   // And clicking another input must dismiss the error immediately.
+   await city.fill('QA Search Failure City Again');
+   await page.locator('.place-suggestion-message')
+     .filter({hasText:'Search unavailable'}).waitFor({timeout:10000});
+   await page.locator('#route-trip-name').click();
+   assert.equal(await page.locator('.place-suggestions').count(),0);
+   await page.evaluate(()=>tab('plan'));
+   console.log('PASS',label,'transient location search notice and outside-click dismissal');
+
    const major=errors.filter(e=>!/network|resource/i.test(e));
    assert.deepEqual(major,[],'Browser uncaught JS errors: '+major.join(' | '));
    await context.close();

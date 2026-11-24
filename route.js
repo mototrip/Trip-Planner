@@ -197,8 +197,13 @@ async function findSuggestions(q){
   if(searchCache.size>80)searchCache.clear();searchCache.set(key,result);return result;
  }finally{clearTimeout(timeout);}
 }
-let activePopup=null,activeInput=null;
-function closePlacePopup(){if(activeInput)activeInput.setAttribute('aria-expanded','false');if(activePopup){activePopup.remove();activePopup=null;}activeInput=null;}
+let activePopup=null,activeInput=null,popupDismissTimer=null;
+function closePlacePopup(){
+ clearTimeout(popupDismissTimer);popupDismissTimer=null;
+ if(activeInput)activeInput.setAttribute('aria-expanded','false');
+ if(activePopup){activePopup.remove();activePopup=null;}
+ activeInput=null;
+}
 function setSelectedPlace(kind,place,index=-1){
  const name=place.label,lat=place.lat,lon=place.lon;
  if(kind==='start'||kind==='planner-start'){
@@ -230,8 +235,9 @@ function placePopupAt(input,popup){
 }
 async function showPlaceSuggestions(input,kind,index=-1,forced=false){
  const value=input.value.trim(),requestKey=value;
- if(value.length<3){if(!forced)closePlacePopup();return;}
- if(!input.isConnected)return;
+ if(value.length<3){closePlacePopup();return;}
+ // A pending debounced request must not resurrect the popup after focus leaves.
+ if(!input.isConnected||(!forced&&document.activeElement!==input))return;
  closePlacePopup();
  const popup=document.createElement('div');popup.className='place-suggestions';popup.setAttribute('role','listbox');
  popup.setAttribute('aria-label','Choose location and state');
@@ -239,9 +245,18 @@ async function showPlaceSuggestions(input,kind,index=-1,forced=false){
  const loading=document.createElement('div');loading.className='place-suggestion-message';loading.textContent='Finding places…';popup.append(loading);
  let options;
  try{options=await findSuggestions(value);}catch{options=null;}
- if(activePopup!==popup||input.value.trim()!==requestKey||!input.isConnected){if(activePopup===popup)closePlacePopup();return;}
+ if(activePopup!==popup||input.value.trim()!==requestKey||!input.isConnected||
+    (!forced&&document.activeElement!==input)){if(activePopup===popup)closePlacePopup();return;}
  popup.replaceChildren();
- if(options===null||options.length===0){const message=document.createElement('div');message.className='place-suggestion-message';message.textContent=options===null?'Search unavailable. You can still enter the full city and state manually.':'No match found. Try city + state (e.g. Bilaspur, Chhattisgarh).';popup.append(message);return;}
+ if(options===null||options.length===0){
+  const message=document.createElement('div');message.className='place-suggestion-message';
+  message.textContent=options===null?'Search unavailable. You can still enter the full city and state manually.':'No match found. Try city + state (e.g. Bilaspur, Chhattisgarh).';
+  popup.append(message);
+  // Search errors and empty results are temporary notices, not selectable
+  // suggestions. Never leave one floating over the route form indefinitely.
+  popupDismissTimer=setTimeout(()=>{if(activePopup===popup)closePlacePopup();},3200);
+  return;
+ }
  for(const o of options){
   const b=document.createElement('button');b.type='button';b.className='place-suggestion';b.setAttribute('role','option');b.tabIndex=0;
   const name=document.createElement('strong');name.textContent=o.label.split(', ')[0];
@@ -261,14 +276,22 @@ function setupPlaceSuggestions(input,kind,index=-1){
  // Also show matches when a user taps an already-filled Delhi/Manali field.
  input.addEventListener('focus',()=>queue(true));
  input.addEventListener('input',()=>queue(false));
- input.addEventListener('blur',()=>{setTimeout(()=>{if(document.activeElement!==input&&!activePopup?.contains(document.activeElement))closePlacePopup();},220);});
+ input.addEventListener('blur',()=>{
+  clearTimeout(timer);
+  setTimeout(()=>{if(document.activeElement!==input&&!activePopup?.contains(document.activeElement))closePlacePopup();},160);
+ });
  input.addEventListener('keydown',e=>{
   if(e.key==='Escape')closePlacePopup();
   if(e.key==='ArrowDown'&&activePopup&&activeInput===input){const first=activePopup.querySelector('button.place-suggestion');if(first){e.preventDefault();first.focus();}}
  });
 }
-document.addEventListener('pointerdown',e=>{if(activePopup&&!activePopup.contains(e.target)&&!e.target.closest?.('input'))closePlacePopup();});
+// Clicking any other field should also close a stale place-search message.
+document.addEventListener('pointerdown',e=>{
+ if(activePopup&&!activePopup.contains(e.target)&&e.target!==activeInput)closePlacePopup();
+});
 window.addEventListener('resize',()=>closePlacePopup());
+window.addEventListener('scroll',()=>closePlacePopup());
+window.addEventListener('pagehide',()=>closePlacePopup());
 function clearLocation(which){
  geoRequest+=1; // Prevent a pending GPS lookup restoring a cleared place.
  $('pick-start').disabled=false;$('pick-end').disabled=false;
