@@ -1,0 +1,30 @@
+MotoTrip V9.28 — Bill Split Save Bug Fix Test Results
+
+Bug confirmed: Bill Split Save Trip called Planner form.checkValidity(), so empty Planner distance/days etc prevented bill saving.
+
+Fixes:
+- Independent Bill Split Save Trip & Update Trip; no Planner details required.
+- Unique saved record per trip name; existing Planner route/budget remains when Bill Split is saved separately.
+- Bill Split group/trip name editable offline and synced with Planner only until manually overridden.
+- Save Bill-Only trips with expense history, members, transfers and reopen from Trips.
+- PDF for bill-only groups shows actual spending, contributions, final settlement, expense history and payments; no fake estimated budget.
+- Excel/CSV mark Bill Split only without imaginary distance and estimates.
+- Backup restore accepts bill-only trips and partial Planner drafts.
+- Save success notice compact; no duplicate message in the footer.
+
+Browser test results:
+PASS bill-only Save with blank distance, mileage, hotel, food, nights
+PASS Update same bill name without duplicate or new ID
+PASS Separate Bill Split group name without touching Planner name
+PASS Open saved Bill Split and restore riders/expenses
+PASS Upgrade bill-only to full Planner record when Planner completed
+PASS Edit Bill Split without losing existing saved Planner route/distance
+PASS JSON restore Bill-Only group and partially completed Planner form
+PASS Bill-only PDF: history, contributions, settlement and no fake budget
+PASS Planned-trip PDF: Budget vs Actual preserved
+PASS Planner/Route/Gear, theme, startup and expense calculations regression
+PASS Responsive layout: 320, 360, 390, 430, 768px without overflow
+
+Limitations:
+Physical iPhone Safari/Android and live Firebase end-to-end testing not performed.
+The website uses localStorage for offline expenses; the user's original data remains on their device.

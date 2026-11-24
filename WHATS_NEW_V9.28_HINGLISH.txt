@@ -1,0 +1,11 @@
+MotoTrip V9.28 — Bill Split save bug fix
+
+- Bill Split Save Trip / Update Trip now works without any Planner route/distance/fuel inputs.
+- Group name can be changed directly in Bill Split when not in an active shared group.
+- Bill-only trips are saved under Trips, with snapshot of members, expense history and transfers.
+- Saved Bill Split can be reopened without entering Planner data.
+- If a matching Planner trip exists, Bill Split updates its expenses but keeps route, distance and budget unchanged.
+- No duplicate trip for same name. App localStorage/backup retained.
+- PDF marks Bill-only reports correctly and hides unavailable Budget vs Actual comparison; expense history and settlements still included.
+- CSV/Excel indicate Bill Split only and do not show fake km/estimated budgets.
+- Old full-Planner Save Trip still requires complete Planner data.

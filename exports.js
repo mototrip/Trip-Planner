@@ -12,7 +12,7 @@ function summaryData(state){
  const get=d=>{const km=safeNum(d.distance)*(d.round?2:1),fuel=d.includeFuel===false?0:(safeNum(d.mileage)>0?km/safeNum(d.mileage)*safeNum(d.price):0),stay=safeNum(d.nights??Math.max(0,safeNum(d.days)-1))*safeNum(d.hotel),food=safeNum(d.days)*safeNum(d.food),toll=safeNum(d.toll),other=safeNum(d.extra);return {km,fuel,stay,food,toll,other,total:fuel+stay+food+toll+other};};
  // Simple, rider-friendly report: no bike/vehicle names or unused technical columns.
  const tripRows=[['Trip','From','To','Distance (km)','Total budget (INR)','Fuel (INR)','Hotel (INR)','Food (INR)','Toll (INR)','Other (INR)','Journey','Mileage (km/L)','Petrol (INR/L)','Start date','End date'],
-  ...trips.map(t=>{const d=t.data||{},v=get(d);return [d.name||'',d.from||'',d.to||'',v.km,v.total,v.fuel,v.stay,v.food,v.toll,v.other,d.round?'Return':'One way',safeNum(d.mileage),safeNum(d.price),d.departDate||'',d.endDate||''];})];
+  ...trips.map(t=>{const d=t.data||{},v=get(d);return t.billOnly?[d.name||'','','','','','','','','','','Bill Split only','','','','']:[d.name||'',d.from||'',d.to||'',v.km,v.total,v.fuel,v.stay,v.food,v.toll,v.other,d.round?'Return':'One way',safeNum(d.mileage),safeNum(d.price),d.departDate||'',d.endDate||''];})];
  const expRows=[['Expense','Paid by','Amount (INR)','Split with','Date','Trip'],...expenses.map(e=>[e.name||'',e.payer||'',safeNum(e.amount)/100,Array.isArray(e.people)?e.people.join(', '):'',e.date||'',g.name||''])];
  const payRows=[['From rider','To rider','Amount (INR)','Status','Date','Trip'],...payments.map(e=>[e.from||'',e.to||'',safeNum(e.amount)/100,e.status==='unpaid'?'Unpaid':'Paid',e.date||'',g.name||''])];
  const rideRows=[['Rider name','Trip'],...riders.map(n=>[n,g.name||''])];
@@ -23,7 +23,7 @@ function summaryData(state){
 function csvVal(v){let s=String(v??''); if(/^[\s]*[=+\-@\t\r]/.test(s))s="'"+s;return /[",\r\n]/.test(s)?'"'+s.replace(/"/g,'""')+'"':s;}
 window.motoTripExportCsv=state=>{
  const d=summaryData(state),head=['Type','Trip','Description','From / Paid by','To / Split with','Amount (INR)','Details'],rows=[head];
- for(const t of d.tripRows.slice(1))rows.push(['Trip',t[0],'Trip budget',t[1],t[2],t[4],`${t[3]} km · Fuel ${t[5]} · Hotel ${t[6]} · Food ${t[7]} · Toll ${t[8]} · Other ${t[9]}`]);
+ for(const t of d.tripRows.slice(1))rows.push(['Trip',t[0],t[10]==='Bill Split only'?'Bill Split only':'Trip budget',t[1],t[2],t[4],t[10]==='Bill Split only'?'No Planner data':`${t[3]} km · Fuel ${t[5]} · Hotel ${t[6]} · Food ${t[7]} · Toll ${t[8]} · Other ${t[9]}`]);
  for(const e of d.expRows.slice(1))rows.push(['Expense',e[5],e[0],e[1],e[3],e[2],e[4]]);
  for(const pay of d.payRows.slice(1))rows.push(['Payment',pay[5],pay[3],pay[0],pay[1],pay[2],pay[4]]);
  download('\uFEFF'+rows.map(r=>r.map(csvVal).join(',')).join('\r\n'),baseName()+'_Report.csv','text/csv;charset=utf-8');
@@ -34,7 +34,7 @@ window.motoTripExportPdf=state=>{
  // same origin, so it can read the selected signed-in account data safely.
  let scope='guest';try{scope=localStorage.getItem('mototrip-account-scope')||'guest';}catch(_){}
  localStorage.setItem('mototrip-report-preview-v71',JSON.stringify({createdAt:Date.now(),scope,state}));
- const win=window.open('./report.html?v=926','_blank');
+ const win=window.open('./report.html?v=928','_blank');
  if(!win)throw Error('Pop-up blocked. Allow MotoTrip pop-ups to open the PDF preview.');
  try{win.opener=null;}catch(_){}
 };

@@ -46,7 +46,7 @@
  const isSingle=trips.length===1;
  const title=isSingle?trips[0]?.data?.name:trips.length?'All saved trips':group.name||'Saved trips';
  $('report-subtitle').textContent=title+' · '+new Date().toLocaleDateString('en-IN');
- $('report-scope').textContent=isSingle?'Selected saved trip · Group expenses and payments':
+ $('report-scope').textContent=isSingle&&trips[0]?.billOnly?'Bill Split only · Expenses, contributions and settlements':isSingle?'Selected saved trip · Group expenses and payments':
   'All saved trips · Group records are from the current expense group only';
  $('print').addEventListener('click',()=>window.print());
 
@@ -63,8 +63,11 @@
   Object.keys(totals).forEach(k=>totals[k]+=v[k]);
   const card=create('article',null,'trip-overview');
   const heading=create('div',null,'trip-header'),info=create('div');
-  info.append(create('h3',d.name||'Unnamed trip'),create('p',[d.from,d.to].filter(Boolean).join(' → ')));
-  heading.append(info,create('strong',money(v.total),'trip-total'));card.append(heading);
+  info.append(create('h3',d.name||'Unnamed trip'),create('p',trip.billOnly?'Bill Split only — no route or budget entered':[d.from,d.to].filter(Boolean).join(' → ')));
+  if(!trip.billOnly)heading.append(info,create('strong',money(v.total),'trip-total'));
+  else heading.append(info,create('strong','Actual expenses','trip-total'));
+  card.append(heading);
+  if(trip.billOnly){$('trip-cards').append(card);continue;}
   card.append(create('p',[v.km.toLocaleString('en-IN')+' km',d.round===true||d.round==='true'?'Return trip':'One-way',
    [d.departDate,d.endDate].filter(Boolean).join(' – ')].filter(Boolean).join(' · '),'trip-meta'));
   const grid=create('div',null,'budget-mini-grid');
@@ -89,13 +92,18 @@
  const actual=[0,0,0,0,0],estimate=[totals.hotel,totals.food,totals.fuel,totals.toll,totals.other];
  for(const e of valid)actual[category(e.name)]+=e.amount/100;
  const spent=actual.reduce((a,b)=>a+b,0),remaining=totals.total-spent;
- for(const [label,value,cls] of [['Saved trips',String(trips.length),''],['Estimated',money(totals.total),''],['Actual spending',money(spent),''],['Riders',String(members.length),'']]){
+ const hasPlannedTrip=trips.some(t=>!t.billOnly);
+ if(!hasPlannedTrip){
+  $('budget-actual-section').hidden=true;
+  $('report-scope').textContent+=' · No estimated budget (Planner not filled)';
+ }
+ for(const [label,value,cls] of [['Saved trips',String(trips.length),''],['Estimated',hasPlannedTrip?money(totals.total):'Not planned',''],['Actual spending',money(spent),''],['Riders',String(members.length),'']]){
   const item=create('div',null,'summary-stat');item.append(create('small',label),create('strong',value,cls));$('summary-cards').append(item);
  }
 
  // Budget vs actual, same names, amounts and category order as the Planner.
  const budgetCards=$('comparison-cards');
- for(const [label,value,cls] of [['Estimated',money(totals.total),''],['Actual',money(spent),''],[remaining<0?'Over budget':'Remaining',money(Math.abs(remaining)),remaining<0?'negative':'positive']]){
+ for(const [label,value,cls] of [['Estimated',hasPlannedTrip?money(totals.total):'Not planned',''],['Actual',money(spent),''],[remaining<0?'Over budget':'Remaining',money(Math.abs(remaining)),remaining<0?'negative':'positive']]){
   const item=create('div',null,'comparison-stat');item.append(create('small',label),create('strong',value,cls));budgetCards.append(item);
  }
  const comparisonRows=['Hotel','Food','Fuel','Toll','Other'].map((label,i)=>[

@@ -9,7 +9,7 @@ function group(){
  // Single source of truth: the Planner's trip name. Keep all existing riders,
  // expenses and payments; only refresh the group's display name.
  const plannerName=form.elements.name.value.trim().slice(0,100);
- if(!window.motoTripSharedRide?.active && (g.name!==plannerName||g.autoTripName!==plannerName)){
+ if(!window.motoTripSharedRide?.active && !g.manualTripName && (g.name!==plannerName||g.autoTripName!==plannerName)){
   g.name=plannerName;g.autoTripName=plannerName;
  }
  return g;
@@ -189,6 +189,7 @@ function renderSplit(){
  const g=group(),previousPayer=$('payer').value,
  prevChecks=new Map([...$('beneficiaries').querySelectorAll('input[type=checkbox]')].map(x=>[x.value,x.checked]));
  $('group-name').value=g.name||'';
+ $('group-name').readOnly=!!window.motoTripSharedRide?.active;
  $('rider-count').textContent=g.members.length+' added';
  for(const id of ['members','payer','beneficiaries','expense-list','balances','settlements','payment-from','payment-to','payment-list'])$(id).replaceChildren();
  if(!g.members.length)$('members').append(node('p','No riders yet. Add a rider above.','no-riders'));
@@ -270,12 +271,21 @@ window.renderSplit=renderSplit;
 function plannerTripName(){return form.elements.name.value.trim().slice(0,100);}
 function syncGroupName(){
  const g=group();
+ if(!window.motoTripSharedRide?.active){g.manualTripName=false;g.name=plannerTripName();g.autoTripName=g.name;}
  $('group-name').value=g.name;
  if($('split-summary-name'))$('split-summary-name').textContent=g.name||'My Trip';
  persist();
  renderBudget();
 }
 window.syncSplitTripName=syncGroupName;
+// Bill Split can have its own group name without requiring route/Planner details.
+$('group-name').addEventListener('change',()=>{
+ if(window.motoTripSharedRide?.active){$('group-name').value=group().name;return;}
+ const name=$('group-name').value.trim().slice(0,100);
+ if(!name){$('group-name').value=group().name;return;}
+ const g=group();g.name=name;g.manualTripName=true;persist();renderSplit();
+ if(typeof updateSaveButtons==='function')updateSaveButtons();
+});
 // Update instantly with each change in Planner, including clearing or editing.
 form.elements.name.addEventListener('input',syncGroupName);
 form.elements.name.addEventListener('change',syncGroupName);
