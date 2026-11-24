@@ -60,6 +60,35 @@ const BASE='http://127.0.0.1:8765';
    assert.equal(stored.trip,'QA Mountain Ride','Planner did not persist saved trip');
    assert.ok(stored.tripCount>=1);
 
+   // Exercise real Bill Split user actions and verify settlement + undo.
+   await page.locator('nav button[data-tab="split"]').click();
+   for (const rider of ['Rider A','Rider B']) {
+     await page.locator('#member-name').fill(rider);
+     await page.locator('#member-form button.primary').click();
+   }
+   await page.locator('#payer').selectOption('Rider A');
+   await page.locator('#expense-name').fill('Fuel');
+   await page.locator('#expense-amount').fill('301.01');
+   await page.locator('#expense-form button.primary').click();
+   const expense = await page.evaluate(() => {
+     const g=group(),result=calculateSplit(g);
+     return {members:g.members.length,expenses:g.expenses.length,
+       cents:g.expenses[0]?.amount,total:result.total,
+       paid:result.rows.find(r=>r.name==='Rider A')?.paid,
+       share:result.rows.reduce((a,r)=>a+r.share,0),
+       outstanding:result.payments.reduce((a,p)=>a+p.n,0)};
+   });
+   assert.deepEqual(expense,{members:2,expenses:1,cents:30101,
+     total:30101,paid:30101,share:30101,outstanding:15050});
+   page.once('dialog',d=>d.accept());
+   await page.locator('#settlements button').first().click();
+   assert.equal(await page.evaluate(()=>calculateSplit(group()).payments.length),0,
+     'Marked payment did not settle the balance');
+   await page.locator('#payment-list .payment-history-toggle').first().click();
+   assert.equal(await page.evaluate(()=>calculateSplit(group()).payments.length),1,
+     'Undo payment did not restore the settlement');
+   console.log('PASS',label,'rider creation, exact expense split, settlement and undo');
+
    // Bill Split precise paise: conservation, smallest-remainder fairness,
    // settlement/undo handling across randomized groups.
    const math=await page.evaluate(()=>{
@@ -113,6 +142,27 @@ const BASE='http://127.0.0.1:8765';
    assert.deepEqual(major,[],'Browser uncaught JS errors: '+major.join(' | '));
    await context.close();
   }
+  // Real service-worker offline reload: app shell must load without network.
+  const offlineContext=await browser.newContext({
+    viewport:{width:390,height:844},serviceWorkers:'allow'
+  });
+  const offlinePage=await offlineContext.newPage();
+  const offlineErrors=[];
+  offlinePage.on('pageerror',e=>offlineErrors.push(e.message));
+  await offlinePage.goto(BASE+'/index.html',{waitUntil:'domcontentloaded'});
+  await offlinePage.evaluate(async()=>{await navigator.serviceWorker.ready;});
+  await offlinePage.reload({waitUntil:'domcontentloaded'});
+  await offlinePage.waitForFunction(()=>Boolean(navigator.serviceWorker.controller),
+    null,{timeout:15000});
+  await offlineContext.setOffline(true);
+  await offlinePage.reload({waitUntil:'domcontentloaded'});
+  await offlinePage.waitForFunction(
+    ()=>!document.documentElement.classList.contains('mt923-booting'),
+    null,{timeout:15000});
+  assert.equal(await offlinePage.locator('#mt923-boot-cover').isVisible(),false);
+  assert.equal(offlineErrors.length,0,'Offline JavaScript error: '+offlineErrors.join(' | '));
+  await offlineContext.close();
+  console.log('PASS offline service worker reload and full app shell');
   console.log('BROWSER_QA_OK');
  } finally {await browser.close();}
 })().catch(e=>{console.error('BROWSER_QA_FAILED',e.stack||e);process.exit(1)});
