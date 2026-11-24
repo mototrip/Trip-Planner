@@ -53,9 +53,11 @@ public final class MainActivity extends Activity {
         settings.setAllowFileAccess(false);
         settings.setAllowFileAccessFromFileURLs(false);
         settings.setAllowUniversalAccessFromFileURLs(false);
-        // Keep selected content:// uploads available for the explicit file picker.
-        // Do not grant any JavaScript-to-native interface to remote pages.
-        settings.setAllowContentAccess(true);
+        // Do not allow a web page to load arbitrary content:// providers.
+        // User-selected uploads are handled by the explicit Android file chooser,
+        // not by allowing content:// navigation inside the WebView.
+        // No JavaScript-to-native bridge is registered.
+        settings.setAllowContentAccess(false);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             settings.setSafeBrowsingEnabled(true);
         }
