@@ -2,7 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <!-- Browser-managed TWA: the chosen browser owns site permissions. -->
     <application
-        android:label="MotoTrip TWA Preview"
+        android:label="MotoTrip"
         android:icon="@mipmap/ic_launcher"
         android:roundIcon="@mipmap/ic_launcher"
         android:theme="@style/MotoTripTheme"
